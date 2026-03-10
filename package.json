@@ -1,0 +1,19 @@
+{
+  "name": "devchain",
+  "version": "1.0.0",
+  "description": "Blockchain-powered developer marketplace",
+  "private": true,
+  "workspaces": [
+    "apps/mobile",
+    "apps/web",
+    "backend"
+  ],
+  "scripts": {
+    "mobile": "cd apps/mobile && expo start",
+    "web": "cd apps/web && npm start",
+    "backend": "cd backend && npm run dev",
+    "install:all": "npm install && cd apps/mobile && npm install && cd ../web && npm install && cd ../../backend && npm install"
+  },
+  "author": "DevChain",
+  "license": "MIT"
+}
