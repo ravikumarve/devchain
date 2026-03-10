@@ -8,7 +8,8 @@
   "scripts": {
     "test": "echo 'No tests yet'",
     "start": "cd .. && node backend/src/index.js",
-    "dev": "cd .. && node backend/src/index.js"
+    "dev": "cd .. && node backend/src/index.js",
+    "postinstall": "npx prisma generate --schema=./prisma/schema.prisma"
   },
   "keywords": [],
   "author": "",
