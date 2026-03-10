@@ -23,6 +23,11 @@ app.use('/api/', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// ── Root ──
+app.get('/', (req, res) => {
+  res.json({ name: 'DevChain API', version: '1.0.0', status: 'live', docs: '/api/v1' });
+});
+
 // ── Health Check ──
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'DevChain API is running', version: '1.0.0', timestamp: new Date().toISOString() });
