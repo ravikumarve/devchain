@@ -9,19 +9,31 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// ── Auto-attach token to every request ──
+// Get token from AsyncStorage OR localStorage (web fallback)
+const getToken = async () => {
+  try {
+    const token = await AsyncStorage.getItem('accessToken');
+    return token;
+  } catch {
+    try { return localStorage.getItem('accessToken'); } catch { return null; }
+  }
+};
+
+// Auto-attach token to every request
 api.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem('accessToken');
+  const token = await getToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// ── Auto-handle 401 (token expired) ──
+// Auto-handle 401
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
+      await AsyncStorage.removeItem('accessToken');
+      await AsyncStorage.removeItem('refreshToken');
+      await AsyncStorage.removeItem('user');
     }
     return Promise.reject(error);
   }

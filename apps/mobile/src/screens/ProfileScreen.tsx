@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/authStore';
 export default function ProfileScreen() {
   const { user, logout } = useAuthStore();
 
-  const handleLogout = () => {
+  const handleLogout = () => { logout(); return;
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Logout', style: 'destructive', onPress: logout },

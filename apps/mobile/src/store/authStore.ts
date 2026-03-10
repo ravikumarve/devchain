@@ -23,6 +23,29 @@ interface AuthState {
   loadUser: () => Promise<void>;
 }
 
+const saveAuth = async (accessToken: string, refreshToken: string, user: User) => {
+  await AsyncStorage.setItem('accessToken', accessToken);
+  await AsyncStorage.setItem('refreshToken', refreshToken);
+  await AsyncStorage.setItem('user', JSON.stringify(user));
+  // Web fallback
+  try {
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem('user', JSON.stringify(user));
+  } catch {}
+};
+
+const clearAuth = async () => {
+  await AsyncStorage.removeItem('accessToken');
+  await AsyncStorage.removeItem('refreshToken');
+  await AsyncStorage.removeItem('user');
+  try {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+  } catch {}
+};
+
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
@@ -34,9 +57,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const res = await authAPI.login({ email, password });
       const { user, accessToken, refreshToken } = res.data;
-      await AsyncStorage.setItem('accessToken', accessToken);
-      await AsyncStorage.setItem('refreshToken', refreshToken);
-      await AsyncStorage.setItem('user', JSON.stringify(user));
+      await saveAuth(accessToken, refreshToken, user);
       set({ user, token: accessToken, isAuthenticated: true });
     } finally {
       set({ isLoading: false });
@@ -48,9 +69,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const res = await authAPI.register({ username, email, password });
       const { user, accessToken, refreshToken } = res.data;
-      await AsyncStorage.setItem('accessToken', accessToken);
-      await AsyncStorage.setItem('refreshToken', refreshToken);
-      await AsyncStorage.setItem('user', JSON.stringify(user));
+      await saveAuth(accessToken, refreshToken, user);
       set({ user, token: accessToken, isAuthenticated: true });
     } finally {
       set({ isLoading: false });
@@ -58,16 +77,17 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
-    await AsyncStorage.removeItem('accessToken');
-    await AsyncStorage.removeItem('refreshToken');
-    await AsyncStorage.removeItem('user');
+    await clearAuth();
     set({ user: null, token: null, isAuthenticated: false });
   },
 
   loadUser: async () => {
     try {
-      const token = await AsyncStorage.getItem('accessToken');
-      const userStr = await AsyncStorage.getItem('user');
+      let token = await AsyncStorage.getItem('accessToken');
+      let userStr = await AsyncStorage.getItem('user');
+      // Web fallback
+      if (!token) { try { token = localStorage.getItem('accessToken'); } catch {} }
+      if (!userStr) { try { userStr = localStorage.getItem('user'); } catch {} }
       if (token && userStr) {
         set({ token, user: JSON.parse(userStr), isAuthenticated: true });
       }
