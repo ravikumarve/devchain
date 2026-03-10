@@ -9,14 +9,11 @@ const PORT = process.env.PORT || 5000;
 
 // ── Security Middleware ──
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: true
-}));
+app.use(cors({ origin: true, credentials: true }));
 
 // ── Rate Limiting ──
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 100,
   message: { error: 'Too many requests, please try again later.' }
 });
@@ -28,22 +25,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // ── Health Check ──
 app.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    message: 'DevChain API is running',
-    version: '1.0.0',
-    timestamp: new Date().toISOString()
-  });
+  res.json({ status: 'ok', message: 'DevChain API is running', version: '1.0.0', timestamp: new Date().toISOString() });
 });
 
-// ── Routes (we'll add these next) ──
- app.use('/api/v1/auth', require('./routes/auth'));
- app.use('/api/v1/products', require('./routes/products'));
- app.use('/api/v1/ownership', require('./routes/ownership'));
- app.use('/api/v1/jobs', require('./routes/jobs'));
-// app.use('/api/v1/orders', require('./routes/orders'));
-// app.use('/api/v1/jobs', require('./routes/jobs'));
-// app.use('/api/v1/users', require('./routes/users'));
+// ── Routes ──
+app.use('/api/v1/auth', require('./routes/auth'));
+app.use('/api/v1/products', require('./routes/products'));
+app.use('/api/v1/ownership', require('./routes/ownership'));
+app.use('/api/v1/jobs', require('./routes/jobs'));
 
 // ── 404 Handler ──
 app.use((req, res) => {
