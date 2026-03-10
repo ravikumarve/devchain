@@ -1,14 +1,139 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(uuid())
+  username         String    @unique
+  email            String    @unique
+  passwordHash     String
+  bio              String?
+  avatarUrl        String?
+  walletAddress    String?
+  reputationScore  Int       @default(0)
+  isEmailVerified  Boolean   @default(false)
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  products         Product[]
+  orders           Order[]
+  jobsPosted       Job[]
+  proposals        Proposal[]
+  reviewsGiven     Review[]  @relation("ReviewerRelation")
+  reviewsReceived  Review[]  @relation("RevieweeRelation")
+
+  @@map("users")
+}
+
+model Product {
+  id            String    @id @default(uuid())
+  sellerId      String
+  title         String
+  description   String
+  price         Float
+  category      String
+  fileUrl       String?
+  previewUrl    String?
+  tags          String[]
+  downloadsCount Int      @default(0)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  seller        User      @relation(fields: [sellerId], references: [id])
+  orders        Order[]
+  reviews       Review[]
+
+  @@map("products")
+}
+
+model Order {
+  id              String    @id @default(uuid())
+  buyerId         String
+  productId       String
+  amountPaid      Float
+  paymentMethod   String    @default("stripe")
+  ownershipHash   String    @unique
+  status          String    @default("completed")
+  createdAt       DateTime  @default(now())
+
+  buyer           User      @relation(fields: [buyerId], references: [id])
+  product         Product   @relation(fields: [productId], references: [id])
+  ownershipRecord OwnershipRecord?
+
+  @@map("orders")
+}
+
+model OwnershipRecord {
+  id             String    @id @default(uuid())
+  orderId        String    @unique
+  buyerId        String
+  productId      String
+  ownershipHash  String    @unique
+  blockchainTx   String?
+  isOnChain      Boolean   @default(false)
+  issuedAt       DateTime  @default(now())
+
+  order          Order     @relation(fields: [orderId], references: [id])
+
+  @@map("ownership_records")
+}
+
+model Job {
+  id              String     @id @default(uuid())
+  clientId        String
+  title           String
+  description     String
+  budgetMin       Float
+  budgetMax       Float
+  skillsRequired  String[]
+  status          String     @default("open")
+  deadline        DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+
+  client          User       @relation(fields: [clientId], references: [id])
+  proposals       Proposal[]
+
+  @@map("jobs")
+}
+
+model Proposal {
+  id            String   @id @default(uuid())
+  jobId         String
+  freelancerId  String
+  coverLetter   String
+  proposedRate  Float
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+
+  job           Job      @relation(fields: [jobId], references: [id])
+  freelancer    User     @relation(fields: [freelancerId], references: [id])
+
+  @@map("proposals")
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  reviewerId  String
+  revieweeId  String
+  productId   String?
+  rating      Int
+  comment     String?
+  createdAt   DateTime @default(now())
+
+  reviewer    User     @relation("ReviewerRelation", fields: [reviewerId], references: [id])
+  reviewee    User     @relation("RevieweeRelation", fields: [revieweeId], references: [id])
+  product     Product? @relation(fields: [productId], references: [id])
+
+  @@map("reviews")
 }
