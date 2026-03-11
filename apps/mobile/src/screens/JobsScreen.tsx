@@ -38,14 +38,15 @@ export default function JobsScreen({ navigation }: any) {
   useEffect(() => { fetchJobs(); }, []);
 
   const renderJob = ({ item }: { item: Job }) => (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => navigation.navigate('JobDetail', { jobId: item.id })}
+    >
       <View style={styles.cardTop}>
         <View style={styles.statusBadge}>
           <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
         </View>
-        <Text style={styles.budget}>
-          ${item.budgetMin}–${item.budgetMax}
-        </Text>
+        <Text style={styles.budget}>${item.budgetMin}–${item.budgetMax}</Text>
       </View>
 
       <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
@@ -75,8 +76,16 @@ export default function JobsScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>💼 Job Board</Text>
-        <Text style={styles.headerSub}>Find freelance work on DevChain</Text>
+        <View>
+          <Text style={styles.headerTitle}>💼 Job Board</Text>
+          <Text style={styles.headerSub}>Find freelance work on DevChain</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.postBtn}
+          onPress={() => navigation.navigate('CreateJob')}
+        >
+          <Text style={styles.postBtnText}>+ Post</Text>
+        </TouchableOpacity>
       </View>
 
       {loading ? (
@@ -88,16 +97,14 @@ export default function JobsScreen({ navigation }: any) {
           renderItem={renderJob}
           contentContainerStyle={styles.list}
           refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => { setRefreshing(true); fetchJobs(); }}
-              tintColor="#7C3AED"
-            />
+            <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchJobs(); }} tintColor="#7C3AED" />
           }
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyText}>No jobs posted yet</Text>
-              <Text style={styles.emptySubText}>Post the first job on DevChain!</Text>
+              <TouchableOpacity style={styles.emptyBtn} onPress={() => navigation.navigate('CreateJob')}>
+                <Text style={styles.emptyBtnText}>Post the first job →</Text>
+              </TouchableOpacity>
             </View>
           }
         />
@@ -108,14 +115,13 @@ export default function JobsScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a' },
-  header: { padding: 20, paddingTop: 50, backgroundColor: '#111' },
+  header: { padding: 20, paddingTop: 50, backgroundColor: '#111', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   headerTitle: { fontSize: 28, fontWeight: 'bold', color: '#fff' },
   headerSub: { fontSize: 13, color: '#666', marginTop: 2 },
+  postBtn: { backgroundColor: '#059669', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8 },
+  postBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
   list: { padding: 16 },
-  card: {
-    backgroundColor: '#111', borderRadius: 14, padding: 16,
-    borderWidth: 1, borderColor: '#1e1e1e', marginBottom: 12
-  },
+  card: { backgroundColor: '#111', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#1e1e1e', marginBottom: 12 },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   statusBadge: { backgroundColor: '#05966922', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
   statusText: { fontSize: 11, fontWeight: '700', color: '#059669' },
@@ -123,13 +129,14 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 16, fontWeight: 'bold', color: '#fff', marginBottom: 6 },
   cardDesc: { fontSize: 13, color: '#777', lineHeight: 18, marginBottom: 10 },
   skills: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
-  skill: { backgroundColor: '#1a1a1a', borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
+  skill: { backgroundColor: '#1a0a2e', borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
   skillText: { fontSize: 11, color: '#7C3AED', fontWeight: '600' },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
   client: { fontSize: 12, color: '#555' },
   proposals: { fontSize: 12, color: '#555' },
   deadline: { fontSize: 12, color: '#F59E0B' },
   empty: { alignItems: 'center', paddingTop: 60 },
-  emptyText: { fontSize: 18, color: '#fff', fontWeight: 'bold' },
-  emptySubText: { fontSize: 14, color: '#555', marginTop: 8 },
+  emptyText: { fontSize: 18, color: '#fff', fontWeight: 'bold', marginBottom: 16 },
+  emptyBtn: { backgroundColor: '#059669', borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 },
+  emptyBtnText: { color: '#fff', fontWeight: 'bold' },
 });

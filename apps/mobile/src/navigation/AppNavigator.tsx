@@ -12,6 +12,8 @@ import JobsScreen from '../screens/JobsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
 import CreateProductScreen from '../screens/CreateProductScreen';
+import JobDetailScreen from '../screens/JobDetailScreen';
+import CreateJobScreen from '../screens/CreateJobScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -31,12 +33,7 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: '#111',
-          borderTopColor: '#1e1e1e',
-          paddingBottom: 8,
-          height: 60,
-        },
+        tabBarStyle: { backgroundColor: '#111', borderTopColor: '#1e1e1e', paddingBottom: 8, height: 60 },
         tabBarActiveTintColor: '#7C3AED',
         tabBarInactiveTintColor: '#555',
       }}
@@ -66,6 +63,8 @@ function MainStack() {
       <RootStack.Screen name="Tabs" component={MainTabs} />
       <RootStack.Screen name="ProductDetail" component={ProductDetailScreen} />
       <RootStack.Screen name="CreateProduct" component={CreateProductScreen} />
+      <RootStack.Screen name="JobDetail" component={JobDetailScreen} />
+      <RootStack.Screen name="CreateJob" component={CreateJobScreen} />
     </RootStack.Navigator>
   );
 }
