@@ -83,8 +83,13 @@ export default function HomeScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>⛓️ DevChain</Text>
-        <Text style={styles.headerSub}>Developer Marketplace</Text>
+        <View>
+          <Text style={styles.headerTitle}>⛓️ DevChain</Text>
+          <Text style={styles.headerSub}>Developer Marketplace</Text>
+        </View>
+        <TouchableOpacity style={styles.sellBtn} onPress={() => navigation.navigate('CreateProduct')}>
+          <Text style={styles.sellBtnText}>+ Sell</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.searchBox}>
@@ -128,7 +133,9 @@ export default function HomeScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a' },
-  header: { padding: 20, paddingTop: 50, backgroundColor: '#111' },
+  header: { padding: 20, paddingTop: 50, backgroundColor: '#111', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  sellBtn: { backgroundColor: '#7C3AED', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8 },
+  sellBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
   headerTitle: { fontSize: 28, fontWeight: 'bold', color: '#7C3AED' },
   headerSub: { fontSize: 13, color: '#666', marginTop: 2 },
   searchBox: { padding: 16, backgroundColor: '#111' },

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
+import { Text } from 'react-native';
 import { useAuthStore } from '../store/authStore';
 
 import LoginScreen from '../screens/LoginScreen';
@@ -10,6 +11,7 @@ import HomeScreen from '../screens/HomeScreen';
 import JobsScreen from '../screens/JobsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
+import CreateProductScreen from '../screens/CreateProductScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -42,17 +44,17 @@ function MainTabs() {
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{ tabBarLabel: 'Marketplace', tabBarIcon: ({ color }) => <TabIcon icon="🛍️" color={color} /> }}
+        options={{ tabBarLabel: 'Marketplace', tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, opacity: color === '#7C3AED' ? 1 : 0.5 }}>🛍️</Text> }}
       />
       <Tab.Screen
         name="Jobs"
         component={JobsScreen}
-        options={{ tabBarLabel: 'Jobs', tabBarIcon: ({ color }) => <TabIcon icon="💼" color={color} /> }}
+        options={{ tabBarLabel: 'Jobs', tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, opacity: color === '#7C3AED' ? 1 : 0.5 }}>💼</Text> }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{ tabBarLabel: 'Profile', tabBarIcon: ({ color }) => <TabIcon icon="👤" color={color} /> }}
+        options={{ tabBarLabel: 'Profile', tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, opacity: color === '#7C3AED' ? 1 : 0.5 }}>👤</Text> }}
       />
     </Tab.Navigator>
   );
@@ -63,20 +65,14 @@ function MainStack() {
     <RootStack.Navigator screenOptions={{ headerShown: false }}>
       <RootStack.Screen name="Tabs" component={MainTabs} />
       <RootStack.Screen name="ProductDetail" component={ProductDetailScreen} />
+      <RootStack.Screen name="CreateProduct" component={CreateProductScreen} />
     </RootStack.Navigator>
   );
 }
 
-function TabIcon({ icon, color }: { icon: string; color: string }) {
-  const { Text } = require('react-native');
-  return <Text style={{ fontSize: 20, opacity: color === '#7C3AED' ? 1 : 0.5 }}>{icon}</Text>;
-}
-
 export default function AppNavigator() {
   const { isAuthenticated, loadUser } = useAuthStore();
-
   useEffect(() => { loadUser(); }, []);
-
   return (
     <NavigationContainer>
       {isAuthenticated ? <MainStack /> : <AuthStack />}
