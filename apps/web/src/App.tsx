@@ -8,6 +8,10 @@ import Jobs from './pages/Jobs';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import ProductDetail from './pages/ProductDetail';
+import Sell from './pages/Sell';
+import JobDetail from './pages/JobDetail';
+import PostJob from './pages/PostJob';
 
 function App() {
   const { loadUser } = useAuthStore();
@@ -23,6 +27,10 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/sell" element={<Sell />} />
+        <Route path="/job/:id" element={<JobDetail />} />
+        <Route path="/post-job" element={<PostJob />} />
       </Routes>
     </BrowserRouter>
   );
