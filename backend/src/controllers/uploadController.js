@@ -1,35 +1,28 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { createClient } = require('@supabase/supabase-js');
 const { PrismaClient } = require('@prisma/client');
+const path = require('path');
 const prisma = new PrismaClient();
 
-// Store files locally in /uploads folder
-const uploadDir = path.join(__dirname, '../../uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${unique}${path.extname(file.originalname)}`);
+const BUCKET = 'devchain-files';
+
+// Use memory storage — file goes straight to Supabase
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.zip', '.tar', '.gz', '.pdf', '.js', '.ts', '.json', '.md', '.txt', '.png', '.jpg', '.svg'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) cb(null, true);
+    else cb(new Error(`File type ${ext} not allowed`), false);
   },
 });
 
-const fileFilter = (req, file, cb) => {
-  const allowed = ['.zip', '.tar', '.gz', '.pdf', '.js', '.ts', '.json', '.md', '.txt', '.png', '.jpg', '.svg'];
-  const ext = path.extname(file.originalname).toLowerCase();
-  if (allowed.includes(ext)) cb(null, true);
-  else cb(new Error(`File type ${ext} not allowed`), false);
-};
-
-const upload = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
-});
-
-// Upload product file (seller only)
 const uploadProductFile = async (req, res) => {
   try {
     const { productId } = req.params;
@@ -40,24 +33,38 @@ const uploadProductFile = async (req, res) => {
     if (product.sellerId !== sellerId) return res.status(403).json({ error: 'Not your product' });
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
-    const fileUrl = `/uploads/${req.file.filename}`;
-    const originalName = req.file.originalname;
-    const fileSize = req.file.size;
+    const ext = path.extname(req.file.originalname);
+    const storagePath = `products/${productId}/${Date.now()}${ext}`;
+
+    // Delete old file if exists
+    if (product.fileUrl) {
+      const oldPath = product.fileUrl.replace(`${BUCKET}/`, '');
+      await supabase.storage.from(BUCKET).remove([oldPath]);
+    }
+
+    // Upload to Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from(BUCKET)
+      .upload(storagePath, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: true,
+      });
+
+    if (uploadError) throw uploadError;
+
+    const fileUrl = `${BUCKET}/${storagePath}`;
 
     await prisma.product.update({
       where: { id: productId },
-      data: {
-        fileUrl,
-        previewUrl: product.previewUrl || null,
-      },
+      data: { fileUrl },
     });
 
     res.json({
       success: true,
       fileUrl,
-      originalName,
-      fileSize,
-      message: 'File uploaded successfully',
+      originalName: req.file.originalname,
+      fileSize: req.file.size,
+      message: 'File uploaded to Supabase Storage',
     });
   } catch (err) {
     console.error(err);
@@ -65,7 +72,6 @@ const uploadProductFile = async (req, res) => {
   }
 };
 
-// Download product file (buyers + seller only)
 const downloadProductFile = async (req, res) => {
   try {
     const { productId } = req.params;
@@ -76,9 +82,8 @@ const downloadProductFile = async (req, res) => {
       include: { seller: { select: { id: true } } },
     });
     if (!product) return res.status(404).json({ error: 'Product not found' });
-    if (!product.fileUrl) return res.status(404).json({ error: 'No file uploaded for this product' });
+    if (!product.fileUrl) return res.status(404).json({ error: 'No file uploaded' });
 
-    // Check access: seller OR buyer with completed order
     const isSeller = product.seller.id === userId;
     if (!isSeller) {
       const order = await prisma.order.findFirst({
@@ -87,23 +92,28 @@ const downloadProductFile = async (req, res) => {
       if (!order) return res.status(403).json({ error: 'Purchase this product to download' });
     }
 
-    const filePath = path.join(__dirname, '../../', product.fileUrl);
-    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found on server' });
+    // Generate signed URL (valid 60 seconds)
+    const storagePath = product.fileUrl.replace(`${BUCKET}/`, '');
+    const { data, error } = await supabase.storage
+      .from(BUCKET)
+      .createSignedUrl(storagePath, 60);
 
-    // Increment download count
+    if (error) throw error;
+
+    // Increment downloads
     await prisma.product.update({
       where: { id: productId },
       data: { downloadsCount: { increment: 1 } },
     });
 
-    res.download(filePath);
+    // Redirect to signed URL
+    res.redirect(data.signedUrl);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Download failed' });
   }
 };
 
-// Get file info for a product
 const getFileInfo = async (req, res) => {
   try {
     const { productId } = req.params;
@@ -125,17 +135,23 @@ const getFileInfo = async (req, res) => {
 
     let fileSize = null;
     let fileName = null;
-    if (hasFile && hasAccess) {
-      const filePath = path.join(__dirname, '../../', product.fileUrl);
-      if (fs.existsSync(filePath)) {
-        const stat = fs.statSync(filePath);
-        fileSize = stat.size;
-        fileName = path.basename(filePath);
+
+    if (hasFile) {
+      const storagePath = product.fileUrl.replace(`${BUCKET}/`, '');
+      fileName = path.basename(storagePath);
+      // Get file metadata from Supabase
+      const parts = storagePath.split('/');
+      const folder = parts.slice(0, -1).join('/');
+      const { data: files } = await supabase.storage.from(BUCKET).list(folder);
+      if (files) {
+        const f = files.find(f => f.name === parts[parts.length - 1]);
+        if (f) fileSize = f.metadata?.size || null;
       }
     }
 
     res.json({ hasFile, hasAccess, isSeller, fileSize, fileName });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Failed to get file info' });
   }
 };
