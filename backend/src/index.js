@@ -38,6 +38,8 @@ app.use('/api/v1/auth', require('./routes/auth'));
 app.use('/api/v1/products', require('./routes/products'));
 app.use('/api/v1/ownership', require('./routes/ownership'));
 app.use('/api/v1/jobs', require('./routes/jobs'));
+app.use('/api/v1/uploads', require('./routes/uploads'));
+app.use('/uploads', require('express').static(require('path').join(__dirname, '../../uploads')));
 
 // ── 404 Handler ──
 app.use((req, res) => {
