@@ -12,6 +12,7 @@ import ProductDetail from './pages/ProductDetail';
 import Sell from './pages/Sell';
 import JobDetail from './pages/JobDetail';
 import PostJob from './pages/PostJob';
+import Analytics from './pages/Analytics';
 
 function App() {
   const { loadUser } = useAuthStore();
@@ -31,6 +32,7 @@ function App() {
         <Route path="/sell" element={<Sell />} />
         <Route path="/job/:id" element={<JobDetail />} />
         <Route path="/post-job" element={<PostJob />} />
+        <Route path="/analytics" element={<Analytics />} />
       </Routes>
     </BrowserRouter>
   );

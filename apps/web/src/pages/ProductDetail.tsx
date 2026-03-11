@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { productsAPI, ownershipAPI } from "../services/api";
 import { useAuthStore } from "../store/authStore";
+import FileManager from "../components/FileManager";
 
 
 function PurchaseModal({ product, onClose, onSuccess }: { product: any; onClose: () => void; onSuccess: () => void }) {
@@ -219,6 +220,8 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+
+      <FileManager productId={product.id} isSeller={isOwner} />
 
       {showModal && <PurchaseModal product={product} onClose={() => setShowModal(false)} onSuccess={() => setPurchased(true)} />}
     </>

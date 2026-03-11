@@ -61,3 +61,15 @@ export const extraAPI = {
   myJobs: () => api.get('/jobs/me/jobs'),
   myProposals: () => api.get('/jobs/me/proposals'),
 };
+
+export const uploadAPI = {
+  uploadFile: (productId: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post(`/uploads/product/${productId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  getFileInfo: (productId: string) => api.get(`/uploads/product/${productId}/info`),
+  getDownloadUrl: (productId: string) => `${api.defaults.baseURL}/uploads/product/${productId}/download`,
+};
