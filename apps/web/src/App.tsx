@@ -7,6 +7,7 @@ import Marketplace from './pages/Marketplace';
 import Jobs from './pages/Jobs';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Profile from './pages/Profile';
 
 function App() {
   const { loadUser } = useAuthStore();
@@ -21,6 +22,7 @@ function App() {
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </BrowserRouter>
   );

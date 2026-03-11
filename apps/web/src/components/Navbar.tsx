@@ -21,12 +21,13 @@ export default function Navbar() {
         <div style={styles.links}>
           <Link to="/marketplace" style={styles.link}>Marketplace</Link>
           <Link to="/jobs" style={styles.link}>Jobs</Link>
+          {isAuthenticated && <Link to="/profile" style={styles.link}>Profile</Link>}
         </div>
 
         <div style={styles.actions}>
           {isAuthenticated ? (
             <>
-              <span style={styles.username}>@{user?.username}</span>
+              <Link to="/profile" style={{ ...styles.link, color: '#7C3AED' }}>@{user?.username}</Link>
               <button className="btn-secondary" onClick={handleLogout} style={{ padding: '8px 16px', fontSize: 14 }}>
                 Logout
               </button>

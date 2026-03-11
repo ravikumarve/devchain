@@ -35,19 +35,29 @@ export const productsAPI = {
   getAll: (params?: any) => api.get('/products', { params }),
   getOne: (id: string) => api.get(`/products/${id}`),
   create: (data: any) => api.post('/products', data),
+  getMine: () => api.get('/products/seller/me'),
 };
 
 export const ownershipAPI = {
   purchase: (productId: string) => api.post('/ownership/purchase', { productId }),
   verify: (hash: string) => api.get(`/ownership/verify/${hash}`),
   myPurchases: () => api.get('/ownership/my-purchases'),
+  mySales: () => api.get('/ownership/my-sales'),
 };
 
 export const jobsAPI = {
   getAll: (params?: any) => api.get('/jobs', { params }),
   getOne: (id: string) => api.get(`/jobs/${id}`),
   create: (data: any) => api.post('/jobs', data),
+  myJobs: () => api.get('/jobs/me/jobs'),
   submitProposal: (jobId: string, data: any) => api.post(`/jobs/${jobId}/proposals`, data),
 };
 
 export default api;
+
+// Extra methods
+export const extraAPI = {
+  myProducts: () => api.get('/products/seller/me'),
+  myJobs: () => api.get('/jobs/me/jobs'),
+  myProposals: () => api.get('/jobs/me/proposals'),
+};
