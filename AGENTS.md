@@ -2,7 +2,8 @@
 
 ## Project Overview
 
-DevChain is a blockchain-powered developer marketplace (monorepo with npm workspaces).
+DevChain is a blockchain-powered developer marketplace — a "Gumroad + Fiverr + GitHub Marketplace"
+for developers. Built as a monorepo with npm workspaces.
 
 ```
 devchain/
@@ -15,6 +16,49 @@ devchain/
 └── scripts/        # Build/deployment scripts
 ```
 
+> **Important:** Always run npm commands from the **monorepo root** (`~/devchain/`), not from
+> subdirectories. This is required due to npm workspaces.
+
+---
+
+## Deployment & Infrastructure
+
+| Layer     | Service                        | URL / ID                              |
+|-----------|-------------------------------|---------------------------------------|
+| Frontend  | Vercel                         | `devchain-app.vercel.app`             |
+| Backend   | Render                         | `devchain.onrender.com`               |
+| Database  | PostgreSQL (via Render/Prisma) | See `DATABASE_URL` in `.env`          |
+| Storage   | Supabase Storage               | Project ID: `ldqpqggbvqjgucucxeny`    |
+| S3 Bucket | `devchain-files`               | Used for file upload/download         |
+
+**Do not suggest:** Docker-based deployments, AWS, GCP, self-hosted VPS, or any paid infra
+upgrades without being explicitly asked.
+
+---
+
+## Machine Constraints
+
+- **OS:** Linux Mint (Ubuntu-based)
+- **Hardware:** CPU-only — no GPU available
+- **Budget:** Lean/minimal — avoid suggesting paid third-party APIs or services
+- Do not suggest GPU-dependent packages (CUDA, torch with GPU, etc.)
+- Prefer lightweight, zero-cost dependencies where possible
+
+---
+
+## Current Feature Status
+
+These features are **already built** — do not re-scaffold or overwrite them:
+
+- ✅ Auth system (JWT access + refresh tokens, `protect` middleware)
+- ✅ Product detail page
+- ✅ Seller analytics dashboard
+- ✅ File upload/download via Supabase Storage
+- ✅ Marketplace search and filter UI
+
+When adding new features, extend existing patterns — do not replace or refactor working code
+unless explicitly asked.
+
 ---
 
 ## Build, Lint, and Test Commands
@@ -23,25 +67,25 @@ devchain/
 ```bash
 npm run install:all       # Install all workspace dependencies
 npm run build             # Backend: npm install + prisma generate
-npm start                # Start backend server (node backend/src/index.js)
+npm start                 # Start backend server (node backend/src/index.js)
 ```
 
 ### Backend (`/backend`)
 ```bash
-npm run dev              # Start with nodemon (auto-reload)
-npm run start            # Start without reload
-npm run test             # Placeholder (no tests yet)
-npx prisma generate      # Regenerate Prisma client
-npx prisma studio        # Open Prisma admin UI
+npm run dev               # Start with nodemon (auto-reload)
+npm run start             # Start without reload
+npm run test              # Placeholder (no tests yet)
+npx prisma generate       # Regenerate Prisma client
+npx prisma studio         # Open Prisma admin UI
 ```
 
 ### Web App (`/apps/web`)
 ```bash
-npm run dev              # Start Vite dev server
-npm run build            # TypeScript compile + Vite build
-npm run lint             # Run ESLint
-npm run lint -- --fix    # Auto-fix lint issues
-npm run preview          # Preview production build
+npm run dev               # Start Vite dev server
+npm run build             # TypeScript compile + Vite build
+npm run lint              # Run ESLint
+npm run lint -- --fix     # Auto-fix lint issues
+npm run preview           # Preview production build
 ```
 
 **Run single file lint:**
@@ -58,10 +102,10 @@ npx vitest src/pages/Login.test.tsx --watch
 
 ### Mobile App (`/apps/mobile`)
 ```bash
-npm run start            # Start Expo dev server
-npm run android          # Start for Android
-npm run ios              # Start for iOS
-npm run web              # Start for web
+npm run start             # Start Expo dev server
+npm run android           # Start for Android
+npm run ios               # Start for iOS
+npm run web               # Start for web
 ```
 
 ---
@@ -91,6 +135,9 @@ npm run web              # Start for web
 - No trailing whitespace
 
 ### Backend (JavaScript - CommonJS)
+
+**Critical:** Backend uses **CommonJS only** (`require` / `module.exports`).
+Do **not** convert to ESM. Do not use `import`/`export` in backend files.
 
 **File naming:** `camelCase.js` (e.g., `authController.js`, `productService.js`)
 
@@ -123,6 +170,8 @@ const controller = async (req, res) => {
 
 ### Frontend (React + TypeScript)
 
+**Web app uses ESM** (`import`/`export`) with TypeScript — do not use `require()`.
+
 **File naming:**
 - Components: `PascalCase.tsx` (e.g., `Navbar.tsx`, `FileManager.tsx`)
 - Pages: `PascalCase.tsx` (e.g., `Login.tsx`, `Marketplace.tsx`)
@@ -150,7 +199,7 @@ export default function Login() {
   // render
 }
 
-// Component - named export for reuse
+// Reusable component - named export
 export function Navbar() { }
 ```
 
@@ -181,8 +230,8 @@ export const useStore = create<State>((set) => ({
 }));
 ```
 
-**Inline styles:** Use `Record<string, React.CSSProperties>` pattern (see existing pages)
-- Keep all styles in a `const styles` object at bottom
+**Inline styles:** Use `Record<string, React.CSSProperties>` pattern (see existing pages).
+- Keep all styles in a `const styles` object at the bottom of the file
 - Use camelCase for CSS properties
 
 **Error handling:**
@@ -202,13 +251,15 @@ try {
 - Use `@default(uuid())` for IDs
 - Use soft deletes with `deletedAt DateTime?`
 
+**Always run `npx prisma generate` after any schema change.**
+
 **Query patterns:**
 ```javascript
 const item = await prisma.model.findUnique({ where: { id } });
 const items = await prisma.model.findMany({ where, orderBy, take, skip });
 await prisma.model.create({ data });
 await prisma.model.update({ where: { id }, data });
-await prisma.model.delete({ where: { id } }); // or soft delete
+await prisma.model.delete({ where: { id } }); // or soft delete via update({ deletedAt: new Date() })
 ```
 
 ---
@@ -216,11 +267,11 @@ await prisma.model.delete({ where: { id } }); // or soft delete
 ## API Design Conventions
 
 ### RESTful Endpoints
-- `GET /api/v1/resource` - List
-- `GET /api/v1/resource/:id` - Get one
-- `POST /api/v1/resource` - Create
-- `PUT/PATCH /api/v1/resource/:id` - Update
-- `DELETE /api/v1/resource/:id` - Delete
+- `GET /api/v1/resource` — List (with pagination: `?page=1&limit=20`)
+- `GET /api/v1/resource/:id` — Get one
+- `POST /api/v1/resource` — Create
+- `PUT/PATCH /api/v1/resource/:id` — Update
+- `DELETE /api/v1/resource/:id` — Delete
 
 ### Authentication
 - Bearer token in Authorization header
@@ -232,7 +283,24 @@ await prisma.model.delete({ where: { id } }); // or soft delete
 - JSON for all requests/responses
 - Validation with Joi on backend
 - Return appropriate HTTP status codes
-- Never expose sensitive data (passwords, hashes)
+- Never expose sensitive data (passwords, hashes, tokens)
+
+### API Base URL
+- Hardcoded in web app: `https://devchain.onrender.com/api/v1`
+- Do not change this without explicit instruction
+
+---
+
+## File Storage (Supabase)
+
+Files are uploaded/downloaded via Supabase Storage — do not replace with local disk storage
+or other providers.
+
+```javascript
+// Supabase project ID: ldqpqggbvqjgucucxeny
+// Storage bucket: devchain-files
+// Use signed URLs for secure access
+```
 
 ---
 
@@ -247,6 +315,8 @@ JWT_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
 PORT=10000
 NODE_ENV=development
+SUPABASE_URL=https://ldqpqggbvqjgucucxeny.supabase.co
+SUPABASE_SERVICE_KEY=<service-role-key>
 ```
 
 ---
@@ -254,40 +324,44 @@ NODE_ENV=development
 ## Adding New Features
 
 ### Backend
-1. Add route in `src/routes/`
+1. Add route file in `src/routes/`
 2. Add controller in `src/controllers/`
 3. Add service/model in `src/services/` or `src/models/` if needed
 4. Add middleware in `src/middleware/` if needed
-5. Update `src/index.js` to mount route
+5. Mount the route in `src/index.js`
 6. Run `npx prisma generate` if schema changed
+7. Run `npx prisma migrate dev --name <description>` for schema migrations
 
 ### Web App
 1. Add page component in `src/pages/`
 2. Add API methods in `src/services/api.ts`
-3. Add store in `src/store/` if needed
-4. Add route in `src/App.tsx`
+3. Add Zustand store in `src/store/` if needed
+4. Register route in `src/App.tsx`
 
 ### Database Changes
 1. Edit `backend/prisma/schema.prisma`
-2. Run `npx prisma migrate dev --name description`
+2. Run `npx prisma migrate dev --name <description>`
 3. Run `npx prisma generate`
 
 ---
 
 ## Testing
 
-Currently no tests configured. When adding tests:
-- Backend: Use Jest or Mocha in `/backend/tests/`
-- Web: Use Vitest (preferred with Vite) or Jest
-- Mobile: Use Jest with React Native Testing Library
+No tests currently configured. When adding:
+- Backend: Jest or Mocha in `/backend/tests/`
+- Web: Vitest (preferred with Vite)
+- Mobile: Jest + React Native Testing Library
 - Place test files next to source: `Login.test.tsx` alongside `Login.tsx`
 
 ---
 
-## Important Notes
+## Agent Behaviour Rules
 
-1. **Backend uses CommonJS** (`require/module.exports`) - do not convert to ESM
-2. **Web app uses ESM** (`import/export`) with TypeScript
+1. **Never convert CommonJS to ESM** in the backend
+2. **Never replace Supabase Storage** with another file storage solution
 3. **Always regenerate Prisma client** after schema changes
-4. **API base URL** is hardcoded in web app: `https://devchain.onrender.com/api/v1`
-5. **Mobile and web share similar patterns** but have separate codebases
+4. **Ask before adding new dependencies** that have a cost or are heavy
+5. **Do not refactor working features** unless explicitly asked
+6. **Run all npm commands from monorepo root** (`~/devchain/`)
+7. **Prefer extending existing patterns** over introducing new architectural patterns
+8. When uncertain about scope, **ask a clarifying question** rather than making assumptions
