@@ -1,55 +1,68 @@
 # DevChain 🔗
 
-> Blockchain-powered developer marketplace — Buy, sell, and own digital products forever.
-
-## What is DevChain?
-DevChain is a cross-platform marketplace where developers buy and sell code, templates, and digital products. Every purchase is backed by a blockchain ownership certificate.
+> A blockchain-powered developer marketplace — buy/sell digital products, hire freelancers, own your work.
 
 ## Tech Stack
-- **Frontend:** React Native + Expo (Web, iOS, Android)
-- **Backend:** Node.js + Express
-- **Database:** PostgreSQL (Supabase)
-- **Cache:** Redis (Upstash)
-- **Storage:** Firebase Storage
-- **Blockchain:** Simulated → Polygon (Phase 2)
+
+| Layer | Technology |
+|-------|-----------|
+| Mobile | React Native + Expo |
+| Backend | Node.js + Express |
+| Database | PostgreSQL via Supabase |
+| Cache | Redis via Upstash |
+| Storage | Firebase Storage |
+| Blockchain | Simulated (Polygon planned) |
 
 ## Project Structure
-\`\`\`
+```
 devchain/
-├── apps/
-│   ├── mobile/     # React Native + Expo app
-│   └── web/        # Web-specific frontend
-├── backend/        # Node.js + Express API
-├── blockchain/     # Smart contracts (Phase 2)
-├── shared/         # Shared types and utilities
-└── docs/           # Documentation
-\`\`\`
+├── apps/mobile/     # Expo app (iOS, Android, Web)
+├── apps/backend/    # REST API
+└── packages/shared/ # Shared TypeScript types
+```
 
 ## Getting Started
-\`\`\`bash
-# Clone the repo
-git clone https://github.com/YOUR_USERNAME/devchain.git
-cd devchain
 
-# Install dependencies
-npm run install:all
+1. Clone the repo: `git clone https://github.com/YOUR_USERNAME/devchain.git`
+2. Install dependencies: `npm install`
+3. Copy env template: `cp .env.example .env`
+4. Fill in your credentials in `.env`
+5. Start backend: `npm run backend`
+6. Start mobile: `npm run mobile`
 
-# Start backend
-npm run backend
+## Environment Setup
 
-# Start mobile app
-npm run mobile
-\`\`\`
+See `.env.example` for all required environment variables.
+Never commit `.env` files. They are gitignored.
 
-## Roadmap
-- [x] Architecture planning
-- [x] Project setup
-- [ ] User auth (register/login)
-- [ ] Product listings
-- [ ] Stripe payments
-- [ ] Ownership certificates
-- [ ] Freelancer job board
-- [ ] Blockchain integration
+## Cost
 
-## License
-MIT
+- Development: **$0/month**
+- MVP scale: **~$50/month**
+- Growth: **~$500/month**
+```
+
+---
+
+### 💰 Cost of This Step
+
+| Item | Cost |
+|---|---|
+| GitHub repo | $0 (free) |
+| GitHub Actions (2000 min/month) | $0 (free) |
+| All tooling (ESLint, Prettier, Husky, TypeScript) | $0 (all open source) |
+| **Total** | **$0.00** |
+
+---
+
+### ✅ After Running All This, Your Repo State Is:
+```
+✅ Git initialized
+✅ Monorepo structure created
+✅ Shared TypeScript types defined
+✅ All environment variables documented
+✅ ESLint + Prettier configured
+✅ Husky blocks bad commits
+✅ GitHub Actions CI running on every push
+✅ .gitignore protecting secrets
+✅ README.md documenting the project

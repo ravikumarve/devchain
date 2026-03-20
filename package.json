@@ -4,21 +4,39 @@
   "description": "Blockchain-powered developer marketplace",
   "private": true,
   "workspaces": [
-    "apps/mobile",
-    "apps/web",
-    "backend"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
-    "mobile": "cd apps/mobile && expo start",
-    "web": "cd apps/web && npm start",
-    "backend": "cd backend && npm run dev",
-    "install:all": "npm install && cd apps/mobile && npm install && cd ../web && npm install && cd ../../backend && npm install",
-    "start": "node backend/src/index.js",
-    "build": "cd backend && npm install && npx prisma generate --schema=./prisma/schema.prisma"
+    "mobile": "npm run start --workspace=apps/mobile",
+    "backend": "npm run dev --workspace=apps/backend",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "typescript-eslint": "^8.57.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   },
   "author": "DevChain",
   "license": "MIT",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   }
 }
