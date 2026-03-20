@@ -1,0 +1,35 @@
+# .github/workflows/keep-alive.yml
+# Pings Supabase every 5 days to prevent free tier pausing.
+# Cost: $0 — uses GitHub Actions free minutes.
+
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    - cron: '0 9 */5 * *'  # Every 5 days at 9am UTC
+  workflow_dispatch:        # Allow manual trigger from GitHub UI
+
+jobs:
+  ping:
+    name: Ping Supabase
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping Supabase health endpoint
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          
+          echo "Supabase response: $response"
+          
+          if [ "$response" = "200" ] || [ "$response" = "404" ]; then
+            echo "✅ Supabase is alive"
+          else
+            echo "❌ Supabase ping failed with status $response"
+            exit 1
+          fi
+
+      - name: Log ping time
+        run: echo "Pinged at $(date -u)"
