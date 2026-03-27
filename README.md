@@ -1,40 +1,63 @@
-# DevChain 🚀
+<p align="center">
+  <h1 align="center">DevChain 🚀</h1>
+  <p align="center">
+    <strong>The Blockchain-Powered Developer Marketplace</strong> — Sell digital products & services with verifiable ownership
+  </p>
+</p>
 
-**The Blockchain-Powered Developer Marketplace** — Gumroad meets Fiverr meets GitHub Marketplace for developers
+<p align="center">
+  <a href="https://github.com/your-org/devchain/stargazers">
+    <img src="https://img.shields.io/github/stars/your-org/devchain?style=social" alt="GitHub Stars" />
+  </a>
+  <a href="https://devchain-app.vercel.app">
+    <img src="https://img.shields.io/badge/demo-live-7C3AED?style=for-the-badge&logo=vercel" alt="Live Demo" />
+  </a>
+  <a href="https://devchain.onrender.com/api/v1">
+    <img src="https://img.shields.io/badge/API-live-059669?style=for-the-badge" alt="API Live" />
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/github/license/your-org/devchain" alt="License" />
+  </a>
+  <img src="https://img.shields.io/badge/typescript-5.0+-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/node.js-20+-339933?logo=node.js&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/react-19-61DAFB?logo=react&logoColor=white" alt="React 19" />
+</p>
 
-[![Live Demo](https://img.shields.io/badge/demo-live-7C3AED?style=for-the-badge&logo=vercel)](https://devchain-app.vercel.app)
-[![Backend API](https://img.shields.io/badge/API-live-059669?style=for-the-badge)](https://devchain.onrender.com/api/v1)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)](LICENSE)
+<p align="center">
+  <!-- Demo GIF placeholder - add actual demo.gif in assets/ folder -->
+  <strong>🎥 Demo coming soon!</strong>
+</p>
 
 DevChain is a next-generation marketplace where developers can sell digital products, offer services, and connect with clients — all secured by blockchain ownership verification.
 
-## ✨ Why DevChain?
+## ✨ Features
 
-- **🛍️ Sell Anything Digital**: Templates, tools, courses, scripts, design assets
-- **🔐 Blockchain Ownership**: Every purchase gets a verifiable SHA-256 certificate
-- **📊 Real Analytics**: Track sales, revenue, and performance metrics
-- **⚡ Instant Delivery**: Automated file delivery via Supabase Storage
-- **🌐 Full-Stack**: Web + mobile apps with TypeScript everywhere
+- **🛍️ Sell Digital Products**: Templates, tools, courses, scripts, design assets with instant delivery
+- **🔐 Blockchain-Verified Ownership**: Every purchase gets a verifiable SHA-256 certificate
+- **📊 Real-time Analytics**: Track sales, revenue, and performance metrics
+- **⚡ Instant File Delivery**: Automated upload/download via Supabase Storage
+- **🌐 Full-Stack TypeScript**: Web + mobile apps with end-to-end type safety
+- **💼 Services Marketplace**: Post jobs, hire developers, manage projects securely
 
 ## 🚀 Quick Start
 
 Get up and running in 5 minutes:
 
 ```bash
-# Clone and setup
+# 1. Install dependencies
 npm run install:all
 
-# Environment setup
+# 2. Setup environment
 cp .env.example .env
 cp backend/.env.example backend/.env
 
-# Database setup
+# 3. Setup database
 cd backend && npx prisma migrate dev
 
-# Start everything
-npm start              # Backend API (port 10000)
-npm run web:dev        # Web app (port 5173)
-npm run mobile:start   # Mobile app
+# 4. Start development servers
+npm start              # Backend API (http://localhost:10000)
+npm run web:dev        # Web app (http://localhost:5173)
+npm run mobile:start   # Mobile app (Expo dev server)
 ```
 
 ## 🏗️ Architecture Overview
@@ -98,7 +121,7 @@ The REST API follows consistent patterns:
 https://devchain.onrender.com/api/v1
 ```
 
-### Endpoints
+### Key Endpoints
 
 | Method | Endpoint              | Description                | Auth Required |
 | ------ | --------------------- | -------------------------- | ------------- |
@@ -203,9 +226,9 @@ npx prisma generate    # Regenerate Prisma client
 npx prisma studio      # Open database admin UI
 ```
 
-## 📈 Roadmap
+## 🗺️ Roadmap
 
-### 🎯 Phase 1: Core Marketplace (Current)
+### ✅ Phase 1: Core Marketplace (Completed)
 
 - [x] User authentication system
 - [x] Product marketplace with search/filter
@@ -213,7 +236,7 @@ npx prisma studio      # Open database admin UI
 - [x] File upload/download system
 - [x] Job board for services
 
-### 🔐 Phase 2: Blockchain Integration (Q2 2025)
+### 🔜 Phase 2: Blockchain Integration (Q2 2025)
 
 - [ ] Polygon blockchain integration
 - [ ] Smart contracts for digital ownership
@@ -238,21 +261,39 @@ npx prisma studio      # Open database admin UI
 
 We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.md) for details.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Quick Contribution Guide
+
+1. **Fork** the repository
+2. **Create a feature branch**: `git checkout -b feat/amazing-feature`
+3. **Make your changes** following our code style
+4. **Commit**: Use [Conventional Commits](https://conventionalcommits.org) format
+5. **Push**: `git push origin feat/amazing-feature`
+6. **Open a Pull Request** with a clear description
+
+### What We're Looking For
+
+- 🐛 Bug fixes with reproduction steps
+- ⚡ Performance improvements with benchmarks
+- 📚 Documentation improvements
+- 🎨 UI/UX enhancements
+- 🔧 New features (please discuss in an issue first)
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 💬 Support
 
-- 📖 [Documentation](docs/) - Detailed guides and API references
-- 🐛 [Issue Tracker](https://github.com/your-org/devchain/issues) - Report bugs or request features
-- 💬 [Discussions](https://github.com/your-org/devchain/discussions) - Questions and community support
+- 📖 **[Documentation](docs/)** - Detailed guides and API references
+- 🐛 **[Issue Tracker](https://github.com/your-org/devchain/issues)** - Report bugs or request features
+- 💬 **[Discussions](https://github.com/your-org/devchain/discussions)** - Questions and community support
+- 📧 **Email**: [your-email@example.com](mailto:your-email@example.com)
+
+### Need Help?
+
+- Check the [docs](docs/) first for common questions
+- Search existing [issues](https://github.com/your-org/devchain/issues) before creating new ones
+- Join our community [discussions](https://github.com/your-org/devchain/discussions) for help
 
 ## 🙏 Acknowledgments
 
@@ -262,4 +303,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**DevChain** - Where code meets commerce, secured by blockchain. 🚀
+<p align="center">
+  <strong>DevChain</strong> - Where code meets commerce, secured by blockchain. 🚀
+</p>
+
+<p align="center">
+  <sub>Made with love for the developer community</sub>
+</p>
