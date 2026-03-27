@@ -1,20 +1,75 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 :root {
   --bg: #050508;
   --bg2: #0d0d12;
   --bg3: #12121a;
   --border: #1e1e2e;
-  --purple: #7C3AED;
-  --purple-light: #9F67FF;
-  --purple-dark: #5B21B6;
+  --purple: #7c3aed;
+  --purple-light: #9f67ff;
+  --purple-dark: #5b21b6;
   --green: #059669;
-  --red: #DC2626;
+  --red: #dc2626;
   --text: #f0f0f5;
   --text2: #9898b0;
   --text3: #55556a;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 极 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
 }
 
 body {
@@ -25,11 +80,21 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
 
-a { color: inherit; text-decoration: none; }
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
 .btn-primary {
   background: var(--purple);
@@ -43,8 +108,15 @@ a { color: inherit; text-decoration: none; }
   transition: all 0.2s;
   font-family: 'Inter', sans-serif;
 }
-.btn-primary:hover { background: var(--purple-light); transform: translateY(-1px); }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-primary:hover {
+  background: var(--purple-light);
+  transform: translateY(-1px);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
 
 .btn-secondary {
   background: var(--bg3);
@@ -58,9 +130,14 @@ a { color: inherit; text-decoration: none; }
   transition: all 0.2s;
   font-family: 'Inter', sans-serif;
 }
-.btn-secondary:hover { border-color: var(--purple); color: var(--purple); }
+.btn-secondary:hover {
+  border-color: var(--purple);
+  color: var(--purple);
+}
 
-input, textarea, select {
+input,
+textarea,
+select {
   background: var(--bg3);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -72,17 +149,28 @@ input, textarea, select {
   outline: none;
   transition: border-color 0.2s;
 }
-input:focus, textarea:focus { border-color: var(--purple); }
-input::placeholder, textarea::placeholder { color: var(--text3); }
+input:focus,
+textarea:focus {
+  border-color: var(--purple);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--text3);
+}
 
 .card {
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 24px;
-  transition: border-color 0.2s, transform 0.2s;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
 }
-.card:hover { border-color: #2e2e4e; transform: translateY(-2px); }
+.card:hover {
+  border-color: #2e2e4e;
+  transform: translateY(-2px);
+}
 
 .badge {
   display: inline-flex;
@@ -94,5 +182,7 @@ input::placeholder, textarea::placeholder { color: var(--text3); }
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }

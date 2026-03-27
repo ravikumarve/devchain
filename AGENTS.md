@@ -23,13 +23,13 @@ devchain/
 
 ## Deployment & Infrastructure
 
-| Layer     | Service                        | URL / ID                              |
-|-----------|-------------------------------|---------------------------------------|
-| Frontend  | Vercel                         | `devchain-app.vercel.app`             |
-| Backend   | Render                         | `devchain.onrender.com`               |
-| Database  | PostgreSQL (via Render/Prisma) | See `DATABASE_URL` in `.env`          |
-| Storage   | Supabase Storage               | Project ID: `ldqpqggbvqjgucucxeny`    |
-| S3 Bucket | `devchain-files`               | Used for file upload/download         |
+| Layer     | Service                        | URL / ID                           |
+| --------- | ------------------------------ | ---------------------------------- |
+| Frontend  | Vercel                         | `devchain-app.vercel.app`          |
+| Backend   | Render                         | `devchain.onrender.com`            |
+| Database  | PostgreSQL (via Render/Prisma) | See `DATABASE_URL` in `.env`       |
+| Storage   | Supabase Storage               | Project ID: `ldqpqggbvqjgucucxeny` |
+| S3 Bucket | `devchain-files`               | Used for file upload/download      |
 
 **Do not suggest:** Docker-based deployments, AWS, GCP, self-hosted VPS, or any paid infra
 upgrades without being explicitly asked.
@@ -64,6 +64,7 @@ unless explicitly asked.
 ## Build, Lint, and Test Commands
 
 ### Root Workspace
+
 ```bash
 npm run install:all       # Install all workspace dependencies
 npm run build             # Backend: npm install + prisma generate
@@ -71,6 +72,7 @@ npm start                 # Start backend server (node backend/src/index.js)
 ```
 
 ### Backend (`/backend`)
+
 ```bash
 npm run dev               # Start with nodemon (auto-reload)
 npm run start             # Start without reload
@@ -80,6 +82,7 @@ npx prisma studio         # Open Prisma admin UI
 ```
 
 ### Web App (`/apps/web`)
+
 ```bash
 npm run dev               # Start Vite dev server
 npm run build             # TypeScript compile + Vite build
@@ -89,18 +92,21 @@ npm run preview           # Preview production build
 ```
 
 **Run single file lint:**
+
 ```bash
 npx eslint src/pages/Login.tsx
 npx eslint src/pages/Login.tsx --fix
 ```
 
 **Run single test (if tests added):**
+
 ```bash
 npx vitest run src/pages/Login.test.tsx
 npx vitest src/pages/Login.test.tsx --watch
 ```
 
 ### Mobile App (`/apps/mobile`)
+
 ```bash
 npm run start             # Start Expo dev server
 npm run android           # Start for Android
@@ -113,6 +119,7 @@ npm run web               # Start for web
 ## TypeScript Configuration
 
 ### Web App (`apps/web/tsconfig.app.json`)
+
 - Target: ES2022
 - Strict mode: **enabled**
 - `noUnusedLocals`: true
@@ -121,6 +128,7 @@ npm run web               # Start for web
 - `erasableSyntaxOnly`: true
 
 ### Mobile App (`apps/mobile/tsconfig.json`)
+
 - Standard Expo TypeScript config (React Native)
 
 ---
@@ -128,6 +136,7 @@ npm run web               # Start for web
 ## Code Style Guidelines
 
 ### General
+
 - Use **2 spaces** for indentation
 - Use **semicolons** at end of statements
 - Use **template literals** for string interpolation
@@ -142,6 +151,7 @@ Do **not** convert to ESM. Do not use `import`/`export` in backend files.
 **File naming:** `camelCase.js` (e.g., `authController.js`, `productService.js`)
 
 **Imports:**
+
 ```javascript
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
@@ -149,6 +159,7 @@ const { protect } = require('../middleware/auth');
 ```
 
 **Error handling pattern:**
+
 ```javascript
 const controller = async (req, res) => {
   try {
@@ -162,6 +173,7 @@ const controller = async (req, res) => {
 ```
 
 **Response structure:**
+
 - Success: `res.status(X).json({ message?, data? })`
 - Errors: `res.status(X).json({ error: 'Descriptive message' })`
 - Always return after sending response
@@ -173,11 +185,13 @@ const controller = async (req, res) => {
 **Web app uses ESM** (`import`/`export`) with TypeScript — do not use `require()`.
 
 **File naming:**
+
 - Components: `PascalCase.tsx` (e.g., `Navbar.tsx`, `FileManager.tsx`)
 - Pages: `PascalCase.tsx` (e.g., `Login.tsx`, `Marketplace.tsx`)
 - Stores/Utilities: `camelCase.ts` (e.g., `authStore.ts`, `api.ts`)
 
 **Imports order:**
+
 1. React/native imports
 2. Third-party libraries
 3. Internal components/stores
@@ -191,6 +205,7 @@ import Navbar from '../components/Navbar';
 ```
 
 **Component patterns:**
+
 ```typescript
 // Page component - default export
 export default function Login() {
@@ -200,10 +215,11 @@ export default function Login() {
 }
 
 // Reusable component - named export
-export function Navbar() { }
+export function Navbar() {}
 ```
 
 **Zustand store pattern:**
+
 ```typescript
 interface State {
   data: Type;
@@ -231,10 +247,12 @@ export const useStore = create<State>((set) => ({
 ```
 
 **Inline styles:** Use `Record<string, React.CSSProperties>` pattern (see existing pages).
+
 - Keep all styles in a `const styles` object at the bottom of the file
 - Use camelCase for CSS properties
 
 **Error handling:**
+
 ```typescript
 try {
   await action();
@@ -246,6 +264,7 @@ try {
 ### Database (Prisma)
 
 **Schema conventions:**
+
 - Table names: `snake_case` (via `@@map`)
 - Field names: `camelCase`
 - Use `@default(uuid())` for IDs
@@ -254,6 +273,7 @@ try {
 **Always run `npx prisma generate` after any schema change.**
 
 **Query patterns:**
+
 ```javascript
 const item = await prisma.model.findUnique({ where: { id } });
 const items = await prisma.model.findMany({ where, orderBy, take, skip });
@@ -267,6 +287,7 @@ await prisma.model.delete({ where: { id } }); // or soft delete via update({ del
 ## API Design Conventions
 
 ### RESTful Endpoints
+
 - `GET /api/v1/resource` — List (with pagination: `?page=1&limit=20`)
 - `GET /api/v1/resource/:id` — Get one
 - `POST /api/v1/resource` — Create
@@ -274,18 +295,21 @@ await prisma.model.delete({ where: { id } }); // or soft delete via update({ del
 - `DELETE /api/v1/resource/:id` — Delete
 
 ### Authentication
+
 - Bearer token in Authorization header
 - JWT access tokens (short-lived, 15m)
 - JWT refresh tokens (long-lived, 7d)
 - Protected routes use `protect` middleware
 
 ### Request/Response
+
 - JSON for all requests/responses
 - Validation with Joi on backend
 - Return appropriate HTTP status codes
 - Never expose sensitive data (passwords, hashes, tokens)
 
 ### API Base URL
+
 - Hardcoded in web app: `https://devchain.onrender.com/api/v1`
 - Do not change this without explicit instruction
 
@@ -307,6 +331,7 @@ or other providers.
 ## Environment Variables
 
 Required in `/backend/.env`:
+
 ```
 DATABASE_URL=postgresql://...
 JWT_SECRET=<random-string>
@@ -324,6 +349,7 @@ SUPABASE_SERVICE_KEY=<service-role-key>
 ## Adding New Features
 
 ### Backend
+
 1. Add route file in `src/routes/`
 2. Add controller in `src/controllers/`
 3. Add service/model in `src/services/` or `src/models/` if needed
@@ -333,12 +359,14 @@ SUPABASE_SERVICE_KEY=<service-role-key>
 7. Run `npx prisma migrate dev --name <description>` for schema migrations
 
 ### Web App
+
 1. Add page component in `src/pages/`
 2. Add API methods in `src/services/api.ts`
 3. Add Zustand store in `src/store/` if needed
 4. Register route in `src/App.tsx`
 
 ### Database Changes
+
 1. Edit `backend/prisma/schema.prisma`
 2. Run `npx prisma migrate dev --name <description>`
 3. Run `npx prisma generate`
@@ -348,6 +376,7 @@ SUPABASE_SERVICE_KEY=<service-role-key>
 ## Testing
 
 No tests currently configured. When adding:
+
 - Backend: Jest or Mocha in `/backend/tests/`
 - Web: Vitest (preferred with Vite)
 - Mobile: Jest + React Native Testing Library
@@ -365,3 +394,36 @@ No tests currently configured. When adding:
 6. **Run all npm commands from monorepo root** (`~/devchain/`)
 7. **Prefer extending existing patterns** over introducing new architectural patterns
 8. When uncertain about scope, **ask a clarifying question** rather than making assumptions
+9. **Use shadcn/ui for all new page UI** — do not use raw HTML inputs or custom button styles on new pages
+10. **Never run shadcn init again** — it is already configured
+11. **Ask before installing new shadcn components** not in the list above
+
+---
+
+## UI Component Library (shadcn/ui)
+
+shadcn/ui is installed in `apps/web`. Components live in `apps/web/src/components/ui/`.
+
+**Import pattern:**
+
+```typescript
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+```
+
+**Rules:**
+
+- Use shadcn components for all new forms, inputs, buttons, dialogs, and cards
+- Do NOT replace shadcn with custom HTML inputs on new pages
+- Existing pages use inline styles (const styles pattern) — do not refactor them to shadcn
+- Only new pages (Sprint 1 onwards) should use shadcn
+
+**Available components (installed):**
+button, input, textarea, select, form, label, badge, card, dialog
+
+**Adding new components:**
+
+```bash
+cd apps/web && npx shadcn@latest add <component-name>
+```
