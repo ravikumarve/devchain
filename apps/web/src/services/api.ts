@@ -27,7 +27,8 @@ api.interceptors.response.use(
 
 export const authAPI = {
   login: (data: { email: string; password: string }) => api.post('/auth/login', data),
-  register: (data: { username: string; email: string; password: string }) => api.post('/auth/register', data),
+  register: (data: { username: string; email: string; password: string }) =>
+    api.post('/auth/register', data),
   getMe: () => api.get('/auth/me'),
 };
 
@@ -71,5 +72,11 @@ export const uploadAPI = {
     });
   },
   getFileInfo: (productId: string) => api.get(`/uploads/product/${productId}/info`),
-  getDownloadUrl: (productId: string) => `${api.defaults.baseURL}/uploads/product/${productId}/download`,
+  getDownloadUrl: (productId: string) =>
+    `${api.defaults.baseURL}/uploads/product/${productId}/download`,
+};
+
+export const paymentsAPI = {
+  createCheckoutSession: (productId: string) =>
+    api.post('/payments/create-checkout-session', { productId }),
 };

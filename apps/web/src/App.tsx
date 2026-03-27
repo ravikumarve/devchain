@@ -13,10 +13,14 @@ import Sell from './pages/Sell';
 import JobDetail from './pages/JobDetail';
 import PostJob from './pages/PostJob';
 import Analytics from './pages/Analytics';
+import PurchaseSuccess from './pages/PurchaseSuccess';
+import PurchaseCancel from './pages/PurchaseCancel';
 
 function App() {
   const { loadUser } = useAuthStore();
-  useEffect(() => { loadUser(); }, []);
+  useEffect(() => {
+    loadUser();
+  }, []);
 
   return (
     <BrowserRouter>
@@ -33,6 +37,8 @@ function App() {
         <Route path="/job/:id" element={<JobDetail />} />
         <Route path="/post-job" element={<PostJob />} />
         <Route path="/analytics" element={<Analytics />} />
+        <Route path="/purchase-success" element={<PurchaseSuccess />} />
+        <Route path="/purchase-cancel" element={<PurchaseCancel />} />
       </Routes>
     </BrowserRouter>
   );

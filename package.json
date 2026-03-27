@@ -18,12 +18,12 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "typescript": "^5.4.5",
+    "eslint": "^9.0.0",
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
-    "typescript-eslint": "^8.57.0",
-    "eslint": "^9.0.0",
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.57.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -38,5 +38,9 @@
   "license": "MIT",
   "engines": {
     "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "prisma": "^5.22.0",
+    "stripe": "^21.0.1"
   }
 }

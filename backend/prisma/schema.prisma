@@ -33,41 +33,37 @@ model User {
 }
 
 model Product {
-  id            String    @id @default(uuid())
-  sellerId      String
-  title         String
-  description   String
-  price         Float
-  category      String
-  fileUrl       String?
-  previewUrl    String?
-  tags          String[]
-  downloadsCount Int      @default(0)
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  price       Int
+  category    String
+  tags        String[]
+  fileKey     String?
+  previewUrl  String?
+  sellerId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
 
-  seller        User      @relation(fields: [sellerId], references: [id])
-  orders        Order[]
-  reviews       Review[]
+  seller User @relation(fields: [sellerId], references: [id])
+  orders Order[]
 
   @@map("products")
 }
 
 model Order {
-  id              String    @id @default(uuid())
-  buyerId         String
-  productId       String
-  amountPaid      Float
-  paymentMethod   String    @default("stripe")
-  ownershipHash   String    @unique
-  status          String    @default("completed")
-  createdAt       DateTime  @default(now())
+  id          String   @id @default(uuid())
+  buyerId     String
+  productId   String
+  amount      Int
+  currency    String   @default("usd")
+  stripeSessionId String @unique
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
 
-  buyer           User      @relation(fields: [buyerId], references: [id])
-  product         Product   @relation(fields: [productId], references: [id])
-  ownershipRecord OwnershipRecord?
+  buyer       User     @relation(fields: [buyerId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id])
 
   @@map("orders")
 }
@@ -81,8 +77,6 @@ model OwnershipRecord {
   blockchainTx   String?
   isOnChain      Boolean   @default(false)
   issuedAt       DateTime  @default(now())
-
-  order          Order     @relation(fields: [orderId], references: [id])
 
   @@map("ownership_records")
 }
@@ -133,7 +127,6 @@ model Review {
 
   reviewer    User     @relation("ReviewerRelation", fields: [reviewerId], references: [id])
   reviewee    User     @relation("RevieweeRelation", fields: [revieweeId], references: [id])
-  product     Product? @relation(fields: [productId], references: [id])
 
   @@map("reviews")
 }
