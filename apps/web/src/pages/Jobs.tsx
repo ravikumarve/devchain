@@ -37,7 +37,7 @@ export default function Jobs() {
   }, [jobs, search, skillFilter]);
 
   return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'var(--bg-void)' }}>
+    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
       <div className="container" style={{ padding: '48px 2rem' }}>
         {/* Header */}
         <div style={{

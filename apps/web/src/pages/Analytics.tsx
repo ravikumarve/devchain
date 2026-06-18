@@ -53,7 +53,7 @@ export default function Analytics() {
   }, [isAuthenticated, navigate]);
 
   if (loading) return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'var(--bg-void)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>Loading...</div>
+    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>Loading...</div>
   );
 
   const totalRevenue = sales.reduce((sum, s) => sum + (s.amountPaid || 0), 0);
@@ -92,7 +92,7 @@ export default function Analytics() {
   };
 
   return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'var(--bg-void)' }}>
+    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
       <div className="container" style={{ padding: '48px 2rem' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 40, flexWrap: 'wrap', gap: 16 }}>
@@ -177,7 +177,7 @@ export default function Analytics() {
                 {products.map((p) => {
                   const prodSales = revenueByProduct[p.id];
                   return (
-                    <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-void)', borderRadius: 10, border: '1px solid var(--border-dim)' }}>
+                    <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'transparent', borderRadius: 10, border: '1px solid var(--border-dim)' }}>
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-main)', marginBottom: 2 }}>{p.title.slice(0, 24)}...</div>
                         <div style={{ fontSize: 11, color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>{p.category} · ${p.price}</div>
@@ -206,7 +206,7 @@ export default function Analytics() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {recentSales.map((s, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', background: 'var(--bg-void)', borderRadius: 12, border: '1px solid var(--border-dim)', flexWrap: 'wrap', gap: 10 }}>
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', background: 'transparent', borderRadius: 12, border: '1px solid var(--border-dim)', flexWrap: 'wrap', gap: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, var(--eth-purple), #9F67FF)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
                       {s.buyer?.username?.[0]?.toUpperCase()}

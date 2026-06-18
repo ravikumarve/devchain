@@ -108,7 +108,7 @@ function PurchaseModal({
                 A unique SHA-256 cryptographic certificate will be permanently linked to your account.
               </p>
               <div style={{
-                background: 'var(--bg-void)', borderRadius: 12,
+                background: 'transparent', borderRadius: 12,
                 border: '1px solid var(--border-dim)', padding: '14px 16px', marginBottom: 20,
               }}>
                 {[
@@ -212,7 +212,7 @@ export default function ProductDetail() {
 
   if (loading) return (
     <div style={{
-      paddingTop: 72, minHeight: '100vh', background: 'var(--bg-void)',
+      paddingTop: 72, minHeight: '100vh', background: 'transparent',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13,
     }}>
@@ -226,7 +226,7 @@ export default function ProductDetail() {
 
   return (
     <>
-      <div style={{ paddingTop: 72, minHeight: '100vh', background: 'var(--bg-void)' }}>
+      <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
         <div className="container" style={{ padding: '48px 2rem' }}>
           <button onClick={() => navigate('/marketplace')}
             className="btn-outline"

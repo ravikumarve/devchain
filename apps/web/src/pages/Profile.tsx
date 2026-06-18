@@ -39,7 +39,7 @@ export default function Profile() {
   if (!isAuthenticated) return null;
 
   return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'var(--bg-void)' }}>
+    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
       <div className="container" style={{ padding: '48px 2rem' }}>
         {/* Profile Header */}
         <div className="card" style={{ padding: 32, display: 'flex', alignItems: 'center', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
@@ -109,7 +109,7 @@ function PurchasesList({ purchases }: { purchases: PurchaseData[] }) {
             <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--eth-purple)', whiteSpace: 'nowrap', fontFamily: 'var(--font-mono)' }}>${p.amountPaid?.toFixed(2)}</span>
           </div>
           {p.certificate?.ownershipHash && (
-            <div style={{ marginTop: 16, background: 'var(--bg-void)', border: '1px solid var(--eth-purple-dim)', borderRadius: 10, padding: 14 }}>
+            <div style={{ marginTop: 16, background: 'transparent', border: '1px solid var(--eth-purple-dim)', borderRadius: 10, padding: 14 }}>
               <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--eth-purple)', letterSpacing: 2, marginBottom: 8, fontFamily: 'var(--font-mono)' }}>🔐 SHA-256 CERTIFICATE</div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#9F67FF', wordBreak: 'break-all', lineHeight: 1.6 }}>{p.certificate.ownershipHash}</div>
               <div style={{ marginTop: 8 }}>

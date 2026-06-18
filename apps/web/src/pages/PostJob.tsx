@@ -35,7 +35,7 @@ export default function PostJob() {
   };
 
   if (success) return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'var(--bg-void)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: 64, marginBottom: 24 }}>🎉</div>
         <h2 style={{ fontSize: 28, fontWeight: 900, color: 'var(--text-main)', marginBottom: 12 }}>Job Posted!</h2>
@@ -45,7 +45,7 @@ export default function PostJob() {
   );
 
   return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'var(--bg-void)' }}>
+    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
       <div className="container" style={{ padding: '48px 2rem' }}>
         <button onClick={() => navigate('/jobs')} className="btn-outline" style={{ marginBottom: 32, padding: '8px 18px', fontSize: 13 }}>
           ← Back to Jobs
@@ -106,7 +106,7 @@ export default function PostJob() {
               )}
             </div>
 
-            <div style={{ background: 'var(--bg-void)', border: '1px solid var(--eth-purple-dim)', borderRadius: 14, padding: 20, display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+            <div style={{ background: 'transparent', border: '1px solid var(--eth-purple-dim)', borderRadius: 14, padding: 20, display: 'flex', gap: 16, alignItems: 'flex-start' }}>
               <span style={{ fontSize: 28 }}>💼</span>
               <div>
                 <div style={{ color: 'var(--eth-purple)', fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Hire with Confidence</div>

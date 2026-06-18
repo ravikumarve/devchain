@@ -62,7 +62,7 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     minHeight: '100vh', display: 'flex', alignItems: 'center',
     justifyContent: 'center', padding: 24, position: 'relative',
-    background: 'var(--bg-void)',
+    background: 'transparent',
   },
   glow: {
     position: 'fixed', top: '40%', left: '50%', transform: 'translate(-50%, -50%)',

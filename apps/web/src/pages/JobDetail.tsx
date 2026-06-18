@@ -37,14 +37,14 @@ export default function JobDetail() {
     } finally { setSubmitting(false); }
   };
 
-  if (loading) return <div style={{ paddingTop: 72, minHeight: '100vh', background: 'var(--bg-void)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>Loading...</div>;
+  if (loading) return <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>Loading...</div>;
   if (!job) return null;
 
   const isOwner = job.client?.id === user?.id;
 
   return (
     <>
-      <div style={{ paddingTop: 72, minHeight: '100vh', background: 'var(--bg-void)' }}>
+      <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
         <div className="container" style={{ padding: '48px 2rem' }}>
           <button onClick={() => navigate('/jobs')} className="btn-outline" style={{ padding: '8px 18px', fontSize: 13, marginBottom: 32 }}>
             ← Back to Jobs

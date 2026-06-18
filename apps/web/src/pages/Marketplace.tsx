@@ -83,7 +83,7 @@ export default function Marketplace() {
   const hasActiveFilters = search || category !== 'all' || sort !== 'newest' || priceMin || priceMax;
 
   return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'var(--bg-void)' }}>
+    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
       <div className="container" style={{ padding: '48px 2rem' }}>
         {/* ─── Header ─── */}
         <div style={{
@@ -202,11 +202,11 @@ export default function Marketplace() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <input type="number" placeholder="Min $" value={priceMin}
                 onChange={e => setPriceMin(e.target.value)}
-                style={{ width: 100, background: 'var(--bg-void)', border: '1px solid var(--border-dim)', borderRadius: 8, padding: '8px 12px', color: 'var(--text-main)', fontSize: 14, fontFamily: 'var(--font-display)' }} />
+                style={{ width: 100, background: 'transparent', border: '1px solid var(--border-dim)', borderRadius: 8, padding: '8px 12px', color: 'var(--text-main)', fontSize: 14, fontFamily: 'var(--font-display)' }} />
               <span style={{ color: 'var(--text-faint)' }}>—</span>
               <input type="number" placeholder="Max $" value={priceMax}
                 onChange={e => setPriceMax(e.target.value)}
-                style={{ width: 100, background: 'var(--bg-void)', border: '1px solid var(--border-dim)', borderRadius: 8, padding: '8px 12px', color: 'var(--text-main)', fontSize: 14, fontFamily: 'var(--font-display)' }} />
+                style={{ width: 100, background: 'transparent', border: '1px solid var(--border-dim)', borderRadius: 8, padding: '8px 12px', color: 'var(--text-main)', fontSize: 14, fontFamily: 'var(--font-display)' }} />
               <button onClick={fetchProducts} className="btn-primary"
                 style={{ padding: '8px 16px', fontSize: 12 }}>
                 Apply

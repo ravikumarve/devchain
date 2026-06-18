@@ -44,52 +44,60 @@
 body {
   font-family: var(--font-display);
   background-color: var(--bg-void);
-  background-image: 
-    /* Mesh grid — thin connecting lines */
-    linear-gradient(rgba(98, 126, 234, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(98, 126, 234, 0.03) 1px, transparent 1px),
-    /* Diagonal cross-mesh */
-    linear-gradient(45deg, rgba(98, 126, 234, 0.02) 1px, transparent 1px),
-    linear-gradient(-45deg, rgba(98, 126, 234, 0.02) 1px, transparent 1px);
-  background-size: 60px 60px, 60px 60px, 60px 60px, 60px 60px;
-  background-position: 0 0, 0 0, 0 0, 0 0;
   color: var(--text-main);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-  position: relative;
 }
 
-/* Global ambient purple glow */
-body::before {
-  content: '';
+/* Fixed background mesh layer (inside root, correct stacking) */
+.bg-mesh {
   position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Mesh grid — thin connecting lines */
+.bg-mesh-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(98, 126, 234, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(98, 126, 234, 0.04) 1px, transparent 1px),
+    linear-gradient(45deg, rgba(98, 126, 234, 0.025) 1px, transparent 1px),
+    linear-gradient(-45deg, rgba(98, 126, 234, 0.025) 1px, transparent 1px);
+  background-size: 60px 60px, 60px 60px, 60px 60px, 60px 60px;
+}
+
+/* Ambient purple glow */
+.bg-mesh-glow {
+  position: absolute;
   top: -20vh;
   left: 50%;
   transform: translateX(-50%);
   width: 80vw;
   height: 60vh;
   background: radial-gradient(ellipse at center, rgba(98, 126, 234, 0.08), transparent 70%);
-  z-index: 0;
-  pointer-events: none;
   filter: blur(120px);
 }
 
-/* Mesh dots at line intersections */
-body::after {
-  content: '';
-  position: fixed;
+/* Mesh dots at grid intersections */
+.bg-mesh-dots {
+  position: absolute;
   inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle at 30px 30px, rgba(98, 126, 234, 0.15) 1.5px, transparent 1.5px);
+  background-image: radial-gradient(circle at 60px 60px, rgba(98, 126, 234, 0.12) 1.5px, transparent 1.5px);
   background-size: 60px 60px;
 }
 
-/* Ensure all page content sits above the background layers */
-#root {
-  position: relative;
-  z-index: 1;
+/* Secondary dot offset for denser mesh */
+.bg-mesh-dots::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 30px 30px, rgba(98, 126, 234, 0.08) 1px, transparent 1px);
+  background-size: 60px 60px;
 }
 
 .mono {

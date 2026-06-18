@@ -4,7 +4,7 @@ export default function PurchaseCancel() {
   const navigate = useNavigate();
 
   return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'var(--bg-void)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div className="card" style={{ padding: 48, textAlign: 'center', maxWidth: 500, width: '100%', margin: '0 20px' }}>
         <div style={{ fontSize: 64, marginBottom: 24 }}>😢</div>
         <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--text-main)', marginBottom: 16, letterSpacing: '-0.03em' }}>Purchase Cancelled</h1>
