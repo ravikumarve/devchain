@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">DevChain 🚀</h1>
   <p align="center">
-    <strong>The Blockchain-Powered Developer Marketplace</strong> — Sell digital products & services with verifiable ownership
+    <strong>The Developer Marketplace with SHA-256 Verified Ownership</strong> — Sell digital products & services with verifiable ownership certificates
   </p>
 </p>
 
@@ -15,25 +15,30 @@
   <a href="https://devchain.onrender.com/api/v1">
     <img src="https://img.shields.io/badge/API-live-059669?style=for-the-badge" alt="API Live" />
   </a>
-  <a href="LICENSE">
+  <a href="https://github.com/your-org/devchain/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/your-org/devchain" alt="License" />
   </a>
   <img src="https://img.shields.io/badge/typescript-5.0+-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/node.js-20+-339933?logo=node.js&logoColor=white" alt="Node.js" />
   <img src="https://img.shields.io/badge/react-19-61DAFB?logo=react&logoColor=white" alt="React 19" />
+  <img src="https://img.shields.io/badge/SHA--256-Ownership-8B5CF6?logo=cryptography&logoColor=white" alt="SHA-256 Ownership" />
+  <img src="https://img.shields.io/badge/tests-183%20passing-22C55E" alt="183 tests passing" />
 </p>
 
 <p align="center">
-  <!-- Demo GIF placeholder - add actual demo.gif in assets/ folder -->
-  <strong>🎥 Demo coming soon!</strong>
+  <img src="assets/demo-placeholder.png" alt="DevChain Demo" width="800" />
+  <br>
+  <em>🎥 Demo: Browse products, purchase with Stripe, and get instant SHA-256 ownership certificates</em>
+  <br>
+  <small><a href="assets/demo-instructions.md">📹 Learn how to create the full demo GIF</a></small>
 </p>
 
-DevChain is a next-generation marketplace where developers can sell digital products, offer services, and connect with clients — all secured by blockchain ownership verification.
+DevChain is a next-generation marketplace where developers can sell digital products, offer services, and connect with clients — all secured by SHA-256 cryptographic ownership verification.
 
 ## ✨ Features
 
 - **🛍️ Sell Digital Products**: Templates, tools, courses, scripts, design assets with instant delivery
-- **🔐 Blockchain-Verified Ownership**: Every purchase gets a verifiable SHA-256 certificate
+- **🔐 SHA-256 Verified Ownership**: Every purchase gets a verifiable cryptographic certificate
 - **📊 Real-time Analytics**: Track sales, revenue, and performance metrics
 - **⚡ Instant File Delivery**: Automated upload/download via Supabase Storage
 - **🌐 Full-Stack TypeScript**: Web + mobile apps with end-to-end type safety
@@ -41,24 +46,47 @@ DevChain is a next-generation marketplace where developers can sell digital prod
 
 ## 🚀 Quick Start
 
-Get up and running in 5 minutes:
+Get up and running in **3 simple steps**:
+
+### Step 1: Install Dependencies
 
 ```bash
-# 1. Install dependencies
+# Install all workspace dependencies
 npm run install:all
+```
 
-# 2. Setup environment
+### Step 2: Configure Environment
+
+```bash
+# Copy environment templates
 cp .env.example .env
 cp backend/.env.example backend/.env
 
-# 3. Setup database
-cd backend && npx prisma migrate dev
-
-# 4. Start development servers
-npm start              # Backend API (http://localhost:10000)
-npm run web:dev        # Web app (http://localhost:5173)
-npm run mobile:start   # Mobile app (Expo dev server)
+# Edit backend/.env with your credentials:
+# - DATABASE_URL (PostgreSQL connection string)
+# - JWT_SECRET & JWT_REFRESH_SECRET
+# - SUPABASE_URL & SUPABASE_SERVICE_KEY
+# - STRIPE_SECRET_KEY & STRIPE_WEBHOOK_SECRET
 ```
+
+### Step 3: Start Development Servers
+
+```bash
+# Terminal 1: Backend API
+npm start              # http://localhost:10000
+
+# Terminal 2: Web App
+cd apps/web
+npm run dev            # http://localhost:5173
+
+# Terminal 3: Mobile App (optional)
+cd apps/mobile
+npm run start          # Expo dev server
+```
+
+**🎉 That's it!** You're now running DevChain locally. Visit `http://localhost:5173` to see the marketplace in action.
+
+---
 
 ## 🏗️ Architecture Overview
 
@@ -91,7 +119,7 @@ devchain/
 
 - Browse and search digital products
 - Filter by category, price, tags
-- Secure checkout with blockchain verification
+- Secure checkout with SHA-256 ownership verification
 
 ### 👨‍💼 Seller Dashboard
 
@@ -173,7 +201,92 @@ Content-Type: application/json
 | `SUPABASE_URL`           | Supabase project URL         | ✅       |
 | `SUPABASE_SERVICE_KEY`   | Supabase service role key    | ✅       |
 
+## 🧪 Testing
+
+The backend has **183 integration tests** across **14 test suites** covering every API endpoint.
+
+### Backend Testing
+
+```bash
+# Run all backend tests (from monorepo root or backend/)
+npm test
+
+# Run with coverage report
+cd backend && npx jest --coverage
+
+# Run a specific test suite
+cd backend && npx jest tests/routes/auth.test.js
+cd backend && npx jest tests/routes/jobs.test.js
+cd backend && npx jest tests/routes/ownership.test.js
+```
+
+**Test suites (14 total, 183 tests):**
+
+| Suite | Tests | Covering |
+|-------|-------|----------|
+| `errors` | 24 | 8 error classes (BadRequest, Unauthorized, etc.) |
+| `asyncHandler` | 3 | Success & error forwarding |
+| `validate` | 13 | Body/query/params Joi validation |
+| `auth` | 11 | JWT protect + optionalAuth middleware |
+| `errorHandler` | 20 | Prisma, JWT, Stripe, Multer, Supabase errors |
+| `cors` | 3 | Dev mode, preflight |
+| `health` | 3 | DB health check, API info |
+| `auth` routes | 17 | Register, login, me, refresh |
+| `products` | 14 | CRUD, search, filter, seller dashboard |
+| `jobs` | 33 | List/search/filter, get, create, proposals, close |
+| `ownership` | 15 | Certificate verify, purchase, purchases, sales |
+| `uploads` | 17 | Upload/download/info, multer, access control |
+| `payments` | 10 | Checkout session, webhooks |
+| `analytics` | 4 | Seller analytics, comparisons, empty state |
+
+### Frontend
+
+```bash
+cd apps/web
+npm run lint          # Run ESLint
+npm run lint -- --fix # Auto-fix lint issues
+```
+
+### End-to-End Testing
+
+```bash
+# Test the complete purchase flow
+# 1. Start backend server
+npm start
+
+# 2. Start web app
+cd apps/web && npm run dev
+
+# 3. Test in browser:
+#    - Browse products
+#    - Create account/login
+#    - Purchase a product (use Stripe test mode)
+#    - Verify ownership certificate
+#    - Download purchased files
+```
+
+### Database Seeding
+
+```bash
+# Populate database with sample products
+cd backend
+node seed-products.js
+```
+
 ## 🚀 Deployment
+
+### Pre-Launch Checklist
+
+- [ ] **Environment Variables**: Configure all required env vars
+- [ ] **Database**: Run migrations and seed sample data
+- [ ] **Stripe**: Set up Stripe account and configure webhooks
+- [ ] **Supabase**: Configure storage bucket and permissions
+- [ ] **Testing**: Complete end-to-end testing of purchase flow
+- [ ] **Security**: Review authentication and authorization
+- [ ] **Performance**: Test load times and optimize assets
+- [ ] **SEO**: Add meta tags and social preview images
+- [ ] **Monitoring**: Set up error tracking and analytics
+- [ ] **Documentation**: Verify all docs are up to date
 
 ### Web App (Vercel)
 
@@ -235,27 +348,30 @@ npx prisma studio      # Open database admin UI
 - [x] Seller dashboard with analytics
 - [x] File upload/download system
 - [x] Job board for services
+- [x] Stripe payment processing
+- [x] SHA-256 ownership certificates
 
-### 🔜 Phase 2: Blockchain Integration (Q2 2025)
+### 🔜 Phase 2: Enhanced Features (Q2 2025)
 
-- [ ] Polygon blockchain integration
-- [ ] Smart contracts for digital ownership
-- [ ] NFT-based certificates for purchases
-- [ ] On-chain verification system
+- [ ] Advanced analytics dashboard
+- [ ] Review and rating system
+- [ ] Seller verification (KYC)
+- [ ] Email notifications
+- [ ] Refund management system
 
-### 💰 Phase 3: Monetization (Q3 2025)
+### 💰 Phase 3: Mobile App (Q3 2025)
 
-- [ ] Stripe payment processing
-- [ ] Seller payout system
-- [ ] Subscription models
-- [ ] Escrow services for jobs
+- [ ] Complete React Native mobile app
+- [ ] Push notifications
+- [ ] Mobile-optimized checkout
+- [ ] Offline mode support
 
 ### 🚀 Phase 4: Growth (Q4 2025)
 
-- [ ] Review and rating system
-- [ ] Seller verification (KYC)
-- [ ] Advanced analytics
-- [ ] Mobile app completion
+- [ ] Affiliate program
+- [ ] Subscription models
+- [ ] Escrow services for jobs
+- [ ] Advanced search algorithms
 
 ## 🤝 Contributing
 
@@ -299,12 +415,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Built with ❤️ by developers, for developers
 - Inspired by Gumroad, Fiverr, and GitHub Marketplace
-- Powered by modern web technologies and blockchain innovation
+- Powered by modern web technologies and cryptographic verification
 
 ---
 
 <p align="center">
-  <strong>DevChain</strong> - Where code meets commerce, secured by blockchain. 🚀
+  <strong>DevChain</strong> - Where code meets commerce, secured by SHA-256 cryptography. 🚀
 </p>
 
 <p align="center">
