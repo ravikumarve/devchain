@@ -12,6 +12,8 @@ import ProductDetail from './pages/ProductDetail';
 import Sell from './pages/Sell';
 import JobDetail from './pages/JobDetail';
 import PostJob from './pages/PostJob';
+import MyJobs from './pages/MyJobs';
+import MyProposals from './pages/MyProposals';
 import Analytics from './pages/Analytics';
 import CreateProduct from './pages/CreateProduct';
 import PurchaseSuccess from './pages/PurchaseSuccess';
@@ -44,6 +46,8 @@ function App() {
         <Route path="/sell" element={<Sell />} />
         <Route path="/job/:id" element={<JobDetail />} />
         <Route path="/post-job" element={<PostJob />} />
+        <Route path="/my-jobs" element={<MyJobs />} />
+        <Route path="/my-proposals" element={<MyProposals />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/create-product" element={<CreateProduct />} />
         <Route path="/purchase-success" element={<PurchaseSuccess />} />

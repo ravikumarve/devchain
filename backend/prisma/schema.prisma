@@ -108,6 +108,7 @@ model Proposal {
   freelancerId  String
   coverLetter   String
   proposedRate  Float
+  deliveryDays  Int?
   status        String   @default("pending")
   createdAt     DateTime @default(now())
 

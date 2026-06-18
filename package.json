@@ -11,6 +11,7 @@
   "scripts": {
     "mobile": "npm run start --workspace=apps/mobile",
     "backend": "npm run dev --workspace=apps/backend",
+    "vercel-build": "cd apps/web && npm run build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "npm run typecheck --workspaces --if-present",
@@ -42,6 +43,7 @@
   },
   "dependencies": {
     "prisma": "^5.22.0",
+    "serverless-http": "^3.2.0",
     "stripe": "^21.0.1"
   }
 }

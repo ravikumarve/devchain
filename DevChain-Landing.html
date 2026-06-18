@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevChain | The SHA-256 Developer Economy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Genesis Palette */
+            --bg-void: #000000;
+            --bg-surface: #0a0a0c;
+            --bg-panel: #111114;
+            --bg-glass: rgba(10, 10, 12, 0.4);
+            
+            --border-dim: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(98, 126, 234, 0.2);
+            
+            /* Web3 Accents */
+            --eth-purple: #627EEA;
+            --eth-purple-dim: rgba(98, 126, 234, 0.15);
+            --crypto-gold: #F5A623;
+            --success-green: #10B981;
+            
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --text-faint: #475569;
+            
+            --font-display: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg-void);
+            color: var(--text-main);
+            font-family: var(--font-display);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 1. Interactive 3D Blockchain Sphere Canvas */
+        #genesis-canvas {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 0; pointer-events: none; opacity: 0.9;
+            mix-blend-mode: screen;
+        }
+
+        /* Ambient Core Glow */
+        .ambient-core {
+            position: absolute; top: -10vh; left: 50%; transform: translateX(-50%);
+            width: 60vw; height: 60vh;
+            background: radial-gradient(ellipse at center, rgba(98, 126, 234, 0.1), transparent 70%);
+            z-index: 0; pointer-events: none; filter: blur(100px);
+        }
+
+        /* Typography Base */
+        h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.04em; line-height: 1.1; }
+        .mono { font-family: var(--font-mono); }
+        .text-purple { color: var(--eth-purple); text-shadow: 0 0 20px rgba(98, 126, 234, 0.4); }
+        .text-gold { color: var(--crypto-gold); }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        /* Structural Layout */
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; position: relative; z-index: 10; }
+        section { padding: 10rem 0; border-bottom: 1px solid var(--border-dim); }
+
+        /* --- NAVIGATION --- */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 2rem 0; border-bottom: 1px solid var(--border-dim);
+            position: relative; z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem; font-weight: 800; color: var(--text-main);
+            text-decoration: none; display: flex; align-items: center; gap: 12px;
+            letter-spacing: -0.5px;
+        }
+        .logo-diamond {
+            width: 20px; height: 20px; background: transparent;
+            border: 2px solid var(--eth-purple); transform: rotate(45deg);
+            box-shadow: 0 0 15px var(--eth-purple-dim); display: flex; align-items: center; justify-content: center;
+        }
+        .logo-diamond::after { content: ''; width: 6px; height: 6px; background: var(--crypto-gold); box-shadow: 0 0 10px var(--crypto-gold); }
+
+        .nav-links { display: flex; gap: 3.5rem; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.3s; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.5px;}
+        .nav-links a:hover { color: var(--text-main); }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 0.8rem 2.2rem; font-family: var(--font-mono); font-size: 0.85rem;
+            text-transform: uppercase; letter-spacing: 1px; border-radius: 4px;
+            text-decoration: none; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer; border: 1px solid transparent; backdrop-filter: blur(10px);
+        }
+        .btn-primary { background: var(--text-main); color: var(--bg-void); }
+        .btn-primary:hover { background: transparent; color: var(--text-main); border-color: var(--text-main); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,255,255,0.15); }
+        
+        .btn-outline { background: var(--bg-glass); color: var(--text-muted); border-color: var(--border-dim); }
+        .btn-outline:hover { border-color: var(--eth-purple); color: var(--eth-purple); background: var(--eth-purple-dim); }
+
+        /* --- HERO SECTION --- */
+        .hero { min-height: 85vh; display: grid; grid-template-columns: 1fr; gap: 4rem; align-items: center; text-align: center; }
+        
+        .hero-content { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+        
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 0.5rem 1.25rem; background: var(--eth-purple-dim);
+            border: 1px solid rgba(98, 126, 234, 0.3); color: var(--eth-purple);
+            font-size: 0.8rem; font-family: var(--font-mono); margin-bottom: 2.5rem; border-radius: 100px;
+            letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 0 20px rgba(98, 126, 234, 0.1);
+        }
+
+        .hero h1 { font-size: clamp(4rem, 7vw, 6.5rem); margin-bottom: 2rem; line-height: 1.05; }
+        .hero p { font-size: 1.25rem; color: var(--text-muted); max-width: 650px; line-height: 1.7; margin-bottom: 3.5rem; font-weight: 300; }
+
+        /* Cryptographic Terminal Float */
+        .crypto-terminal {
+            width: 100%; max-width: 800px; margin: 0 auto;
+            background: var(--bg-glass); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--border-dim); border-radius: 16px;
+            padding: 2.5rem; box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+            text-align: left; position: relative; z-index: 2;
+        }
+
+        .term-header {
+            display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-dim);
+            padding-bottom: 1rem; margin-bottom: 1.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-faint);
+        }
+
+        .term-line { font-family: var(--font-mono); font-size: 0.85rem; line-height: 2.2; color: var(--text-muted); display: flex; align-items: flex-start; gap: 12px;}
+        .tl-time { color: var(--text-faint); user-select: none; }
+        .tl-sys { color: var(--eth-purple); font-weight: 600; }
+        .tl-hash { color: var(--crypto-gold); word-break: break-all; font-size: 0.8rem; background: rgba(245, 166, 35, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(245, 166, 35, 0.2);}
+
+        /* --- BENTO MATRIX (CAPABILITIES) --- */
+        .matrix-header { margin-bottom: 6rem; text-align: center; }
+        .matrix-header h2 { font-size: 3.5rem; margin-bottom: 1.5rem; }
+        .matrix-header p { color: var(--text-muted); font-size: 1.2rem; max-width: 700px; margin: 0 auto; font-weight: 300; }
+
+        .bento-matrix { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.5rem; }
+        .bento-node { 
+            background: var(--bg-surface); border: 1px solid var(--border-dim); 
+            border-radius: 20px; padding: 4rem; position: relative; overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+        }
+        
+        .bento-node::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at top right, rgba(98, 126, 234, 0.1), transparent 50%);
+            opacity: 0; transition: opacity 0.4s; pointer-events: none;
+        }
+
+        .bento-node:hover { border-color: var(--border-glow); transform: translateY(-4px); box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+        .bento-node:hover::after { opacity: 1; }
+
+        .span-8 { grid-column: span 8; }
+        .span-4 { grid-column: span 4; }
+        .span-6 { grid-column: span 6; }
+        .span-12 { grid-column: span 12; }
+
+        .node-idx { font-family: var(--font-mono); font-size: 0.75rem; color: var(--eth-purple); margin-bottom: 2.5rem; display: block; letter-spacing: 1px; text-transform: uppercase;}
+        .bento-node h3 { font-size: 1.8rem; margin-bottom: 1rem; color: var(--text-main); }
+        .bento-node p { color: var(--text-muted); font-size: 1.05rem; line-height: 1.7; font-weight: 300; }
+
+        /* --- ARCHITECTURE & TECH STACK --- */
+        .arch-columns { display: grid; grid-template-columns: 1fr 1.2fr; gap: 6rem; align-items: center; }
+        .arch-info h2 { font-size: 3.5rem; margin-bottom: 1.5rem; }
+        .arch-info p { color: var(--text-muted); font-size: 1.15rem; line-height: 1.7; margin-bottom: 3rem; font-weight: 300; }
+
+        .stack-card { background: var(--bg-void); border: 1px solid var(--border-glow); border-radius: 16px; padding: 3rem; box-shadow: inset 0 0 50px rgba(98, 126, 234, 0.03); }
+        .stack-list { list-style: none; }
+        .stack-list li { padding: 1.25rem 0; border-bottom: 1px dashed var(--border-dim); display: flex; justify-content: space-between; font-size: 1rem; color: var(--text-muted); align-items: center;}
+        .stack-list li:last-child { border-bottom: none; padding-bottom: 0;}
+        .stack-list li span:last-child { color: var(--text-main); font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg-surface); padding: 6px 12px; border-radius: 4px; border: 1px solid var(--border-dim);}
+
+        /* API Reference Block */
+        .api-block {
+            background: var(--bg-void); border: 1px solid var(--border-dim); border-radius: 16px;
+            padding: 3rem; font-family: var(--font-mono); font-size: 0.85rem; line-height: 2; color: var(--text-muted);
+        }
+        .api-cat { color: var(--text-faint); margin: 2rem 0 0.75rem; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; border-bottom: 1px dashed var(--border-dim); padding-bottom: 0.5rem; }
+        .api-cat:first-child { margin-top: 0; }
+        .api-method { font-weight: 700; width: 60px; display: inline-block; }
+        .m-get { color: #3b82f6; }
+        .m-post { color: var(--success-green); }
+        .api-route { color: var(--text-main); }
+        .api-auth { color: var(--eth-purple); font-size: 0.7rem; float: right; border: 1px solid var(--eth-purple-dim); padding: 2px 8px; border-radius: 4px; background: rgba(98, 126, 234, 0.05);}
+
+        /* --- CTA BAND --- */
+        .cta-band { background: linear-gradient(135deg, var(--bg-panel) 0%, var(--bg-void) 100%); border: 1px solid var(--border-dim); border-radius: 24px; padding: 7rem 4rem; text-align: center; position: relative; overflow: hidden; margin: 4rem 0; box-shadow: 0 40px 80px rgba(0,0,0,0.5); }
+        .cta-band::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at center, rgba(245, 166, 35, 0.05) 0%, transparent 50%); pointer-events: none; }
+        .cta-band h2 { font-size: 3.5rem; margin-bottom: 1.5rem; }
+        .cta-band p { color: var(--text-muted); font-size: 1.2rem; max-width: 600px; margin: 0 auto 3rem; font-weight: 300; line-height: 1.7;}
+
+        /* --- DEEP FOOTER --- */
+        footer { padding: 8rem 0 4rem; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 4rem; border-top: 1px solid var(--border-dim); position: relative; z-index: 10; }
+        .footer-brand p { color: var(--text-muted); font-size: 0.95rem; margin-top: 1.5rem; max-width: 320px; line-height: 1.7; font-weight: 300; }
+        
+        .footer-col h5 { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-faint); margin-bottom: 2rem; letter-spacing: 1px; text-transform: uppercase; }
+        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
+        .footer-col a { color: var(--text-muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s; font-weight: 300; }
+        .footer-col a:hover { color: var(--text-main); }
+        .footer-bottom { margin-top: 6rem; padding-top: 2rem; border-top: 1px solid var(--border-dim); display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-faint); }
+
+        /* --- MOBILE MENU --- */
+        .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; z-index: 200; }
+        .hamburger span { display: block; width: 22px; height: 2px; background: var(--text-main); border-radius: 2px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        .hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .mobile-overlay {
+            position: fixed; top: 0; right: -100%; width: 100%; height: 100vh;
+            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+            z-index: 150; transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .mobile-overlay.open { right: 0; }
+
+        .mobile-nav-links { display: flex; flex-direction: column; align-items: center; gap: 2.5rem; }
+        .mobile-nav-links a { color: var(--text-muted); text-decoration: none; font-size: 1.4rem; font-weight: 500; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 2px; transition: color 0.3s; }
+        .mobile-nav-links a:hover { color: var(--text-main); }
+        .mobile-nav-links .btn { font-size: 1rem; width: 100%; text-align: center; }
+
+        /* Responsiveness */
+        @media (max-width: 1024px) {
+            .hero, .arch-columns { grid-template-columns: 1fr; gap: 4rem; }
+            .bento-matrix { display: flex; flex-direction: column; }
+            footer { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            nav { flex-direction: row; padding: 1.25rem 0; }
+            .nav-links { display: none; }
+            .nav-cta { display: none; }
+            .hamburger { display: flex; }
+            .hero h1 { font-size: 3rem; }
+            .glass-terminal { padding: 1.5rem; font-size: 0.75rem; }
+            .bento-node { padding: 2.5rem 1.5rem; }
+            .cta-band { padding: 4rem 2rem; }
+            footer { grid-template-columns: 1fr; gap: 3rem; }
+            .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-core"></div>
+
+    <canvas id="genesis-canvas"></canvas>
+
+    <div class="container">
+        <nav>
+            <a href="#" class="logo">
+                <div class="logo-diamond"></div>
+                DevChain
+            </a>
+            <div class="nav-links">
+                <a href="#marketplace">Marketplace</a>
+                <a href="#architecture">Architecture</a>
+                <a href="#api">API Specs</a>
+            </div>
+            <button class="hamburger" id="mobile-menu-btn" aria-label="Toggle navigation menu">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-cta" style="display: flex; gap: 1rem;">
+                <a href="https://devchain.onrender.com/api/v1" class="btn btn-outline">Live API</a>
+                <a href="https://devchain-app.vercel.app" class="btn btn-primary">Launch App</a>
+            </div>
+        </nav>
+
+        <!-- Mobile Navigation Overlay -->
+        <div class="mobile-overlay" id="mobile-overlay">
+            <div class="mobile-nav-links">
+                <a href="#marketplace" class="mobile-link">Marketplace</a>
+                <a href="#architecture" class="mobile-link">Architecture</a>
+                <a href="#api" class="mobile-link">API Specs</a>
+                <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%; margin-top: 1rem;">
+                    <a href="https://devchain.onrender.com/api/v1" class="btn btn-outline" style="width: 100%;">Live API</a>
+                    <a href="https://devchain-app.vercel.app" class="btn btn-primary" style="width: 100%;">Launch App</a>
+                </div>
+            </div>
+        </div>
+
+        <section class="hero">
+            <div class="hero-content">
+                <div class="hero-badge mono">
+                    <span style="display: inline-block; width: 6px; height: 6px; background: var(--eth-purple); border-radius: 50%; box-shadow: 0 0 10px var(--eth-purple);"></span>
+                    183 Tests Passing · Production Ready
+                </div>
+                <h1 class="text-gradient">The SHA-256 Verified <br>Developer Economy.</h1>
+                <p>DevChain is a next-generation marketplace where developers can sell digital products, offer services, and connect with clients—all secured by verifiable cryptographic ownership certificates.</p>
+                <div style="display: flex; gap: 1rem; margin-bottom: 4rem;">
+                    <a href="https://devchain-app.vercel.app" class="btn btn-primary">Browse Marketplace</a>
+                    <a href="https://github.com/ravikumarve/devchain" class="btn btn-outline">View GitHub</a>
+                </div>
+            </div>
+
+            <div class="glass-terminal">
+                <div class="term-header">
+                    <div>DEVCHAIN_OS // VERIFICATION_NODE</div>
+                    <div>STATUS: CONNECTED</div>
+                </div>
+                <div class="term-line">
+                    <span class="tl-time">[00:01]</span>
+                    <span><span class="tl-sys">CLIENT:</span> Initiated POST <span class="text-main">/api/v1/products/purchase</span></span>
+                </div>
+                <div class="term-line">
+                    <span class="tl-time">[00:02]</span>
+                    <span><span class="tl-sys">SYSTEM:</span> Processing Stripe payment intent parameters...</span>
+                </div>
+                <div class="term-line">
+                    <span class="tl-time">[00:04]</span>
+                    <span><span class="tl-sys">SYSTEM:</span> Generating cryptographic ownership certificate...</span>
+                </div>
+                <div class="term-line">
+                    <span class="tl-time">[00:05]</span>
+                    <span class="tl-hash">HASH: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span>
+                </div>
+                <div class="term-line">
+                    <span class="tl-time">[00:06]</span>
+                    <span><span style="color: var(--success-green); font-weight: 600;">[SUCCESS]</span> Certificate verified. Unlocking Supabase storage files.</span>
+                </div>
+                <div class="term-line" style="margin-top: 12px; color: var(--eth-purple);">
+                    <span class="tl-time">></span> Awaiting next transaction <span style="animation: blink 1s infinite;">_</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="marketplace">
+            <div class="matrix-header">
+                <h2>Built for the <span class="text-purple">Creator Economy.</span></h2>
+                <p>DevChain provides end-to-end infrastructure for independent developers to monetize their code, tools, and expertise safely.</p>
+            </div>
+
+            <div class="bento-matrix">
+                <div class="bento-node span-8">
+                    <span class="node-idx">01 // DIGITAL COMMERCE</span>
+                    <h3>Sell Digital Products</h3>
+                    <p>Monetize templates, tools, courses, and scripts. DevChain handles the entire lifecycle—from secure Stripe checkout sessions to instant automated file delivery via Supabase Storage.</p>
+                </div>
+                <div class="bento-node span-4">
+                    <span class="node-idx">02 // CRYPTOGRAPHIC PROOF</span>
+                    <h3>SHA-256 Certified</h3>
+                    <p>Protect your intellectual property. Every single purchase generates a verifiable cryptographic certificate mathematically proving ownership — no blockchain required.</p>
+                </div>
+                <div class="bento-node span-6">
+                    <span class="node-idx">03 // SELLER INFRASTRUCTURE</span>
+                    <h3>Real-time Analytics</h3>
+                    <p>Track sales velocity, revenue metrics, and product performance from a dedicated seller dashboard built natively in React 19.</p>
+                </div>
+                <div class="bento-node span-6">
+                    <span class="node-idx">04 // FREELANCE SERVICES</span>
+                    <h3>Job Board & Proposals</h3>
+                    <p>Transition from products to services seamlessly. Post development jobs, submit proposals, hire developers securely, and manage project milestones.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture">
+            <div class="arch-columns">
+                <div class="arch-info">
+                    <h2>Full-Stack <br><span class="text-purple">TypeScript.</span></h2>
+                    <p>DevChain is engineered with end-to-end type safety, robust relational database modeling, and scalable cloud infrastructure. The backend API is rigorously protected by 183 integration tests across 14 distinct test suites.</p>
+                    
+                    <div class="tech-stack-card" style="margin-top: 4rem;">
+                        <h3>Infrastructure Stack</h3>
+                        <ul class="stack-list">
+                            <li>Frontend Web <span>React 19 + TypeScript + Vite</span></li>
+                            <li>Mobile Client <span>React Native + Expo</span></li>
+                            <li>Backend API Engine <span>Node.js + Express</span></li>
+                            <li>Relational Database <span>PostgreSQL + Prisma</span></li>
+                            <li>File Asset Storage <span>Supabase Storage</span></li>
+                            <li>Secure Auth <span>JWT + bcrypt</span></li>
+                            <li>Cloud Deployment <span>Vercel + Render</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="api-block">
+                    <h3 style="font-size: 1.25rem; font-family: var(--font-mono); color: var(--text-main); margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 1px;">REST API Reference</h3>
+                    
+                    <div class="api-cat">Product Operations</div>
+                    <div style="margin-bottom: 1rem;"><span class="api-method m-get">GET</span> <span class="api-route">/api/v1/products</span> <span class="api-auth" style="color: var(--text-muted); border-color: var(--border-dim); background: transparent;">Public</span></div>
+                    <div style="margin-bottom: 1rem;"><span class="api-method m-get">GET</span> <span class="api-route">/api/v1/products/:id</span> <span class="api-auth" style="color: var(--text-muted); border-color: var(--border-dim); background: transparent;">Public</span></div>
+                    <div style="margin-bottom: 1rem;"><span class="api-method m-post">POST</span> <span class="api-route">/api/v1/products</span> <span class="api-auth">Seller</span></div>
+                    <div style="margin-bottom: 1rem;"><span class="api-method m-get">GET</span> <span class="api-route">/api/v1/products/seller/me</span> <span class="api-auth">Seller</span></div>
+
+                    <div class="api-cat" style="margin-top: 3rem;">Authentication & Users</div>
+                    <div style="margin-bottom: 1rem;"><span class="api-method m-post">POST</span> <span class="api-route">/api/v1/auth/register</span> <span class="api-auth" style="color: var(--text-muted); border-color: var(--border-dim); background: transparent;">Public</span></div>
+                    <div style="margin-bottom: 1rem;"><span class="api-method m-post">POST</span> <span class="api-route">/api/v1/auth/login</span> <span class="api-auth" style="color: var(--text-muted); border-color: var(--border-dim); background: transparent;">Public</span></div>
+                    <div style="margin-bottom: 1rem;"><span class="api-method m-get">GET</span> <span class="api-route">/api/v1/auth/me</span> <span class="api-auth" style="color: var(--text-main); border-color: var(--border-dim); background: transparent;">Authenticated</span></div>
+
+                    <div class="api-cat" style="margin-top: 3rem;">Example Request Payload</div>
+                    <div style="background: var(--bg-void); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-dim);">
+<span style="color: var(--text-faint);">// POST /api/v1/products</span><br>
+{<br>
+&nbsp;&nbsp;<span style="color: var(--text-muted);">"title"</span>: <span style="color: var(--success-green);">"React Dashboard Template"</span>,<br>
+&nbsp;&nbsp;<span style="color: var(--text-muted);">"price"</span>: <span style="color: var(--eth-purple);">29.99</span>,<br>
+&nbsp;&nbsp;<span style="color: var(--text-muted);">"category"</span>: <span style="color: var(--success-green);">"templates"</span>,<br>
+&nbsp;&nbsp;<span style="color: var(--text-muted);">"tags"</span>: [<span style="color: var(--success-green);">"react"</span>, <span style="color: var(--success-green);">"typescript"</span>]<br>
+}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section style="padding: 2rem 0; border: none;">
+            <div class="cta-band">
+                <h2>Deploy the DevChain ecosystem.</h2>
+                <p>Download the open-source repository, configure your environment variables, and launch the marketplace locally in under 3 minutes.</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem;">
+                    <a href="https://github.com/ravikumarve/devchain" class="btn btn-primary">Clone Repository</a>
+                    <a href="https://devchain-app.vercel.app" class="btn btn-outline">Explore Live Demo</a>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-brand">
+                <a href="#" class="logo"><div class="logo-diamond"></div>DevChain</a>
+                <p>The cryptographic developer marketplace. Every transaction generates a verifiable SHA-256 ownership certificate. Where code meets commerce.</p>
+            </div>
+            <div class="footer-col">
+                <h5>Platform Spec</h5>
+                <ul>
+                    <li><a href="#marketplace">Marketplace Engine</a></li>
+                    <li><a href="#architecture">Seller Dashboard</a></li>
+                    <li><a href="#architecture">Job Board</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h5>Development</h5>
+                <ul>
+                    <li><a href="https://github.com/ravikumarve/devchain">GitHub Repository</a></li>
+                    <li><a href="https://devchain.onrender.com/api/v1">Live REST API</a></li>
+                    <li><a href="docs/CONTRIBUTING.md">Contribution Guide</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h5>Ecosystem</h5>
+                <ul>
+                    <li><a href="https://devchain-app.vercel.app">Web Application (React 19)</a></li>
+                    <li><a href="#">Mobile Application (Expo)</a></li>
+                    <li><a href="LICENSE">MIT License</a></li>
+                </ul>
+            </div>
+        </footer>
+
+        <div class="footer-bottom">
+            <div>© 2026 DEVCHAIN. LICENSED UNDER MIT.</div>
+            <div><span style="color: var(--success-green);">●</span> ALL SYSTEMS NOMINAL</div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('genesis-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, time = 0;
+        let mouseX = 0, mouseY = 0;
+        const nodes = [];
+
+        function init() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            nodes.length = 0;
+            
+            // Dynamic density calculation based on screen size
+            const numNodes = Math.floor((width * height) / 10000); 
+            
+            // Fibonacci Sphere distribution for even mapping
+            const phi = Math.PI * (3 - Math.sqrt(5)); 
+            
+            for(let i = 0; i < numNodes; i++) {
+                let y = 1 - (i / (numNodes - 1)) * 2; // y goes from 1 to -1
+                let radius = Math.sqrt(1 - y * y); // radius at y
+                
+                let theta = phi * i; // golden angle increment
+                
+                let x = Math.cos(theta) * radius;
+                let z = Math.sin(theta) * radius;
+                
+                // Scale the sphere radius
+                const sphereRadius = 380;
+                
+                nodes.push({
+                    x: x * sphereRadius,
+                    y: y * sphereRadius,
+                    z: z * sphereRadius,
+                    originalX: x * sphereRadius,
+                    originalY: y * sphereRadius,
+                    originalZ: z * sphereRadius
+                });
+            }
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            // Track mouse position for interactive rotation
+            mouseX = (e.clientX - width / 2) * 0.0005;
+            mouseY = (e.clientY - height / 2) * 0.0005;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, width, height);
+            
+            // Auto rotation speed + mouse interaction
+            time += 0.002;
+            let rotX = time + mouseY;
+            let rotY = time + mouseX;
+
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const fov = 800; // Camera perspective
+
+            // Project 3D nodes to 2D screen space
+            let projected = nodes.map(n => {
+                // Rotate around X
+                let y1 = n.originalY * Math.cos(rotX) - n.originalZ * Math.sin(rotX);
+                let z1 = n.originalY * Math.sin(rotX) + n.originalZ * Math.cos(rotX);
+                
+                // Rotate around Y
+                let x2 = n.originalX * Math.cos(rotY) + z1 * Math.sin(rotY);
+                let z2 = -n.originalX * Math.sin(rotY) + z1 * Math.cos(rotY);
+
+                let z3d = z2 + 1000; // Move sphere back from camera
+                
+                let scale = fov / z3d;
+                let px = x2 * scale + centerX;
+                let py = y1 * scale + centerY;
+
+                return { x: px, y: py, z: z3d, scale: scale };
+            });
+
+            // Painter's algorithm (sort back-to-front)
+            projected.sort((a, b) => b.z - a.z);
+
+            // Draw Nodes and Lines
+            for(let i = 0; i < projected.length; i++) {
+                let p = projected[i];
+                // Depth-based opacity fading
+                let opacity = Math.max(0.05, Math.min(0.9, 1200 / p.z - 0.5));
+
+                // Draw Cryptographic Node
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 1.5 * p.scale, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(98, 126, 234, ${opacity})`; // Eth Purple
+                ctx.fill();
+
+                // Draw Network Lines
+                let connections = 0;
+                for(let j = i + 1; j < projected.length && connections < 4; j++) {
+                    let p2 = projected[j];
+                    let dx = p.x - p2.x;
+                    let dy = p.y - p2.y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    // Connection distance threshold
+                    if(dist < 120 * p.scale) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        
+                        let lineAlpha = opacity * (1 - dist / (120 * p.scale)) * 0.4;
+                        ctx.strokeStyle = `rgba(98, 126, 234, ${lineAlpha})`;
+                        ctx.lineWidth = 0.8 * p.scale;
+                        ctx.stroke();
+                        connections++;
+                    }
+                }
+            }
+        }
+
+        // ══════════════════════════════════════════════
+        //  MOBILE HAMBURGER MENU TOGGLE
+        // ══════════════════════════════════════════════
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const overlay = document.getElementById('mobile-overlay');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        menuBtn.addEventListener('click', () => {
+            const isOpen = overlay.classList.toggle('open');
+            menuBtn.classList.toggle('active');
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        });
+
+        // Close menu when a link is clicked
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                overlay.classList.remove('open');
+                menuBtn.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+
+        // ══════════════════════════════════════════════
+        //  DEBOUNCED CANVAS RESIZE (avoids visual glitch from node recalculation)
+        // ══════════════════════════════════════════════
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(init, 150);
+        });
+
+        init();
+        animate();
+    </script>
+</body>
+</html>

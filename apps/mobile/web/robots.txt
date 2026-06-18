@@ -1,0 +1,20 @@
+# DevChain robots.txt
+# https://devchain.app/robots.txt
+
+User-agent: *
+Allow: /
+
+# Allow all major crawlers explicitly
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Block admin and API routes from indexing
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/
+
+# Sitemap location
+Sitemap: https://devchain.app/sitemap.xml

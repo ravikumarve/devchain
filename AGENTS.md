@@ -487,15 +487,69 @@ cd apps/web && npx shadcn@latest add <component-name>
 
 ## 💾 Session Memory Ledger
 
-### [2026-06-18] - Backend Core Hardening
+### [2026-06-18 15:00] - Empty State Redesign (Marketplace, Jobs, Analytics)
 - **State**: Success
-- **MCP Data Used**: Direct file reads for audit, write for 7 new files, edit for 15+ modified files
+- **MCP Data Used**: Direct file reads of 3 pages + 1 CSS file, write for 1 new component + 4 edits
 - **Agents Deployed**: Orchestrator (direct execution)
 - **Architectural Decision**:
-  - Moved from inline try-catch + `console.error` to `asyncHandler` wrapper + pino structured logging
-  - Centralized error handling with custom error classes → consistent JSON error responses
-  - Joi validation middleware on all 7 route modules → request body/query/params sanitization
-  - CORS whitelist in production, Helmet CSP in production, auth rate limiting
-  - Env validation at startup (exits in prod if missing required vars)
-  - Graceful shutdown (SIGTERM/SIGINT) + DB health check endpoint
-- **Next Turn Directive**: Frontend redesign, or deploy hardened backend to Render
+  - Created `EmptyState.tsx` — a shared component with 3 skeleton variants (card/list/chart), demo preview cards, feature education blocks, and configurable CTAs
+  - **Marketplace**: Shows 4 skeleton placeholder cards + 4 demo product previews (UI Kit, ML Pipeline, Mobile Template, Solidity Pack) + "What You Can Sell" education block. CTA directs to /sell or /login.
+  - **Jobs**: Shows 3 skeleton list cards + 3 demo job listings (React DApp, Solidity Audit, Full-Stack MVP) + features (Escrow, Global Talent, Quick Matching). CTA directs to /post-job or /login.
+  - **Analytics**: Completely restructured — when no products AND no sales, shows full-page EmptyState with chart skeleton + 4 feature education blocks + "Create First Product" CTA. Sub-sections now show enhanced empty states with icons and action buttons instead of bare text.
+  - Added CSS: `@keyframes shimmer`, `.skeleton`, `.skeleton-card`, `.skeleton-block`, `.demo-card`, `.feature-grid`, `.feature-block`
+  - Fixed `hasActiveFilters` type from `string | boolean` to `boolean` (Marketplace)
+  - Fixed React purity violation (`Math.random` → deterministic height array)
+- **Commit**: `002c8f4` — 5 files, 533 insertions, 45 deletions.
+- **Next Turn Directive**: Add seed/demo data script to populate DB with sample products and jobs for first-time visitors, or set up CI pipeline to run tests on push.
+
+### [2026-06-18] - All Route Tests Complete (183 tests)
+- **State**: Success
+- **MCP Data Used**: Direct file reads of 5 route + 5 controller files, write for 5 new test files
+- **Agents Deployed**: Orchestrator (direct execution)
+- **Architectural Decision**:
+  - Created `tests/helpers/prismaMock.js` — shared mock factory so all test files share the same singleton pattern for `@prisma/client` mocking
+  - `@prisma/client` uses `exports` map → manual mocks break → inline factory with `jest.fn(() => sharedInstance)` is the only reliable approach
+  - Same singleton pattern applied to `stripe` mock (factory creates one instance in closure)
+  - Multer fileFilter errors now handled as 400 in errorHandler (was falling through to 500)
+- **Test Coverage**: 14 suites, 183 tests:
+  - jobs (33): list/search/filter, get by ID, create, proposals (submit/own/duplicate/closed), my jobs/proposals, close (owner/non-owner/missing)
+  - ownership (15): certificate verify (valid/invalid/wrong hash), purchase (success/own/duplicate/missing/not found/inactive), my-purchases, my-sales
+  - uploads (17): upload (auth/owner/file-type/missing), download (auth/access control/seller/buyer), file info (seller/buyer/no-access)
+  - payments (10): checkout session (auth/product/duplicate), webhooks (completed/failed/invalid signature/missing)
+  - analytics (4): seller analytics with comparison metrics, empty state
+- **Commit**: `f0ce7c9` — 7 files, 1447 insertions.
+- **Next Turn Directive**: Begin frontend redesign, or set up CI pipeline to run tests on push.
+
+### [2026-06-18] - Backend Test Suite (104 tests passing)
+- **State**: Success
+- **MCP Data Used**: Direct file reads/writes for test files and mock implementation
+- **Agents Deployed**: Orchestrator (direct execution)
+- **Architectural Decision**:
+  - Inline `jest.mock('@prisma/client', factory)` with shared `prismaInstance` singleton via `jest.fn(() => prismaInstance)` — required because `@prisma/client` uses `exports` map in `package.json` which breaks manual mock resolution (`__mocks__/` dir approach).
+  - Each test file's `jest.mock` factory creates the singleton once; all controllers and test code calling `new PrismaClient()` get the same object.
+  - Jest 29 (not 30) due to `clearMocksOnScope` compatibility with Node 20.
+  - `forceExit: true` in jest config to handle Express `app.listen()` TCPSERVERWRAP handles from `require()`-ing index.js.
+- **Test Coverage**: 9 suites, 104 tests — errors (24), asyncHandler (3), validate (13), auth middleware (11), cors (3), errorHandler (20), health (3), auth routes (17), products (14).
+- **NPM test script**: Updated to `"jest"` (was `"echo 'No tests yet'"`).
+- **Commit**: `ccc67e6` — 12 files, 1470 insertions, 1 deletion.
+- **Next Turn Directive**: Add integration tests for remaining routes (jobs, ownership, uploads, payments, analytics), or begin frontend redesign.
+
+### [2026-06-18 20:00] - Vercel + Supabase Full Deployment
+- **State**: Success
+- **MCP Data Used**: websearch for Supabase pooler docs, direct file reads/writes for .env edits, bash for Docker/psql/Vercel CLI operations
+- **Agents Deployed**: Orchestrator (direct execution)
+- **Architectural Decision**:
+  - **Supabase PostgreSQL** (pooler at `aws-1-ap-south-1`, not `aws-0-ap-south-1`) as the database instead of Docker local PostgreSQL
+  - **Express app exported as Vercel serverless function** at `api/[...path].js` — no `serverless-http` needed, Express IS a `(req, res)` handler
+  - **Prisma schema pushed** to Supabase DB; seed data (3 users, 8 products, 6 jobs) loaded
+  - **Frontend API_URL** uses `import.meta.env.VITE_API_URL` with fallback to `/api/v1`
+  - **Monorepo root as Vercel project root** — both `apps/web/` and `backend/` accessible; npm workspaces provide all deps
+  - **vercel.json** at root: build from monorepo root, output to `apps/web/dist`, rewrite `/api/*` to the catch-all function
+  - **Fixed productController** reviews query (separate Prisma call instead of broken include)
+  - **Fixed backend/index.js** to only `app.listen()` when `require.main === module` (allows importing as serverless handler)
+- **URLs**:
+  - Frontend: `https://web-vert-mu-22.vercel.app` (Genesis redesign, products clickable)
+  - API: `https://web-vert-mu-22.vercel.app/api/v1/products` (returns 8 seeded products)
+  - Supabase: `https://igrrgytacxqsetksrmqs.supabase.co` (PostgreSQL + Storage)
+- **Demo logins**: `demo-seller@devchain.dev` / `Demo1234`, `demo-buyer@devchain.dev`, `demo-client@devchain.dev`
+- **Next Turn Directive**: Set up CI (GitHub Actions) to auto-deploy on push, or add payment integration with real Stripe keys

@@ -83,7 +83,11 @@ describe('GET /api/v1/analytics/seller', () => {
     prisma.product.findMany.mockReset();
     prisma.user.findMany.mockReset();
     prisma.user.findUnique.mockReset();
+    prisma.review.findMany.mockReset();
     prisma.user.findUnique.mockResolvedValue(mockUser);
+
+    // Default: no reviews
+    prisma.review.findMany.mockResolvedValue([]);
 
     // This month orders
     prisma.order.findMany.mockImplementation(async (args) => {

@@ -157,7 +157,7 @@ const createJob = asyncHandler(async (req, res) => {
 // ────────────────────────────────────────────────
 const submitProposal = asyncHandler(async (req, res) => {
   const { id: jobId } = req.params;
-  const { coverLetter, proposedRate } = req.body;
+  const { coverLetter, proposedRate, deliveryDays } = req.body;
   const freelancerId = req.user.userId;
 
   if (!coverLetter || coverLetter.trim().length < 20) {
@@ -188,6 +188,7 @@ const submitProposal = asyncHandler(async (req, res) => {
       freelancerId,
       coverLetter: coverLetter.trim(),
       proposedRate: parseFloat(proposedRate),
+      deliveryDays: deliveryDays ? parseInt(deliveryDays) : null,
     },
     include: {
       freelancer: {
@@ -208,7 +209,7 @@ const submitProposal = asyncHandler(async (req, res) => {
 });
 
 // ────────────────────────────────────────────────
-// GET MY JOBS
+// GET MY JOBS (client perspective — includes proposals)
 // ────────────────────────────────────────────────
 const getMyJobs = asyncHandler(async (req, res) => {
   const clientId = req.user.userId;
@@ -216,6 +217,14 @@ const getMyJobs = asyncHandler(async (req, res) => {
   const jobs = await prisma.job.findMany({
     where: { clientId, deletedAt: null },
     include: {
+      proposals: {
+        include: {
+          freelancer: {
+            select: { id: true, username: true, avatarUrl: true, reputationScore: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      },
       _count: { select: { proposals: true } },
     },
     orderBy: { createdAt: 'desc' },
@@ -249,6 +258,124 @@ const getMyProposals = asyncHandler(async (req, res) => {
 });
 
 // ────────────────────────────────────────────────
+// GET PROPOSALS FOR A JOB (client only)
+// ────────────────────────────────────────────────
+const getJobProposals = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const clientId = req.user.userId;
+
+  const job = await prisma.job.findUnique({ where: { id } });
+  if (!job || job.deletedAt) throw new NotFoundError('Job not found.');
+  if (job.clientId !== clientId) throw new ForbiddenError('You can only view proposals for your own jobs.');
+
+  const proposals = await prisma.proposal.findMany({
+    where: { jobId: id },
+    include: {
+      freelancer: {
+        select: { id: true, username: true, avatarUrl: true, reputationScore: true, bio: true },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  res.json({ proposals });
+});
+
+// ────────────────────────────────────────────────
+// ACCEPT PROPOSAL
+// ────────────────────────────────────────────────
+const acceptProposal = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const clientId = req.user.userId;
+
+  const proposal = await prisma.proposal.findUnique({
+    where: { id },
+    include: { job: true },
+  });
+  if (!proposal) throw new NotFoundError('Proposal not found.');
+  if (proposal.job.clientId !== clientId) {
+    throw new ForbiddenError('You can only accept proposals for your own jobs.');
+  }
+  if (proposal.job.status !== 'open') {
+    throw new BadRequestError('This job is no longer accepting proposals.');
+  }
+  if (proposal.status !== 'pending') {
+    throw new BadRequestError('This proposal has already been processed.');
+  }
+
+  // Accept the proposal, reject all others, mark job as in_progress
+  const [updatedProposal] = await prisma.$transaction([
+    prisma.proposal.update({
+      where: { id },
+      data: { status: 'accepted' },
+      include: {
+        freelancer: {
+          select: { id: true, username: true, avatarUrl: true, reputationScore: true },
+        },
+        job: {
+          select: { id: true, title: true, status: true },
+        },
+      },
+    }),
+    prisma.proposal.updateMany({
+      where: { jobId: proposal.jobId, id: { not: id }, status: 'pending' },
+      data: { status: 'rejected' },
+    }),
+    prisma.job.update({
+      where: { id: proposal.jobId },
+      data: { status: 'in_progress' },
+    }),
+  ]);
+
+  log.info({ proposalId: id, jobId: proposal.jobId, freelancerId: proposal.freelancerId }, 'Proposal accepted');
+
+  res.json({
+    message: 'Proposal accepted! The freelancer has been notified.',
+    proposal: updatedProposal,
+  });
+});
+
+// ────────────────────────────────────────────────
+// REJECT PROPOSAL
+// ────────────────────────────────────────────────
+const rejectProposal = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const clientId = req.user.userId;
+
+  const proposal = await prisma.proposal.findUnique({
+    where: { id },
+    include: { job: true },
+  });
+  if (!proposal) throw new NotFoundError('Proposal not found.');
+  if (proposal.job.clientId !== clientId) {
+    throw new ForbiddenError('You can only reject proposals for your own jobs.');
+  }
+  if (proposal.status !== 'pending') {
+    throw new BadRequestError('This proposal has already been processed.');
+  }
+
+  const updated = await prisma.proposal.update({
+    where: { id },
+    data: { status: 'rejected' },
+    include: {
+      freelancer: {
+        select: { id: true, username: true },
+      },
+      job: {
+        select: { id: true, title: true },
+      },
+    },
+  });
+
+  log.info({ proposalId: id, jobId: proposal.jobId }, 'Proposal rejected');
+
+  res.json({
+    message: 'Proposal rejected.',
+    proposal: updated,
+  });
+});
+
+// ────────────────────────────────────────────────
 // CLOSE JOB
 // ────────────────────────────────────────────────
 const closeJob = asyncHandler(async (req, res) => {
@@ -276,5 +403,8 @@ module.exports = {
   submitProposal,
   getMyJobs,
   getMyProposals,
+  getJobProposals,
+  acceptProposal,
+  rejectProposal,
   closeJob,
 };

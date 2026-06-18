@@ -16,7 +16,7 @@ const getSellerAnalytics = asyncHandler(async (req, res) => {
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
-  const [ordersThisMonth, ordersLastMonth, products] = await Promise.all([
+  const [ordersThisMonth, ordersLastMonth, products, reviewsData] = await Promise.all([
     prisma.order.findMany({
       where: {
         product: { sellerId },
@@ -42,6 +42,13 @@ const getSellerAnalytics = asyncHandler(async (req, res) => {
           select: { createdAt: true },
         },
       },
+    }),
+    prisma.review.findMany({
+      where: { revieweeId: sellerId },
+      include: {
+        product: { select: { id: true, title: true } },
+      },
+      orderBy: { createdAt: 'desc' },
     }),
   ]);
 
@@ -104,11 +111,34 @@ const getSellerAnalytics = asyncHandler(async (req, res) => {
 
   const totalRevenueAllTime = productsWithMetrics.reduce((sum, p) => sum + p.revenue, 0);
 
+  // ── Review metrics ──
+  const totalReviews = reviewsData.length;
+  const ratingBreakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  reviewsData.forEach(r => {
+    if (r.rating >= 1 && r.rating <= 5) ratingBreakdown[r.rating]++;
+  });
+  const averageRating = totalReviews > 0
+    ? parseFloat((reviewsData.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1))
+    : 0;
+  const topRatedProducts = products
+    .map(p => {
+      const productReviews = reviewsData.filter(r => r.productId === p.id);
+      const avg = productReviews.length > 0
+        ? productReviews.reduce((s, r) => s + r.rating, 0) / productReviews.length
+        : 0;
+      return { id: p.id, title: p.title, averageRating: parseFloat(avg.toFixed(1)), reviewCount: productReviews.length };
+    })
+    .filter(p => p.reviewCount > 0)
+    .sort((a, b) => b.averageRating - a.averageRating)
+    .slice(0, 5);
+
   const insights = generateInsights(productsWithMetrics, {
     totalSalesThisMonth,
     totalRevenueThisMonth,
     totalProducts: products.length,
     avgOrderValue,
+    averageRating,
+    totalReviews,
   });
 
   const ranking = await calculateRanking(sellerId, totalRevenueAllTime);
@@ -133,6 +163,18 @@ const getSellerAnalytics = asyncHandler(async (req, res) => {
       },
     },
     products: productsWithMetrics.sort((a, b) => b.salesCount - a.salesCount),
+    reviews: {
+      totalReviews,
+      averageRating,
+      ratingBreakdown: {
+        oneStar: ratingBreakdown[1],
+        twoStar: ratingBreakdown[2],
+        threeStar: ratingBreakdown[3],
+        fourStar: ratingBreakdown[4],
+        fiveStar: ratingBreakdown[5],
+      },
+      topRatedProducts,
+    },
     insights,
     ranking,
   });
@@ -205,6 +247,29 @@ function generateInsights(products, stats) {
       type: 'success', icon: '💰', title: 'High-Value Sales',
       description: `Your average order value is $${stats.avgOrderValue.toFixed(0)}. Focus on premium products.`,
       priority: 'low',
+    });
+  }
+
+  // ── Review-based insights ──
+  if (stats.totalReviews > 0 && stats.averageRating >= 4.5) {
+    insights.push({
+      type: 'success', icon: '⭐', title: 'Excellent Ratings',
+      description: `Your average rating is ${stats.averageRating}/5 from ${stats.totalReviews} review${stats.totalReviews !== 1 ? 's' : ''}. Keep up the great work!`,
+      priority: 'low',
+    });
+  } else if (stats.totalReviews > 0 && stats.averageRating < 3) {
+    insights.push({
+      type: 'warning', icon: '⚠️', title: 'Ratings Need Improvement',
+      description: `Your average rating is ${stats.averageRating}/5. Consider improving product quality or descriptions.`,
+      action: 'View Reviews', actionUrl: '/profile', priority: 'high',
+    });
+  }
+
+  if (stats.totalReviews === 0 && stats.totalSalesThisMonth > 3) {
+    insights.push({
+      type: 'tip', icon: '💬', title: 'Encourage Reviews',
+      description: 'You have sales but no reviews yet. Follow up with buyers to leave feedback — it builds trust.',
+      priority: 'medium',
     });
   }
 

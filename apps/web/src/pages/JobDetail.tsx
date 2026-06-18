@@ -30,7 +30,7 @@ export default function JobDetail() {
     if (!proposal.coverLetter || !proposal.bidAmount || !proposal.deliveryDays) { alert('Please fill all fields.'); return; }
     setSubmitting(true);
     try {
-      await jobsAPI.submitProposal(id!, { coverLetter: proposal.coverLetter, bidAmount: parseFloat(proposal.bidAmount), deliveryDays: parseInt(proposal.deliveryDays) });
+      await jobsAPI.submitProposal(id!, { coverLetter: proposal.coverLetter, proposedRate: parseFloat(proposal.bidAmount), deliveryDays: parseInt(proposal.deliveryDays) });
       setSubmitted(true); setShowProposal(false);
     } catch (err: unknown) {
       alert((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to submit proposal.');

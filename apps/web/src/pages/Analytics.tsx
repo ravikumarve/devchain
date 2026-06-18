@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { ownershipAPI, productsAPI } from '../services/api';
+import { ownershipAPI, productsAPI, reviewsAPI } from '../services/api';
 import EmptyState from '../components/EmptyState';
 
 interface SaleData { id: string; amountPaid: number; purchasedAt?: string; createdAt?: string; buyer?: { username?: string; }; product?: { id: string; title: string; category?: string; }; }
@@ -38,6 +38,7 @@ export default function Analytics() {
   const { isAuthenticated, user } = useAuthStore();
   const [sales, setSales] = useState<SaleData[]>([]);
   const [products, setProducts] = useState<ProductInfo[]>([]);
+  const [reviews, setReviews] = useState<{ id: string; rating: number; comment?: string; reviewer: { username: string }; product?: { title: string }; createdAt: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -45,13 +46,15 @@ export default function Analytics() {
     Promise.all([
       ownershipAPI.mySales().catch(() => ({ data: { sales: [] } })),
       productsAPI.getMine().catch(() => ({ data: { products: [] } })),
+      user?.id ? reviewsAPI.getSellerReviews(user.id).catch(() => ({ data: { reviews: [] } })) : Promise.resolve({ data: { reviews: [] } }),
     ])
-      .then(([salesRes, productsRes]) => {
+      .then(([salesRes, productsRes, reviewsRes]) => {
         setSales(salesRes.data.sales || []);
         setProducts(productsRes.data.products || []);
+        setReviews(reviewsRes.data.reviews || []);
       })
       .finally(() => setLoading(false));
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, user?.id]);
 
   if (loading) return (
     <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>Loading...</div>
@@ -267,6 +270,75 @@ export default function Analytics() {
                 </div>
               ))}
             </div>
+          )}
+        </div>
+
+        {/* Reviews Section */}
+        <div className="card" style={{ padding: 24, marginTop: 24 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-main)', marginBottom: 4 }}>⭐ Reviews & Ratings</h3>
+          <p style={{ color: 'var(--text-faint)', fontSize: 13, fontFamily: 'var(--font-mono)', marginBottom: 20 }}>Buyer feedback on your products</p>
+
+          {reviews.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '28px 0', color: 'var(--text-faint)' }}>
+              <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.5 }}>⭐</div>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--text-faint)' }}>
+                No reviews yet. Reviews from buyers will appear here.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Rating Summary */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 24, marginBottom: 24, alignItems: 'center' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 48, fontWeight: 900, color: 'var(--text-main)', lineHeight: 1 }}>
+                    {(reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)}
+                  </div>
+                  <div style={{ fontSize: 14, color: '#f59e0b', marginTop: 4 }}>
+                    {'★'.repeat(5)}{' '}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-faint)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
+                    {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+                  </div>
+                </div>
+                <div>
+                  {[5, 4, 3, 2, 1].map(star => {
+                    const count = reviews.filter(r => r.rating === star).length;
+                    const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                    return (
+                      <div key={star} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <span style={{ fontSize: 12, color: 'var(--text-muted)', minWidth: 30, fontFamily: 'var(--font-mono)' }}>{star}★</span>
+                        <div style={{ flex: 1, height: 8, background: 'var(--bg-panel)', borderRadius: 4, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${pct}%`, background: '#f59e0b', borderRadius: 4, transition: 'width 1s ease' }} />
+                        </div>
+                        <span style={{ fontSize: 12, color: 'var(--text-faint)', fontFamily: 'var(--font-mono)', minWidth: 24, textAlign: 'right' }}>{count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Recent Reviews */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-main)', fontFamily: 'var(--font-mono)', marginBottom: 4 }}>Recent Reviews</h4>
+                {reviews.slice(0, 5).map(r => (
+                  <div key={r.id} style={{ padding: '14px 18px', background: 'transparent', borderRadius: 12, border: '1px solid var(--border-dim)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-main)', fontFamily: 'var(--font-mono)' }}>
+                        @{r.reviewer?.username}
+                        {r.product?.title && <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}> on {r.product.title.slice(0, 30)}...</span>}
+                      </div>
+                      <div style={{ color: '#f59e0b', fontSize: 13, fontFamily: 'var(--font-mono)' }}>
+                        {'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}
+                      </div>
+                    </div>
+                    {r.comment && <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6 }}>{r.comment}</p>}
+                    <div style={{ fontSize: 11, color: 'var(--text-faint)', fontFamily: 'var(--font-mono)', marginTop: 6 }}>
+                      {new Date(r.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </>)}

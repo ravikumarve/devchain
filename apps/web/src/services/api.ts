@@ -51,7 +51,11 @@ export const jobsAPI = {
   getOne: (id: string) => api.get(`/jobs/${id}`),
   create: (data: Record<string, unknown>) => api.post('/jobs', data),
   myJobs: () => api.get('/jobs/me/jobs'),
+  myProposals: () => api.get('/jobs/me/proposals'),
   submitProposal: (jobId: string, data: Record<string, unknown>) => api.post(`/jobs/${jobId}/proposals`, data),
+  getJobProposals: (jobId: string) => api.get(`/jobs/${jobId}/proposals`),
+  acceptProposal: (proposalId: string) => api.patch(`/jobs/proposals/${proposalId}/accept`),
+  rejectProposal: (proposalId: string) => api.patch(`/jobs/proposals/${proposalId}/reject`),
 };
 
 export default api;

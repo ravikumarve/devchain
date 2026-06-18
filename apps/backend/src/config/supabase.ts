@@ -1,0 +1,13 @@
+// src/config/supabase.ts
+// Two clients: standard (respects RLS) and admin (bypasses RLS).
+// NEVER send supabaseAdmin or service role key to the frontend.
+import { createClient } from '@supabase/supabase-js';
+import { env } from './env.js';
+
+export const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY);
+
+export const supabaseAdmin = createClient(
+  env.SUPABASE_URL,
+  env.SUPABASE_SERVICE_ROLE_KEY,
+  { auth: { autoRefreshToken: false, persistSession: false } }
+);

@@ -1,30 +1,45 @@
+// src/screens/RegisterScreen.tsx
+// Fixed — adds displayName field required by our backend
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  StyleSheet, ActivityIndicator, Alert, ScrollView, KeyboardAvoidingView, Platform
+  StyleSheet, ActivityIndicator, Alert,
+  ScrollView, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useAuthStore } from '../store/authStore';
 
 export default function RegisterScreen({ navigation }: any) {
+  const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { register, isLoading } = useAuthStore();
 
   const handleRegister = async () => {
-    if (!username || !email || !password) {
+    if (!displayName || !username || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
+    if (password.length < 8) {
+      Alert.alert('Error', 'Password must be at least 8 characters.');
+      return;
+    }
+    if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      Alert.alert('Error', 'Password must contain an uppercase letter and a number.');
+      return;
+    }
     try {
-      await register(username.trim(), email.trim(), password);
+      await register({ displayName, username, email: email.trim(), password });
     } catch (err: any) {
       Alert.alert('Registration Failed', err.response?.data?.error || 'Something went wrong.');
     }
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <Text style={styles.logo}>⛓️ DevChain</Text>
@@ -34,6 +49,17 @@ export default function RegisterScreen({ navigation }: any) {
         <View style={styles.form}>
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Join the developer marketplace</Text>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Display Name</Text>
+            <TextInput
+              style={styles.input}
+              value={displayName}
+              onChangeText={setDisplayName}
+              placeholder="Ravi Kumar"
+              placeholderTextColor="#555"
+            />
+          </View>
 
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Username</Text>
@@ -66,7 +92,7 @@ export default function RegisterScreen({ navigation }: any) {
               style={styles.input}
               value={password}
               onChangeText={setPassword}
-              placeholder="Min 8 characters"
+              placeholder="Min 8 chars, 1 uppercase, 1 number"
               placeholderTextColor="#555"
               secureTextEntry
             />
@@ -84,7 +110,9 @@ export default function RegisterScreen({ navigation }: any) {
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.link}>Already have an account? <Text style={styles.linkBold}>Sign In</Text></Text>
+            <Text style={styles.link}>
+              Already have an account? <Text style={styles.linkBold}>Sign In</Text>
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -105,11 +133,11 @@ const styles = StyleSheet.create({
   label: { fontSize: 13, color: '#999', marginBottom: 6, fontWeight: '600' },
   input: {
     backgroundColor: '#1a1a1a', borderRadius: 10, padding: 14,
-    color: '#fff', fontSize: 15, borderWidth: 1, borderColor: '#222'
+    color: '#fff', fontSize: 15, borderWidth: 1, borderColor: '#222',
   },
   btn: {
     backgroundColor: '#7C3AED', borderRadius: 10, padding: 16,
-    alignItems: 'center', marginTop: 8, marginBottom: 16
+    alignItems: 'center', marginTop: 8, marginBottom: 16,
   },
   btnDisabled: { opacity: 0.6 },
   btnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
