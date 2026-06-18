@@ -115,78 +115,91 @@ export default function Marketplace() {
           )}
         </div>
 
-        {/* ─── Search + Controls ─── */}
+        {/* ─── Compact Controls Bar ─── */}
         <div style={{
-          display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap',
+          display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14,
+          flexWrap: 'wrap',
         }}>
-          <div style={{ flex: 1, position: 'relative', minWidth: 240 }}>
+          {/* Search — flexible width */}
+          <div style={{ flex: '1 1 260px', position: 'relative', minWidth: 200 }}>
             <span style={{
-              position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-              color: 'var(--text-faint)', fontSize: 16, pointerEvents: 'none',
+              position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
+              color: 'var(--text-faint)', fontSize: 14, pointerEvents: 'none', lineHeight: 1,
             }}>
               🔍
             </span>
             <input
-              placeholder="Search products, templates, tools..."
+              placeholder="Search products..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               style={{
-                width: '100%', paddingLeft: 40,
-                background: 'var(--bg-surface)', borderColor: 'var(--border-dim)',
+                width: '100%', height: 40, padding: '0 32px 0 34px',
+                background: 'var(--bg-surface)', border: '1px solid var(--border-dim)',
+                borderRadius: 8, color: 'var(--text-main)', fontSize: 14, outline: 'none',
+                fontFamily: 'var(--font-display)', boxSizing: 'border-box',
               }}
             />
             {search && (
               <button onClick={() => setSearch('')} style={{
-                position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+                position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
                 background: 'none', border: 'none', color: 'var(--text-faint)',
-                cursor: 'pointer', fontSize: 18,
+                cursor: 'pointer', fontSize: 16, padding: 0, lineHeight: 1,
               }}>
                 ×
               </button>
             )}
           </div>
 
-          <select
-            value={sort}
-            onChange={e => setSort(e.target.value)}
-            style={{
-              background: 'var(--bg-surface)', border: '1px solid var(--border-dim)',
-              borderRadius: 10, padding: '12px 14px', color: 'var(--text-main)',
-              fontSize: 14, fontFamily: 'var(--font-display)', cursor: 'pointer',
-              minWidth: 180,
-            }}
-          >
-            {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-
-          <button
-            onClick={() => setShowFilters(f => !f)}
-            style={{
-              padding: '12px 18px', borderRadius: 10,
-              background: showFilters ? 'var(--eth-purple)' : 'var(--bg-surface)',
-              border: `1px solid ${showFilters ? 'var(--eth-purple)' : 'var(--border-dim)'}`,
-              color: showFilters ? '#fff' : 'var(--text-muted)',
-              fontWeight: 600, cursor: 'pointer', fontSize: 14,
-              fontFamily: 'var(--font-display)', transition: 'all 0.2s',
-            }}
-          >
-            ⚙️ Filters{hasActiveFilters ? ' ●' : ''}
-          </button>
-
+          {/* Sort + Filter + View Toggle — grouped */}
           <div style={{
-            display: 'flex', background: 'var(--bg-surface)',
-            border: '1px solid var(--border-dim)', borderRadius: 10, overflow: 'hidden',
+            display: 'flex', alignItems: 'center', gap: 8,
           }}>
-            {(['grid', 'list'] as const).map(v => (
-              <button key={v} onClick={() => setViewMode(v)} style={{
-                padding: '12px 14px',
-                background: viewMode === v ? 'var(--bg-panel)' : 'transparent',
-                border: 'none', color: viewMode === v ? 'var(--text-main)' : 'var(--text-faint)',
-                cursor: 'pointer', fontSize: 16, transition: 'background 0.2s',
-              }}>
-                {v === 'grid' ? '⊞' : '☰'}
-              </button>
-            ))}
+            <select
+              value={sort}
+              onChange={e => setSort(e.target.value)}
+              style={{
+                height: 40, padding: '0 28px 0 12px',
+                background: 'var(--bg-surface)', border: '1px solid var(--border-dim)',
+                borderRadius: 8, color: 'var(--text-main)',
+                fontSize: 13, fontFamily: 'var(--font-mono)', cursor: 'pointer',
+                minWidth: 120, outline: 'none', appearance: 'auto',
+              }}
+            >
+              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+
+            <button
+              onClick={() => setShowFilters(f => !f)}
+              style={{
+                height: 40, padding: '0 14px', borderRadius: 8,
+                background: showFilters ? 'var(--eth-purple)' : 'var(--bg-surface)',
+                border: `1px solid ${showFilters ? 'var(--eth-purple)' : 'var(--border-dim)'}`,
+                color: showFilters ? '#fff' : 'var(--text-muted)',
+                fontWeight: 600, cursor: 'pointer', fontSize: 13,
+                fontFamily: 'var(--font-mono)', transition: 'all 0.2s',
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}
+            >
+              ⚙️{hasActiveFilters ? ' ●' : ''}
+            </button>
+
+            <div style={{
+              display: 'flex', height: 40,
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-dim)', borderRadius: 8, overflow: 'hidden',
+            }}>
+              {(['grid', 'list'] as const).map(v => (
+                <button key={v} onClick={() => setViewMode(v)} style={{
+                  padding: '0 12px',
+                  background: viewMode === v ? 'var(--bg-panel)' : 'transparent',
+                  border: 'none', color: viewMode === v ? 'var(--text-main)' : 'var(--text-faint)',
+                  cursor: 'pointer', fontSize: 16, transition: 'background 0.2s',
+                  display: 'flex', alignItems: 'center',
+                }}>
+                  {v === 'grid' ? '⊞' : '☰'}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -194,49 +207,74 @@ export default function Marketplace() {
         {showFilters && (
           <div style={{
             background: 'var(--bg-surface)', border: '1px solid var(--border-dim)',
-            borderRadius: 12, padding: '20px 24px', marginBottom: 16,
-            display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap',
+            borderRadius: 10, padding: '14px 20px', marginBottom: 14,
+            display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap',
           }}>
-            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-main)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>
-              💰 Price Range:
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <input type="number" placeholder="Min $" value={priceMin}
+            <span style={{
+              fontWeight: 700, fontSize: 12, color: 'var(--text-main)',
+              fontFamily: 'var(--font-mono)', letterSpacing: '0.5px',
+            }}>
+              💰 Price
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input type="number" placeholder="Min" value={priceMin}
                 onChange={e => setPriceMin(e.target.value)}
-                style={{ width: 100, background: 'transparent', border: '1px solid var(--border-dim)', borderRadius: 8, padding: '8px 12px', color: 'var(--text-main)', fontSize: 14, fontFamily: 'var(--font-display)' }} />
-              <span style={{ color: 'var(--text-faint)' }}>—</span>
-              <input type="number" placeholder="Max $" value={priceMax}
+                style={{
+                  width: 80, height: 34, background: 'transparent',
+                  border: '1px solid var(--border-dim)', borderRadius: 6,
+                  padding: '0 10px', color: 'var(--text-main)', fontSize: 13,
+                  fontFamily: 'var(--font-display)', outline: 'none',
+                }} />
+              <span style={{ color: 'var(--text-faint)', fontSize: 12 }}>—</span>
+              <input type="number" placeholder="Max" value={priceMax}
                 onChange={e => setPriceMax(e.target.value)}
-                style={{ width: 100, background: 'transparent', border: '1px solid var(--border-dim)', borderRadius: 8, padding: '8px 12px', color: 'var(--text-main)', fontSize: 14, fontFamily: 'var(--font-display)' }} />
-              <button onClick={fetchProducts} className="btn-primary"
-                style={{ padding: '8px 16px', fontSize: 12 }}>
+                style={{
+                  width: 80, height: 34, background: 'transparent',
+                  border: '1px solid var(--border-dim)', borderRadius: 6,
+                  padding: '0 10px', color: 'var(--text-main)', fontSize: 13,
+                  fontFamily: 'var(--font-display)', outline: 'none',
+                }} />
+              <button onClick={fetchProducts}
+                style={{
+                  height: 34, padding: '0 14px', borderRadius: 6,
+                  background: 'var(--eth-purple)', border: 'none',
+                  color: '#fff', fontWeight: 600, cursor: 'pointer',
+                  fontSize: 12, fontFamily: 'var(--font-mono)',
+                }}>
                 Apply
               </button>
             </div>
             {hasActiveFilters && (
               <button onClick={clearFilters} style={{
-                marginLeft: 'auto', padding: '8px 16px', borderRadius: 8,
-                background: 'transparent', border: '1px solid rgba(220, 38, 38, 0.27)',
-                color: '#DC2626', fontWeight: 600, cursor: 'pointer', fontSize: 13,
-                fontFamily: 'var(--font-display)',
+                marginLeft: 'auto', height: 34, padding: '0 14px', borderRadius: 6,
+                background: 'transparent', border: '1px solid rgba(220,38,38,0.27)',
+                color: '#DC2626', fontWeight: 600, cursor: 'pointer', fontSize: 12,
+                fontFamily: 'var(--font-mono)',
               }}>
-                ✕ Clear All
+                ✕ Clear
               </button>
             )}
           </div>
         )}
 
-        {/* ─── Category Pills ─── */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 32 }}>
+        {/* ─── Category Pills (compact scrollable row) ─── */}
+        <div style={{
+          display: 'flex', gap: 6, marginBottom: 28,
+          overflowX: 'auto', paddingBottom: 4,
+          scrollbarWidth: 'thin', scrollbarColor: 'var(--border-dim) transparent',
+          WebkitOverflowScrolling: 'touch',
+        }}>
           {CATEGORIES.map(cat => (
             <button key={cat} onClick={() => setCategory(cat)}
               style={{
+                flexShrink: 0,
                 background: category === cat ? 'var(--eth-purple)' : 'var(--bg-surface)',
                 border: `1px solid ${category === cat ? 'var(--eth-purple)' : 'var(--border-dim)'}`,
-                borderRadius: 100, padding: '6px 16px',
-                color: category === cat ? '#fff' : 'var(--text-muted)',
-                fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                borderRadius: 100, padding: '5px 14px',
+                color: category === cat ? '#fff' : 'var(--text-faint)',
+                fontSize: 12, fontWeight: 600, cursor: 'pointer',
                 transition: 'all 0.2s', fontFamily: 'var(--font-mono)',
+                whiteSpace: 'nowrap', lineHeight: 1.4,
               }}>
               {cat}
             </button>
