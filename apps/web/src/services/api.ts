@@ -69,6 +69,7 @@ export const authAPI = {
     api.post('/auth/register', data),
   getMe: () => api.get('/auth/me'),
   refresh: (data: { refreshToken: string }) => api.post('/auth/refresh', data),
+  updateProfile: (data: { bio?: string; avatarUrl?: string }) => api.put('/auth/me', data),
 };
 
 export const productsAPI = {

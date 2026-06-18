@@ -219,4 +219,32 @@ const refreshToken = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { register, login, getMe, refreshToken };
+// ────────────────────────────────────────────────
+// UPDATE PROFILE
+// ────────────────────────────────────────────────
+const updateProfile = asyncHandler(async (req, res) => {
+  const userId = req.user.userId;
+  const { bio, avatarUrl } = req.body;
+
+  const data = {};
+  if (bio !== undefined) data.bio = bio.trim().slice(0, 500);
+  if (avatarUrl !== undefined) data.avatarUrl = avatarUrl.trim();
+
+  if (Object.keys(data).length === 0) {
+    throw new BadRequestError('No fields to update. Provide bio or avatarUrl.');
+  }
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data,
+    select: {
+      id: true, username: true, email: true, bio: true, avatarUrl: true,
+      reputationScore: true, createdAt: true,
+    },
+  });
+
+  log.info({ userId }, 'Profile updated');
+  res.json({ message: 'Profile updated.', user });
+});
+
+module.exports = { register, login, getMe, refreshToken, updateProfile };

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, type NavigateFunction } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { ownershipAPI, jobsAPI, productsAPI } from '../services/api';
+import { ownershipAPI, jobsAPI, productsAPI, authAPI } from '../services/api';
 
 interface ProductData { id: string; title: string; category: string; downloadsCount: number; price: number; isActive: boolean; seller?: { username: string }; tags?: string[]; description?: string; }
 interface UserRef { id: string; username: string; reputationScore?: number; }
@@ -18,6 +18,9 @@ export default function Profile() {
   const [products, setProducts] = useState<ProductData[]>([]);
   const [jobs, setJobs] = useState<JobData[]>([]);
   const [loading, setLoading] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [bio, setBio] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) { navigate('/login'); return; }
@@ -51,14 +54,22 @@ export default function Profile() {
           </div>
           <div style={{ flex: 1 }}>
             <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.03em', marginBottom: 4 }}>@{user?.username}</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 10 }}>{user?.email}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 6 }}>{user?.email}</p>
+            <p style={{ color: 'var(--text-faint)', fontSize: 13, fontStyle: 'italic', marginBottom: 10 }}>
+              {(user as Record<string, unknown>)?.bio || 'No bio yet'}
+            </p>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--bg-panel)', border: '1px solid var(--crypto-gold-dim)', borderRadius: 20, padding: '4px 12px', color: 'var(--crypto-gold)', fontSize: 13, fontWeight: 600 }}>
               ⭐ {user?.reputationScore} Reputation Score
             </div>
           </div>
-          <button className="btn-outline" onClick={handleLogout} style={{ padding: '10px 20px', fontSize: 13 }}>
-            Logout
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn-outline" onClick={() => { setBio((user as Record<string, unknown>)?.bio as string || ''); setEditOpen(true); }} style={{ padding: '10px 20px', fontSize: 13 }}>
+              ✏️ Edit Profile
+            </button>
+            <button className="btn-outline" onClick={handleLogout} style={{ padding: '10px 20px', fontSize: 13 }}>
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -75,6 +86,38 @@ export default function Profile() {
             </button>
           ))}
         </div>
+
+        {/* Edit Profile Modal */}
+        {editOpen && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+            onClick={() => setEditOpen(false)}>
+            <div className="card" style={{ width: '100%', maxWidth: 480, padding: 28 }} onClick={e => e.stopPropagation()}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-main)', marginBottom: 20 }}>✏️ Edit Profile</h2>
+              <div style={{ marginBottom: 18 }}>
+                <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-main)', display: 'block', marginBottom: 8 }}>Bio</label>
+                <textarea
+                  style={{ width: '100%', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 10, padding: '12px 14px', color: 'var(--text-main)', fontSize: 14, fontFamily: 'var(--font-display)', height: 100, resize: 'vertical', boxSizing: 'border-box', outline: 'none' }}
+                  value={bio} onChange={e => setBio(e.target.value)} placeholder="Tell others about yourself..." maxLength={500}
+                />
+                <div style={{ fontSize: 11, color: 'var(--text-faint)', textAlign: 'right', fontFamily: 'var(--font-mono)', marginTop: 4 }}>{bio.length}/500</div>
+              </div>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button onClick={() => setEditOpen(false)} className="btn-outline" style={{ flex: 1, padding: '12px', fontSize: 14 }}>Cancel</button>
+                <button onClick={async () => {
+                  setSaving(true);
+                  try {
+                    const res = await authAPI.updateProfile({ bio });
+                    setEditOpen(false);
+                  } catch (err: unknown) {
+                    alert('Failed: ' + ((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Unknown error'));
+                  } finally { setSaving(false); }
+                }} disabled={saving} className="btn-primary" style={{ flex: 1, padding: '12px', fontSize: 14, opacity: saving ? 0.6 : 1 }}>
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Content */}
         <div style={{ minHeight: 300 }}>
