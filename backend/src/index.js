@@ -1,70 +1,182 @@
 const express = require('express');
-const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 require('dotenv').config();
+
+// ── Internal Modules ──
+const { validateEnv } = require('./config/env');
+const { logger, httpLogger } = require('./utils/logger');
+const errorHandler = require('./middleware/errorHandler');
+const corsMiddleware = require('./middleware/cors');
+
+// ── Validate environment before anything else ──
+validateEnv();
 
 const app = express();
 const PORT = process.env.PORT || 10000;
+const isProd = process.env.NODE_ENV === 'production';
 
-// ── Security Middleware ──
-app.use(helmet());
-app.use(cors({ origin: true, credentials: true }));
+// ══════════════════════════════════════════════
+//  SECURITY MIDDLEWARE (applied first)
+// ══════════════════════════════════════════════
 
-// ── Rate Limiting ──
-const limiter = rateLimit({
+// Helmet with strict CSP in production
+app.use(helmet({
+  contentSecurityPolicy: isProd ? {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+      connectSrc: ["'self'", process.env.FRONTEND_URL || 'http://localhost:5173'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      objectSrc: ["'none'"],
+      frameSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  } : false,
+  crossOriginEmbedderPolicy: false,
+}));
+
+// CORS — tightened per environment
+app.use(corsMiddleware);
+
+// ══════════════════════════════════════════════
+//  REQUEST LOGGING
+// ══════════════════════════════════════════════
+app.use(httpLogger);
+
+// ══════════════════════════════════════════════
+//  RATE LIMITING
+// ══════════════════════════════════════════════
+const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: { error: 'Too many requests, please try again later.' },
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.', code: 'RATE_LIMIT' },
 });
-app.use('/api/', limiter);
+app.use('/api/', globalLimiter);
 
-// ── Body Parser ──
+// Stricter rate limit for auth routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts, please try again later.', code: 'AUTH_RATE_LIMIT' },
+});
+
+// ══════════════════════════════════════════════
+//  BODY PARSER
+// ══════════════════════════════════════════════
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// ── Root ──
+// ══════════════════════════════════════════════
+//  ROOT & HEALTH
+// ══════════════════════════════════════════════
 app.get('/', (req, res) => {
-  res.json({ name: 'DevChain API', version: '1.0.0', status: 'live', docs: '/api/v1' });
-});
-
-// ── Health Check ──
-app.get('/health', (req, res) => {
   res.json({
-    status: 'ok',
-    message: 'DevChain API is running',
+    name: 'DevChain API',
     version: '1.0.0',
-    timestamp: new Date().toISOString(),
+    status: 'live',
+    environment: process.env.NODE_ENV || 'development',
+    docs: '/api/v1',
   });
 });
 
-// ── Routes ──
-app.use('/api/v1/auth', require('./routes/auth'));
+app.get('/health', async (req, res) => {
+  const health = {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+    version: '1.0.0',
+  };
+
+  // Check database connectivity
+  try {
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+    await prisma.$queryRaw`SELECT 1`;
+    await prisma.$disconnect();
+    health.database = 'connected';
+  } catch (err) {
+    health.status = 'degraded';
+    health.database = 'disconnected';
+    logger.error('Health check — database unreachable');
+  }
+
+  const statusCode = health.status === 'ok' ? 200 : 503;
+  res.status(statusCode).json(health);
+});
+
+// ══════════════════════════════════════════════
+//  API ROUTES
+// ══════════════════════════════════════════════
+app.use('/api/v1/auth', authLimiter, require('./routes/auth'));
 app.use('/api/v1/products', require('./routes/products'));
 app.use('/api/v1/ownership', require('./routes/ownership'));
 app.use('/api/v1/jobs', require('./routes/jobs'));
 app.use('/api/v1/uploads', require('./routes/uploads'));
 app.use('/api/v1/payments', require('./routes/payments'));
-app.use('/uploads', require('express').static(require('path').join(__dirname, '../../uploads')));
+app.use('/api/v1/analytics', require('./routes/analytics'));
 
-// ── 404 Handler ──
+// Static file serving (local uploads — deprecated in favor of Supabase)
+app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+
+// ══════════════════════════════════════════════
+//  404 HANDLER
+// ══════════════════════════════════════════════
 app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
-// ── Global Error Handler ──
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  res.status(404).json({
+    error: `Route ${req.method} ${req.originalUrl} not found`,
+    code: 'ROUTE_NOT_FOUND',
   });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 DevChain API running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/health`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+// ══════════════════════════════════════════════
+//  GLOBAL ERROR HANDLER (must be last)
+// ══════════════════════════════════════════════
+app.use(errorHandler);
+
+// ══════════════════════════════════════════════
+//  GRACEFUL SHUTDOWN
+// ══════════════════════════════════════════════
+const server = app.listen(PORT, '0.0.0.0', () => {
+  logger.info({
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development',
+    frontend: process.env.FRONTEND_URL || 'http://localhost:5173',
+  }, 'DevChain API started');
+});
+
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received — shutting down gracefully');
+  server.close(() => {
+    logger.info('HTTP server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  logger.info('SIGINT received — shutting down gracefully');
+  server.close(() => {
+    logger.info('HTTP server closed');
+    process.exit(0);
+  });
+});
+
+// Handle uncaught errors
+process.on('uncaughtException', (err) => {
+  logger.error({ err }, 'Uncaught exception');
+  server.close(() => process.exit(1));
+});
+
+process.on('unhandledRejection', (reason) => {
+  logger.error({ err: reason }, 'Unhandled rejection');
 });
 
 module.exports = app;

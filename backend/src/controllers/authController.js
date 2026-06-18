@@ -4,23 +4,37 @@ const { PrismaClient } = require('@prisma/client');
 const crypto = require('crypto');
 
 const prisma = new PrismaClient();
+const { getLogger } = require('../utils/logger');
+const asyncHandler = require('../utils/asyncHandler');
+const {
+  BadRequestError,
+  UnauthorizedError,
+  ConflictError,
+} = require('../utils/errors');
 
-// ── Helper: generate tokens ──
+const log = getLogger('auth');
+
+// ── Constants ──
+const BCRYPT_ROUNDS = 12;
+const ACCESS_TOKEN_EXPIRY = process.env.JWT_EXPIRES_IN || '15m';
+const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+
+// ── Helper: generate token pair ──
 const generateTokens = (userId, email) => {
   const accessToken = jwt.sign(
     { userId, email },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
+    { expiresIn: ACCESS_TOKEN_EXPIRY }
   );
   const refreshToken = jwt.sign(
-    { userId, email },
+    { userId, email, tokenId: crypto.randomUUID() },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+    { expiresIn: REFRESH_TOKEN_EXPIRY }
   );
   return { accessToken, refreshToken };
 };
 
-// ── Helper: safe user object (never return password) ──
+// ── Helper: safe user object (never expose password) ──
 const safeUser = (user) => ({
   id: user.id,
   username: user.username,
@@ -35,155 +49,147 @@ const safeUser = (user) => ({
 // ────────────────────────────────────────────────
 // REGISTER
 // ────────────────────────────────────────────────
-const register = async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+const register = asyncHandler(async (req, res) => {
+  const { username, email, password } = req.body;
 
-    // ── Validation ──
-    if (!username || !email || !password) {
-      return res.status(400).json({ error: 'Username, email and password are required.' });
-    }
-    if (username.length < 3 || username.length > 30) {
-      return res.status(400).json({ error: 'Username must be between 3 and 30 characters.' });
-    }
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      return res.status(400).json({ error: 'Username can only contain letters, numbers and underscores.' });
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ error: 'Please provide a valid email address.' });
-    }
-    if (password.length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters.' });
-    }
-
-    // ── Check if user already exists ──
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email: email.toLowerCase() },
-          { username: username.toLowerCase() }
-        ]
-      }
-    });
-
-    if (existingUser) {
-      if (existingUser.email === email.toLowerCase()) {
-        return res.status(409).json({ error: 'An account with this email already exists.' });
-      }
-      return res.status(409).json({ error: 'This username is already taken.' });
-    }
-
-    // ── Hash password ──
-    const passwordHash = await bcrypt.hash(password, 12);
-
-    // ── Create user ──
-    const user = await prisma.user.create({
-      data: {
-        username: username.toLowerCase(),
-        email: email.toLowerCase(),
-        passwordHash,
-      }
-    });
-
-    // ── Generate tokens ──
-    const { accessToken, refreshToken } = generateTokens(user.id, user.email);
-
-    res.status(201).json({
-      message: 'Account created successfully! Welcome to DevChain.',
-      user: safeUser(user),
-      accessToken,
-      refreshToken,
-    });
-
-  } catch (err) {
-    console.error('Register error:', err);
-    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+  // ── Validation ──
+  if (!username || !email || !password) {
+    throw new BadRequestError('Username, email and password are required.');
   }
-};
+  if (username.length < 3 || username.length > 30) {
+    throw new BadRequestError('Username must be between 3 and 30 characters.');
+  }
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+    throw new BadRequestError('Username can only contain letters, numbers and underscores.');
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new BadRequestError('Please provide a valid email address.');
+  }
+  if (password.length < 8) {
+    throw new BadRequestError('Password must be at least 8 characters.');
+  }
+  if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+    throw new BadRequestError('Password must contain at least 1 letter and 1 number.');
+  }
+
+  // ── Check uniqueness ──
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: email.toLowerCase() },
+        { username: username.toLowerCase() },
+      ],
+    },
+  });
+
+  if (existingUser) {
+    if (existingUser.email === email.toLowerCase()) {
+      throw new ConflictError('An account with this email already exists.');
+    }
+    throw new ConflictError('This username is already taken.');
+  }
+
+  // ── Create user ──
+  const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+  const user = await prisma.user.create({
+    data: {
+      username: username.toLowerCase(),
+      email: email.toLowerCase(),
+      passwordHash,
+    },
+  });
+
+  const { accessToken, refreshToken } = generateTokens(user.id, user.email);
+
+  log.info({ userId: user.id }, 'User registered successfully');
+
+  res.status(201).json({
+    message: 'Account created successfully! Welcome to DevChain.',
+    user: safeUser(user),
+    accessToken,
+    refreshToken,
+  });
+});
 
 // ────────────────────────────────────────────────
 // LOGIN
 // ────────────────────────────────────────────────
-const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-    // ── Validation ──
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required.' });
-    }
-
-    // ── Find user ──
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
-    });
-
-    if (!user || !user.isActive) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
-    }
-
-    // ── Check password ──
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
-    }
-
-    // ── Generate tokens ──
-    const { accessToken, refreshToken } = generateTokens(user.id, user.email);
-
-    res.json({
-      message: 'Welcome back to DevChain!',
-      user: safeUser(user),
-      accessToken,
-      refreshToken,
-    });
-
-  } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+  if (!email || !password) {
+    throw new BadRequestError('Email and password are required.');
   }
-};
+
+  const user = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() },
+  });
+
+  if (!user || !user.isActive) {
+    throw new UnauthorizedError('Invalid email or password.');
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+  if (!isPasswordValid) {
+    throw new UnauthorizedError('Invalid email or password.');
+  }
+
+  const { accessToken, refreshToken } = generateTokens(user.id, user.email);
+
+  log.info({ userId: user.id }, 'User logged in');
+
+  res.json({
+    message: 'Welcome back to DevChain!',
+    user: safeUser(user),
+    accessToken,
+    refreshToken,
+  });
+});
 
 // ────────────────────────────────────────────────
-// GET CURRENT USER (me)
+// GET CURRENT USER
 // ────────────────────────────────────────────────
-const getMe = async (req, res) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.userId }
-    });
+const getMe = asyncHandler(async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: { id: req.user.userId },
+  });
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found.' });
-    }
-
-    res.json({ user: safeUser(user) });
-
-  } catch (err) {
-    console.error('GetMe error:', err);
-    res.status(500).json({ error: 'Something went wrong.' });
+  if (!user) {
+    throw new UnauthorizedError('User not found. Please login again.');
   }
-};
+
+  res.json({ user: safeUser(user) });
+});
 
 // ────────────────────────────────────────────────
 // REFRESH TOKEN
 // ────────────────────────────────────────────────
-const refreshToken = async (req, res) => {
-  try {
-    const { refreshToken } = req.body;
+const refreshToken = asyncHandler(async (req, res) => {
+  const { refreshToken: token } = req.body;
 
-    if (!refreshToken) {
-      return res.status(400).json({ error: 'Refresh token is required.' });
-    }
-
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    const { accessToken, refreshToken: newRefreshToken } = generateTokens(decoded.userId, decoded.email);
-
-    res.json({ accessToken, refreshToken: newRefreshToken });
-
-  } catch (err) {
-    return res.status(401).json({ error: 'Invalid or expired refresh token. Please login again.' });
+  if (!token) {
+    throw new BadRequestError('Refresh token is required.');
   }
-};
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      throw new UnauthorizedError('Session expired. Please login again.');
+    }
+    throw new UnauthorizedError('Invalid refresh token. Please login again.');
+  }
+
+  // Issue new token pair (rotation)
+  const tokens = generateTokens(decoded.userId, decoded.email);
+
+  log.info({ userId: decoded.userId }, 'Tokens refreshed');
+
+  res.json({
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+  });
+});
 
 module.exports = { register, login, getMe, refreshToken };

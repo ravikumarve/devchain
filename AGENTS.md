@@ -21,6 +21,22 @@ devchain/
 
 ---
 
+### [2025-04-22] - Sprint Alpha Execution
+- **State**: Success (90% Complete)
+- **MCP Data Used**: code_tree for architecture analysis, file system operations for implementation
+- **Agents Deployed**: Direct implementation (backend-architect, frontend-developer, docs, github-profile-polish patterns)
+- **Architectural Decision**: Enhanced Stripe payment flow with comprehensive webhook handling, SHA-256 ownership verification, and download security
+- **Next Turn Directive**: Complete end-to-end testing with sample products, create social preview images, and prepare for production launch
+
+### [2025-04-22] - Sprint Beta Execution
+- **State**: Success (58% Complete)
+- **MCP Data Used**: Chrome headless for image generation, file system operations for documentation
+- **Agents Deployed**: Direct implementation (frontend-developer, docs, asset creation)
+- **Architectural Decision**: Created professional social preview assets and comprehensive testing documentation
+- **Next Turn Directive**: Complete manual backend testing, configure Stripe test mode, and finalize production deployment
+
+---
+
 ## Deployment & Infrastructure
 
 | Layer     | Service                        | URL / ID                           |
@@ -58,6 +74,45 @@ These features are **already built** — do not re-scaffold or overwrite them:
 
 When adding new features, extend existing patterns — do not replace or refactor working code
 unless explicitly asked.
+
+---
+
+## 🛡️ Backend Hardening (Sprint — June 18, 2026)
+
+The backend was comprehensively hardened. Key changes:
+
+### New Files Created
+| File | Purpose |
+|------|---------|
+| `backend/src/utils/errors.js` | 7 custom error classes (BadRequest, Unauthorized, Forbidden, NotFound, Conflict, Validation, RateLimit) |
+| `backend/src/utils/logger.js` | Pino structured JSON logging with pino-pretty in dev |
+| `backend/src/utils/asyncHandler.js` | Wraps async controllers to forward errors to centralized handler |
+| `backend/src/config/env.js` | Validates required env vars at startup (DATABASE_URL, JWT_SECRET, SUPABASE_URL, SUPABASE_SERVICE_KEY) |
+| `backend/src/middleware/validate.js` | Joi schema validation middleware for body/query/params |
+| `backend/src/middleware/errorHandler.js` | Centralized error handler — catches Prisma, Stripe, JWT, Multer, Supabase errors |
+| `backend/src/routes/analytics.js` | Analytics route (was missing) |
+
+### Files Modified
+| File | Changes |
+|------|---------|
+| `backend/src/index.js` | Env validation on boot, graceful shutdown (SIGTERM/SIGINT), health check with DB ping, pino http logger, auth-specific rate limiter (20/15min), strict Helmet CSP in prod, tightened middleware ordering |
+| `backend/src/middleware/auth.js` | Enhanced JWT error handling, added `optionalAuth` middleware |
+| `backend/src/middleware/cors.js` | Whitelist-based CORS in prod (devchain-app.vercel.app, devchain.onrender.com), 24h preflight cache |
+| All 7 controllers | Replaced try-catch with `asyncHandler`, replaced `console.error` with structured `log.error`, replaced inline 400/404/403 responses with error classes |
+| All 6 route files | Added Joi validation schemas for every endpoint |
+| `backend/src/services/emailService.js` | Replaced console.log with pino logger |
+| `.env.example` | Documented REQUIRED vs optional vars, added LOG_LEVEL, FRONTEND_URL, OWNERSHIP_HASH_SECRET |
+
+### Security Improvements
+1. Helmet CSP in production
+2. CORS whitelist (production)
+3. Auth rate limit: 20 req/15min
+4. JWT refresh token rotation (random UUID per token)
+5. Stronger password validation (min 8 chars, 1 letter + 1 number)
+6. File upload: extension whitelist, filename sanitization, 50MB limit
+7. No stack traces in production error responses
+8. Prisma error handling (unique constraint, FK, connection, not found)
+9. Request body redaction (passwords, tokens, secrets from logs)
 
 ---
 
@@ -427,3 +482,20 @@ button, input, textarea, select, form, label, badge, card, dialog
 ```bash
 cd apps/web && npx shadcn@latest add <component-name>
 ```
+
+---
+
+## 💾 Session Memory Ledger
+
+### [2026-06-18] - Backend Core Hardening
+- **State**: Success
+- **MCP Data Used**: Direct file reads for audit, write for 7 new files, edit for 15+ modified files
+- **Agents Deployed**: Orchestrator (direct execution)
+- **Architectural Decision**:
+  - Moved from inline try-catch + `console.error` to `asyncHandler` wrapper + pino structured logging
+  - Centralized error handling with custom error classes → consistent JSON error responses
+  - Joi validation middleware on all 7 route modules → request body/query/params sanitization
+  - CORS whitelist in production, Helmet CSP in production, auth rate limiting
+  - Env validation at startup (exits in prod if missing required vars)
+  - Graceful shutdown (SIGTERM/SIGINT) + DB health check endpoint
+- **Next Turn Directive**: Frontend redesign, or deploy hardened backend to Render

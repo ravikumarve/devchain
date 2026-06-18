@@ -1,15 +1,20 @@
 const express = require('express');
+const Joi = require('joi');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
 const { upload, uploadProductFile, downloadProductFile, getFileInfo } = require('../controllers/uploadController');
 
-// Upload file for a product (seller only)
-router.post('/product/:productId', protect, upload.single('file'), uploadProductFile);
+// ── Validation schemas ──
+const productIdParam = {
+  params: Joi.object({
+    productId: Joi.string().uuid().required(),
+  }),
+};
 
-// Download product file (buyer or seller)
-router.get('/product/:productId/download', protect, downloadProductFile);
-
-// Get file info
-router.get('/product/:productId/info', protect, getFileInfo);
+// ── Routes ──
+router.post('/product/:productId', protect, validate(productIdParam), upload.single('file'), uploadProductFile);
+router.get('/product/:productId/download', protect, validate(productIdParam), downloadProductFile);
+router.get('/product/:productId/info', protect, validate(productIdParam), getFileInfo);
 
 module.exports = router;
