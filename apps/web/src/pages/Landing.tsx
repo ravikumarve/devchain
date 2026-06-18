@@ -111,7 +111,6 @@ export default function Landing() {
     <div style={{ minHeight: '100vh' }}>
       {/* ─── 3D Blockchain Sphere ─── */}
       <BlockchainSphere />
-      <div className="ambient-core" />
 
       <div className="container">
         {/* ─── HERO ─── */}
