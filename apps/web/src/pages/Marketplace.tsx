@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productsAPI } from '../services/api';
 import { useAuthStore } from '../store/authStore';
+import EmptyState from '../components/EmptyState';
 
 interface ProductData {
   id: string; title: string; description: string; price: number;
@@ -80,7 +81,7 @@ export default function Marketplace() {
   useEffect(() => { fetchProducts(); }, [category, sort, debouncedSearch, fetchProducts]);
 
   const clearFilters = () => { setSearch(''); setCategory('all'); setSort('newest'); setPriceMin(''); setPriceMax(''); };
-  const hasActiveFilters = search || category !== 'all' || sort !== 'newest' || priceMin || priceMax;
+  const hasActiveFilters = !!(search || category !== 'all' || sort !== 'newest' || priceMin || priceMax);
 
   return (
     <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
@@ -255,27 +256,38 @@ export default function Marketplace() {
             </p>
           </div>
         ) : products.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 0' }}>
-            <p style={{ fontSize: 48 }}>📦</p>
-            <h3 style={{ marginBottom: 8, fontSize: 24, fontWeight: 700 }}>No products found</h3>
-            <p style={{ color: 'var(--text-muted)', marginBottom: 20 }}>
-              {hasActiveFilters ? 'Try adjusting your filters' : 'Be the first to list a product!'}
-            </p>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              {hasActiveFilters && (
-                <button onClick={clearFilters} className="btn-outline"
-                  style={{ padding: '10px 20px', fontSize: 13 }}>
-                  Clear Filters
-                </button>
-              )}
-              {isAuthenticated && (
-                <button className="btn-primary" onClick={() => navigate('/sell')}
-                  style={{ padding: '10px 20px', fontSize: 13 }}>
-                  + List Product
-                </button>
-              )}
-            </div>
-          </div>
+          <EmptyState
+            icon="📦"
+            title={hasActiveFilters ? 'No matching products' : 'Your marketplace awaits'}
+            description={hasActiveFilters
+              ? 'Try adjusting your search terms or filters to find what you\'re looking for.'
+              : 'Be the first to list a blockchain-verified code asset. DevChain lets you sell code with SHA-256 authenticity certificates.'
+            }
+            skeleton={{ count: hasActiveFilters ? 2 : 4, type: 'card' }}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
+            actions={
+              hasActiveFilters
+                ? undefined
+                : [
+                  ...(isAuthenticated
+                    ? [{ label: '+ List Your First Product', onClick: () => navigate('/sell') }]
+                    : [{ label: 'Sign In to Start Selling', onClick: () => navigate('/login'), variant: 'outline' as const }]
+                  ),
+                ]
+            }
+            demos={hasActiveFilters ? undefined : [
+              { icon: '⚛️', title: 'React Component Library', description: 'A collection of 40+ accessible UI components built with TypeScript and Tailwind.', badge: 'UI KITS', meta: '$29 · by @componentlab' },
+              { icon: '🐍', title: 'ML Pipeline Toolkit', description: 'End-to-end machine learning pipeline with data processing, training, and deployment scripts.', badge: 'PYTHON-SCRIPTS', meta: '$49 · by @mlengineer' },
+              { icon: '📱', title: 'E-Commerce Mobile Template', description: 'React Native iOS/Android storefront with Stripe integration and admin dashboard.', badge: 'MOBILE TEMPLATES', meta: '$39 · by @mobilepro' },
+              { icon: '🔗', title: 'Solidity Smart Contract Pack', description: 'Audited ERC-721 + ERC-1155 contracts with deployment scripts and Hardhat config.', badge: 'BLOCKCHAIN', meta: '$149 · by @soliditydev' },
+            ]}
+            features={hasActiveFilters ? undefined : [
+              { icon: '🔐', title: 'SHA-256 Certified', description: 'Every purchase includes a cryptographic proof of ownership signed on the blockchain.' },
+              { icon: '💎', title: 'Set Your Price', description: 'From $1 to $10,000 — you decide the value of your work. No middleman markups.' },
+              { icon: '📊', title: 'Analytics Dashboard', description: 'Track sales, revenue, and customer insights in real-time from your seller dashboard.' },
+            ]}
+          />
         ) : viewMode === 'grid' ? (
           <div style={{
             display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',

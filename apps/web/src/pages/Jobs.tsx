@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jobsAPI } from '../services/api';
 import { useAuthStore } from '../store/authStore';
+import EmptyState from '../components/EmptyState';
 
 interface JobListItem {
   id: string; title: string; description: string; status: string;
@@ -151,21 +152,34 @@ export default function Jobs() {
             Loading...
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 0' }}>
-            <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.3 }}>💼</div>
-            <h3 style={{ color: 'var(--text-main)', fontSize: 20, marginBottom: 8 }}>
-              {search || skillFilter ? 'No matching jobs' : 'No jobs posted yet'}
-            </h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
-              {search || skillFilter ? 'Try different search terms or filters.' : ''}
-            </p>
-            {isAuthenticated && !search && !skillFilter && (
-              <button className="btn-primary" onClick={() => navigate('/post-job')}
-                style={{ marginTop: 16, padding: '12px 24px' }}>
-                Post the first job →
-              </button>
-            )}
-          </div>
+          <EmptyState
+            icon="💼"
+            title={search || skillFilter ? 'No matching jobs' : 'No jobs posted yet'}
+            description={search || skillFilter
+              ? 'Try different search terms or skill filters to find open positions.'
+              : 'DevChain Jobs connects you with clients who need blockchain, full-stack, and AI talent. Post a job or browse open positions.'
+            }
+            skeleton={{ count: 3, type: 'list' }}
+            hasActiveFilters={!!(search || skillFilter)}
+            onClearFilters={() => { setSearch(''); setSkillFilter(''); }}
+            actions={
+              (search || skillFilter)
+                ? undefined
+                : isAuthenticated
+                  ? [{ label: 'Post a Job', onClick: () => navigate('/post-job') }]
+                  : [{ label: 'Sign In to Post', onClick: () => navigate('/login'), variant: 'outline' as const }]
+            }
+            demos={(search || skillFilter) ? undefined : [
+              { title: 'Senior React Developer — DApp Frontend', description: 'Build a decentralized exchange interface with React, ethers.js, and Web3Modal. 3-month contract.', badge: 'FULL-TIME', meta: '$8K–$12K · by @defilabs' },
+              { title: 'Rust Solidity Engineer — Smart Contract Audit', description: 'Audit 5 DeFi protocols for security vulnerabilities. Must have prior audit experience.', badge: 'CONTRACT', meta: '$5K–$15K · by @securechain' },
+              { title: 'Full-Stack Python + Next.js Developer', description: 'Build an MVP for an AI-powered analytics platform. FastAPI backend, Next.js frontend, PostgreSQL.', badge: 'PART-TIME', meta: '$3K–$6K · by @aistartup' },
+            ]}
+            features={(search || skillFilter) ? undefined : [
+              { icon: '🔒', title: 'Escrow Protection', description: 'Funds held in smart contract escrow until work is verified and approved by both parties.' },
+              { icon: '🌐', title: 'Global Talent Pool', description: 'Find developers from around the world specializing in blockchain, AI, full-stack, and mobile.' },
+              { icon: '⚡', title: 'Quick Matching', description: 'AI-powered job matching connects you with developers whose skills match your requirements.' },
+            ]}
+          />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {filtered.map(job => (

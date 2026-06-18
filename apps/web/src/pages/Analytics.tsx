@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { ownershipAPI, productsAPI } from '../services/api';
+import EmptyState from '../components/EmptyState';
 
 interface SaleData { id: string; amountPaid: number; purchasedAt?: string; createdAt?: string; buyer?: { username?: string; }; product?: { id: string; title: string; category?: string; }; }
 interface ProductInfo { id: string; title: string; price: number; category: string; isActive: boolean; }
@@ -91,6 +92,8 @@ export default function Analytics() {
     blockchain: '#F59E0B', other: '#6B7280',
   };
 
+  const isCompletelyEmpty = products.length === 0 && sales.length === 0;
+
   return (
     <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
       <div className="container" style={{ padding: '48px 2rem' }}>
@@ -113,7 +116,24 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Top Stats */}
+        {/* Comprehensive empty state when no products and no sales */}
+        {isCompletelyEmpty ? (
+          <EmptyState
+            icon="📊"
+            title="Your analytics dashboard is ready"
+            description="List your first product to start tracking revenue, sales, and performance metrics. Your dashboard will populate automatically with real-time data."
+            skeleton={{ count: 1, type: 'chart' }}
+            actions={[
+              { label: '+ Create Your First Product', onClick: () => navigate('/create-product') },
+            ]}
+            features={[
+              { icon: '💰', title: 'Revenue Tracking', description: 'See daily, weekly, and monthly earnings with beautiful charts and trend analysis.' },
+              { icon: '📦', title: 'Product Performance', description: 'Identify your best-selling products and categories to optimize your catalog.' },
+              { icon: '🧾', title: 'Transaction History', description: 'Complete audit trail of every sale with buyer details, amounts, and timestamps.' },
+              { icon: '📈', title: 'Growth Metrics', description: 'Track average order value, conversion rates, and month-over-month growth.' },
+            ]}
+          />
+        ) : (<>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
           <StatCard icon="💰" label="Total Revenue" value={`$${totalRevenue.toFixed(2)}`} sub="All-time earnings" color="var(--eth-purple)" />
           <StatCard icon="🛍️" label="Total Sales" value={totalSales} sub="Orders completed" color="#10b981" />
@@ -146,7 +166,14 @@ export default function Analytics() {
             <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-main)', marginBottom: 4 }}>🏆 Top Products</h3>
             <p style={{ color: 'var(--text-faint)', fontSize: 13, fontFamily: 'var(--font-mono)', marginBottom: 24 }}>Revenue by product</p>
             {productRevenue.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-faint)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>No sales yet</div>
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <div style={{ fontSize: 32, marginBottom: 8, opacity: 0.4 }}>📈</div>
+                <p style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)', fontSize: 12, marginBottom: 12 }}>No sales yet</p>
+                <button onClick={() => navigate('/create-product')} className="btn-outline"
+                  style={{ padding: '6px 14px', fontSize: 11, borderColor: 'var(--border-dim)' }}>
+                  + List more products
+                </button>
+              </div>
             ) : (
               productRevenue.map((p) => <MiniBar key={p.title} label={p.title.slice(0, 28) + (p.title.length > 28 ? '...' : '')} value={p.revenue} max={maxRevenue} color="var(--eth-purple)" />)
             )}
@@ -159,7 +186,10 @@ export default function Analytics() {
             <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-main)', marginBottom: 4 }}>🗂️ Revenue by Category</h3>
             <p style={{ color: 'var(--text-faint)', fontSize: 13, fontFamily: 'var(--font-mono)', marginBottom: 24 }}>Sales distribution</p>
             {Object.keys(revenueByCategory).length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-faint)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>No sales yet</div>
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <div style={{ fontSize: 32, marginBottom: 8, opacity: 0.4 }}>🗂️</div>
+                <p style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>No sales across categories yet</p>
+              </div>
             ) : (
               Object.entries(revenueByCategory).sort((a, b) => b[1] - a[1]).map(([cat, rev]) => (
                 <MiniBar key={cat} label={cat} value={rev} max={totalRevenue} color={catColors[cat] || '#6B7280'} />
@@ -171,7 +201,14 @@ export default function Analytics() {
             <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-main)', marginBottom: 4 }}>📦 Product Performance</h3>
             <p style={{ color: 'var(--text-faint)', fontSize: 13, fontFamily: 'var(--font-mono)', marginBottom: 20 }}>Your listed products</p>
             {products.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-faint)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>No products listed</div>
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <div style={{ fontSize: 32, marginBottom: 8, opacity: 0.4 }}>📦</div>
+                <p style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)', fontSize: 12, marginBottom: 12 }}>No products listed</p>
+                <button onClick={() => navigate('/create-product')} className="btn-outline"
+                  style={{ padding: '6px 14px', fontSize: 11, borderColor: 'var(--border-dim)' }}>
+                  + Create product
+                </button>
+              </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {products.map((p) => {
@@ -199,9 +236,15 @@ export default function Analytics() {
           <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-main)', marginBottom: 4 }}>🧾 Recent Sales</h3>
           <p style={{ color: 'var(--text-faint)', fontSize: 13, fontFamily: 'var(--font-mono)', marginBottom: 20 }}>Latest transactions</p>
           {recentSales.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-faint)' }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>💰</div>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13 }}>No sales yet. List a product to start earning!</p>
+            <div style={{ textAlign: 'center', padding: '28px 0', color: 'var(--text-faint)' }}>
+              <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.5 }}>💰</div>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginBottom: 14, color: 'var(--text-faint)' }}>
+                No sales yet. Your first transaction will appear here.
+              </p>
+              <button onClick={() => navigate('/create-product')} className="btn-outline"
+                style={{ padding: '8px 16px', fontSize: 12, borderColor: 'var(--border-dim)' }}>
+                + List a product to start earning
+              </button>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -226,7 +269,8 @@ export default function Analytics() {
             </div>
           )}
         </div>
-      </div>
+      </>)}
     </div>
+  </div>
   );
 }
