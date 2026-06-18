@@ -3,11 +3,19 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { jobsAPI } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 
+interface JobDetailData {
+  id: string; title: string; description: string; status: string;
+  budgetMin: number; budgetMax: number; budgetType?: string;
+  category?: string; proposalCount?: number; createdAt: string;
+  client?: { id: string; username: string; reputationScore?: number; };
+  skills?: string[];
+}
+
 export default function JobDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuthStore();
-  const [job, setJob] = useState<any>(null);
+  const [job, setJob] = useState<JobDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showProposal, setShowProposal] = useState(false);
   const [proposal, setProposal] = useState({ coverLetter: '', bidAmount: '', deliveryDays: '' });
@@ -16,7 +24,7 @@ export default function JobDetail() {
 
   useEffect(() => {
     jobsAPI.getOne(id!).then(res => setJob(res.data.job)).catch(() => navigate('/jobs')).finally(() => setLoading(false));
-  }, [id]);
+  }, [id, navigate]);
 
   const handleSubmit = async () => {
     if (!proposal.coverLetter || !proposal.bidAmount || !proposal.deliveryDays) {
@@ -32,8 +40,8 @@ export default function JobDetail() {
       });
       setSubmitted(true);
       setShowProposal(false);
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to submit proposal.');
+    } catch (err: unknown) {
+      alert((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to submit proposal.');
     } finally {
       setSubmitting(false);
     }
@@ -80,7 +88,7 @@ export default function JobDetail() {
               </div>
 
               {/* Skills */}
-              {job.skills?.length > 0 && (
+              {!!job.skills?.length && (
                 <div style={{ background: '#0d0d12', border: '1px solid #1e1e2e', borderRadius: 16, padding: 28 }}>
                   <h3 style={{ color: '#e2e8f0', fontWeight: 700, fontSize: 16, marginBottom: 14 }}>Required Skills</h3>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

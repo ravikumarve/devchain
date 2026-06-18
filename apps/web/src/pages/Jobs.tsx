@@ -3,8 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { jobsAPI } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 
+interface JobListItem {
+  id: string; title: string; description: string; status: string;
+  budgetMin: number; budgetMax: number; proposalCount: number;
+  deadline?: string; skillsRequired?: string[];
+  client?: { username: string; };
+}
+
 export default function Jobs() {
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<JobListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();

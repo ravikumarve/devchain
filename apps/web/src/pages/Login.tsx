@@ -15,8 +15,8 @@ export default function Login() {
     try {
       await login(email, password);
       navigate('/marketplace');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed. Please try again.');
+    } catch (err: unknown) {
+      setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Login failed. Please try again.');
     }
   };
 

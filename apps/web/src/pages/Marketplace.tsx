@@ -3,6 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { productsAPI } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 
+interface ProductData {
+  id: string; title: string; description: string; price: number;
+  category: string; downloadsCount: number; createdAt: string;
+  seller?: { username: string }; tags?: string[];
+}
+
 const CATEGORIES = ['all', 'react-components', 'node-packages', 'python-scripts', 'mobile-templates', 'ui-kits', 'apis', 'tools', 'blockchain', 'other'];
 const SORT_OPTIONS = [
   { value: 'newest', label: '🕐 Newest' },
@@ -29,7 +35,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export default function Marketplace() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<ProductData[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
@@ -42,8 +48,6 @@ export default function Marketplace() {
   const navigate = useNavigate();
   const debouncedSearch = useDebounce(search, 400);
 
-  useEffect(() => { fetchProducts(); }, [category, sort, debouncedSearch]);
-
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
@@ -54,11 +58,11 @@ export default function Marketplace() {
       let results = res.data.products || [];
 
       // Client-side price filter
-      if (priceMin) results = results.filter((p: any) => p.price >= parseFloat(priceMin));
-      if (priceMax) results = results.filter((p: any) => p.price <= parseFloat(priceMax));
+      if (priceMin) results = results.filter((p: ProductData) => p.price >= parseFloat(priceMin));
+      if (priceMax) results = results.filter((p: ProductData) => p.price <= parseFloat(priceMax));
 
       // Client-side sort
-      results = [...results].sort((a: any, b: any) => {
+      results = [...results].sort((a: ProductData, b: ProductData) => {
         if (sort === 'price_asc') return a.price - b.price;
         if (sort === 'price_desc') return b.price - a.price;
         if (sort === 'popular') return b.downloadsCount - a.downloadsCount;
@@ -70,6 +74,8 @@ export default function Marketplace() {
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   }, [category, sort, debouncedSearch, priceMin, priceMax]);
+
+  useEffect(() => { fetchProducts(); }, [category, sort, debouncedSearch, fetchProducts]);
 
   const clearFilters = () => { setSearch(''); setCategory('all'); setSort('newest'); setPriceMin(''); setPriceMax(''); };
   const hasActiveFilters = search || category !== 'all' || sort !== 'newest' || priceMin || priceMax;
@@ -194,7 +200,7 @@ export default function Marketplace() {
   );
 }
 
-function ProductCard({ product, onClick }: { product: any; onClick: () => void }) {
+function ProductCard({ product, onClick }: { product: ProductData; onClick: () => void }) {
   const color = catColors[product.category] || '#7C3AED';
   return (
     <div className="card" onClick={onClick} style={{ cursor: 'pointer', transition: 'all 0.2s' }}
@@ -219,7 +225,7 @@ function ProductCard({ product, onClick }: { product: any; onClick: () => void }
   );
 }
 
-function ProductRow({ product, onClick }: { product: any; onClick: () => void }) {
+function ProductRow({ product, onClick }: { product: ProductData; onClick: () => void }) {
   const color = catColors[product.category] || '#7C3AED';
   return (
     <div onClick={onClick} style={{ background: '#0d0d12', border: '1px solid #1e1e2e', borderRadius: 14, padding: '18px 24px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', transition: 'all 0.2s' }}

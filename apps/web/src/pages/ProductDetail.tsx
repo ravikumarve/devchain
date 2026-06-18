@@ -333,7 +333,7 @@ export default function ProductDetail() {
       .then((res) => setProduct(res.data.product))
       .catch(() => navigate('/marketplace'))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, navigate]);
 
   if (loading)
     return (

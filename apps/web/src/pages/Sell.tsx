@@ -21,7 +21,7 @@ export default function Sell() {
     return null;
   }
 
-  const set = (k: string, v: any) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k: string, v: string | string[]) => setForm(f => ({ ...f, [k]: v }));
 
   const addTag = () => {
     const t = tagInput.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
@@ -50,8 +50,8 @@ export default function Sell() {
       });
       setSuccess(true);
       setTimeout(() => navigate(`/product/${res.data.product.id}`), 2000);
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to create product.');
+    } catch (err: unknown) {
+      alert((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to create product.');
     } finally {
       setLoading(false);
     }

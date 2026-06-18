@@ -8,21 +8,33 @@ function formatSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+interface UploadInfo {
+  hasFile: boolean; hasAccess: boolean; fileName?: string; fileSize?: number;
+}
+
 export default function FileManager({ productId, isSeller }: { productId: string; isSeller: boolean }) {
   const { token } = useAuthStore();
-  const [info, setInfo] = useState<any>(null);
+  const [info, setInfo] = useState<UploadInfo | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { loadInfo(); }, [productId]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await uploadAPI.getFileInfo(productId);
+        if (!cancelled) setInfo(res.data);
+      } catch { if (!cancelled) setInfo({ hasFile: false, hasAccess: false }); }
+    })();
+    return () => { cancelled = true; };
+  }, [productId]);
 
-  const loadInfo = async () => {
-    try {
-      const res = await uploadAPI.getFileInfo(productId);
-      setInfo(res.data);
-    } catch { setInfo({ hasFile: false, hasAccess: false }); }
+  const reloadInfo = () => {
+    uploadAPI.getFileInfo(productId)
+      .then(res => setInfo(res.data))
+      .catch(() => setInfo({ hasFile: false, hasAccess: false }));
   };
 
   const handleUpload = async (file: File) => {
@@ -35,9 +47,9 @@ export default function FileManager({ productId, isSeller }: { productId: string
       await uploadAPI.uploadFile(productId, file);
       clearInterval(interval);
       setUploadProgress(100);
-      setTimeout(() => { setUploading(false); setUploadProgress(0); loadInfo(); }, 800);
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Upload failed');
+      setTimeout(() => { setUploading(false); setUploadProgress(0); reloadInfo(); }, 800);
+    } catch (err: unknown) {
+      alert((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Upload failed');
       setUploading(false);
     }
   };

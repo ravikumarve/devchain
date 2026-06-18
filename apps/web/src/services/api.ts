@@ -33,9 +33,9 @@ export const authAPI = {
 };
 
 export const productsAPI = {
-  getAll: (params?: any) => api.get('/products', { params }),
+  getAll: (params?: Record<string, unknown>) => api.get('/products', { params }),
   getOne: (id: string) => api.get(`/products/${id}`),
-  create: (data: any) => api.post('/products', data),
+  create: (data: Record<string, unknown>) => api.post('/products', data),
   getMine: () => api.get('/products/seller/me'),
 };
 
@@ -47,11 +47,11 @@ export const ownershipAPI = {
 };
 
 export const jobsAPI = {
-  getAll: (params?: any) => api.get('/jobs', { params }),
+  getAll: (params?: Record<string, unknown>) => api.get('/jobs', { params }),
   getOne: (id: string) => api.get(`/jobs/${id}`),
-  create: (data: any) => api.post('/jobs', data),
+  create: (data: Record<string, unknown>) => api.post('/jobs', data),
   myJobs: () => api.get('/jobs/me/jobs'),
-  submitProposal: (jobId: string, data: any) => api.post(`/jobs/${jobId}/proposals`, data),
+  submitProposal: (jobId: string, data: Record<string, unknown>) => api.post(`/jobs/${jobId}/proposals`, data),
 };
 
 export default api;

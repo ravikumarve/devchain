@@ -18,7 +18,7 @@ export default function PostJob() {
 
   if (!isAuthenticated) { navigate('/login'); return null; }
 
-  const set = (k: string, v: any) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k: string, v: string | string[]) => setForm(f => ({ ...f, [k]: v }));
 
   const addSkill = () => {
     const s = skillInput.trim();
@@ -45,8 +45,8 @@ export default function PostJob() {
       });
       setSuccess(true);
       setTimeout(() => navigate(`/job/${res.data.job.id}`), 2000);
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to post job.');
+    } catch (err: unknown) {
+      alert((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to post job.');
     } finally {
       setLoading(false);
     }

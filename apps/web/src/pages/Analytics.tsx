@@ -4,7 +4,10 @@ import { useAuthStore } from '../store/authStore';
 import { ownershipAPI, productsAPI } from '../services/api';
 import { Button } from '../../@/components/ui/button';
 
-function StatCard({ icon, label, value, sub, color = '#7C3AED' }: any) {
+interface SaleData { id: string; amountPaid: number; purchasedAt?: string; createdAt?: string; buyer?: { username?: string; }; product?: { id: string; title: string; category?: string; }; }
+interface ProductInfo { id: string; title: string; price: number; category: string; isActive: boolean; }
+
+function StatCard({ icon, label, value, sub, color = '#7C3AED' }: { icon: string; label: string; value: string | number; sub?: string; color?: string }) {
   return (
     <div
       style={{ background: '#0d0d12', border: '1px solid #1e1e2e', borderRadius: 16, padding: 24 }}
@@ -55,8 +58,8 @@ function MiniBar({
 export default function Analytics() {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
-  const [sales, setSales] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
+  const [sales, setSales] = useState<SaleData[]>([]);
+  const [products, setProducts] = useState<ProductInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -73,7 +76,7 @@ export default function Analytics() {
         setProducts(productsRes.data.products || []);
       })
       .finally(() => setLoading(false));
-  }, [isAuthenticated]);
+  }, [isAuthenticated, navigate]);
 
   if (loading)
     return (
@@ -100,12 +103,12 @@ export default function Analytics() {
   // Revenue by product
   const revenueByProduct: Record<string, { title: string; revenue: number; sales: number }> = {};
   sales.forEach((s) => {
-    const pid = s.product?.id;
-    if (!pid) return;
-    if (!revenueByProduct[pid])
-      revenueByProduct[pid] = { title: s.product.title, revenue: 0, sales: 0 };
-    revenueByProduct[pid].revenue += s.amountPaid || 0;
-    revenueByProduct[pid].sales += 1;
+    const prod = s.product;
+    if (!prod?.id) return;
+    if (!revenueByProduct[prod.id])
+      revenueByProduct[prod.id] = { title: prod.title, revenue: 0, sales: 0 };
+    revenueByProduct[prod.id].revenue += s.amountPaid || 0;
+    revenueByProduct[prod.id].sales += 1;
   });
   const productRevenue = Object.values(revenueByProduct).sort((a, b) => b.revenue - a.revenue);
   const maxRevenue = productRevenue[0]?.revenue || 1;
@@ -126,8 +129,9 @@ export default function Analytics() {
   const salesByDay: Record<string, number> = {};
   last7.forEach((d) => (salesByDay[d] = 0));
   sales.forEach((s) => {
-    const d = new Date(s.purchasedAt || s.createdAt).toISOString().slice(0, 10);
-    if (salesByDay[d] !== undefined) salesByDay[d] += s.amountPaid || 0;
+    const dateStr = s.purchasedAt ?? s.createdAt;
+    const d = dateStr ? new Date(dateStr).toISOString().slice(0, 10) : '';
+    if (d && salesByDay[d] !== undefined) salesByDay[d] += s.amountPaid || 0;
   });
   const maxDay = Math.max(...Object.values(salesByDay), 1);
 
@@ -492,7 +496,7 @@ export default function Analytics() {
                       +${s.amountPaid?.toFixed(2)}
                     </div>
                     <div style={{ fontSize: 12, color: '#55556a' }}>
-                      {new Date(s.purchasedAt || s.createdAt).toLocaleDateString()}
+                      {(s.purchasedAt ?? s.createdAt) ? new Date((s.purchasedAt ?? s.createdAt) as string).toLocaleDateString() : '—'}
                     </div>
                     <div
                       style={{

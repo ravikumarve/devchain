@@ -2,6 +2,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { productsAPI, jobsAPI } from '../services/api';
 
+interface LProductData { id: string; title: string; description?: string; price?: number; category: string; seller?: { username: string }; }
+interface LJobData { id: string; title: string; budgetMin: number; budgetMax: number; proposalCount?: number; client?: { username: string }; }
+
 const features = [
   { icon: '🔐', title: 'Blockchain Ownership', desc: 'Every purchase generates a SHA-256 certificate — permanent, tamper-proof proof of ownership.' },
   { icon: '🛍️', title: 'Code Marketplace', desc: 'Buy and sell templates, components, scripts, and APIs. Ship faster, earn more.' },
@@ -64,8 +67,8 @@ function StatItem({ value, label, prefix = '', suffix = '' }: { value: number; l
 
 export default function Landing() {
   const navigate = useNavigate();
-  const [products, setProducts] = useState<any[]>([]);
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [products, setProducts] = useState<LProductData[]>([]);
+  const [jobs, setJobs] = useState<LJobData[]>([]);
   const [certVisible, setCertVisible] = useState(false);
 
   useEffect(() => {

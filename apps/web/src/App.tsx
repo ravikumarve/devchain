@@ -21,7 +21,7 @@ function App() {
   const { loadUser } = useAuthStore();
   useEffect(() => {
     loadUser();
-  }, []);
+  }, [loadUser]);
 
   return (
     <BrowserRouter>

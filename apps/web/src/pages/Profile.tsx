@@ -1,22 +1,42 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, type NavigateFunction } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { ownershipAPI, jobsAPI, productsAPI } from '../services/api';
+
+interface ProductData {
+  id: string; title: string; category: string; downloadsCount: number;
+  price: number; isActive: boolean; seller?: { username: string };
+  tags?: string[]; description?: string;
+}
+interface UserRef { id: string; username: string; reputationScore?: number; }
+interface PurchaseData {
+  id: string; product?: ProductData & { seller?: UserRef };
+  purchasedAt: string; amountPaid: number;
+  certificate?: { ownershipHash: string; verifyUrl: string; };
+}
+interface SaleData {
+  id: string; product?: ProductData; buyer?: UserRef;
+  purchasedAt: string; amountPaid: number;
+}
+interface JobData {
+  id: string; title: string; budgetMin: number; budgetMax: number;
+  proposalCount: number; status: string; client?: UserRef;
+}
 
 export default function Profile() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const navigate = useNavigate();
   const [tab, setTab] = useState<'purchases' | 'sales' | 'products' | 'jobs'>('purchases');
-  const [purchases, setPurchases] = useState<any[]>([]);
-  const [sales, setSales] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [purchases, setPurchases] = useState<PurchaseData[]>([]);
+  const [sales, setSales] = useState<SaleData[]>([]);
+  const [products, setProducts] = useState<ProductData[]>([]);
+  const [jobs, setJobs] = useState<JobData[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) { navigate('/login'); return; }
     loadTab(tab);
-  }, [tab, isAuthenticated]);
+  }, [tab, isAuthenticated, navigate]);
 
   const loadTab = async (t: string) => {
     setLoading(true);
@@ -84,7 +104,7 @@ export default function Profile() {
           ].map(t => (
             <button
               key={t.key}
-              onClick={() => setTab(t.key as any)}
+              onClick={() => setTab(t.key as 'purchases' | 'sales' | 'products' | 'jobs')}
               style={{ ...styles.tab, ...(tab === t.key ? styles.tabActive : {}) }}
             >
               {t.label}
@@ -112,7 +132,7 @@ export default function Profile() {
   );
 }
 
-function PurchasesList({ purchases }: { purchases: any[] }) {
+function PurchasesList({ purchases }: { purchases: PurchaseData[] }) {
   if (purchases.length === 0) return <Empty icon="🧾" text="No purchases yet" sub="Browse the marketplace to find something amazing" />;
   return (
     <div style={listStyles.list}>
@@ -142,9 +162,9 @@ function PurchasesList({ purchases }: { purchases: any[] }) {
   );
 }
 
-function SalesList({ sales }: { sales: any[] }) {
+function SalesList({ sales }: { sales: SaleData[] }) {
   if (!sales.length) return <Empty icon="💰" text="No sales yet" sub="List a product to start earning" />;
-  const total = sales.reduce((sum: number, s: any) => sum + (s.amountPaid || 0), 0);
+  const total = sales.reduce((sum: number, s: SaleData) => sum + (s.amountPaid || 0), 0);
   return (
     <div>
       <div style={listStyles.totalBox}>
@@ -152,7 +172,7 @@ function SalesList({ sales }: { sales: any[] }) {
         <span style={listStyles.totalValue}>${total.toFixed(2)}</span>
       </div>
       <div style={listStyles.list}>
-        {sales.map((s: any) => (
+        {sales.map((s: SaleData) => (
           <div key={s.id} className="card" style={listStyles.item}>
             <div style={listStyles.itemTop}>
               <div>
@@ -168,11 +188,11 @@ function SalesList({ sales }: { sales: any[] }) {
   );
 }
 
-function ProductsList({ products }: { products: any[] }) {
+function ProductsList({ products }: { products: ProductData[] }) {
   if (!products.length) return <Empty icon="📦" text="No products listed" sub="Start selling your code on DevChain" />;
   return (
     <div style={listStyles.list}>
-      {products.map((p: any) => (
+      {products.map((p: ProductData) => (
         <div key={p.id} className="card" style={listStyles.item}>
           <div style={listStyles.itemTop}>
             <div>
@@ -192,11 +212,11 @@ function ProductsList({ products }: { products: any[] }) {
   );
 }
 
-function JobsList({ jobs, navigate }: { jobs: any[]; navigate: any }) {
+function JobsList({ jobs, navigate }: { jobs: JobData[]; navigate: NavigateFunction }) {
   if (!jobs.length) return <Empty icon="💼" text="No jobs posted" sub="Post a job to hire DevChain developers" />;
   return (
     <div style={listStyles.list}>
-      {jobs.map((j: any) => (
+      {jobs.map((j: JobData) => (
         <div key={j.id} className="card" style={{ ...listStyles.item, cursor: 'pointer' }} onClick={() => navigate(`/job/${j.id}`)}>
           <div style={listStyles.itemTop}>
             <div>

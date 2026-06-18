@@ -16,8 +16,8 @@ export default function Register() {
     try {
       await register(username, email, password);
       navigate('/marketplace');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Registration failed. Please try again.');
+    } catch (err: unknown) {
+      setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Registration failed. Please try again.');
     }
   };
 
