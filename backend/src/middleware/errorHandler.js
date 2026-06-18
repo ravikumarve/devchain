@@ -56,6 +56,14 @@ function errorHandler(err, req, res, _next) {
     });
   }
 
+  // Handle multer file filter rejections (e.g., disallowed file type)
+  if (err.message && err.message.includes('not allowed')) {
+    return res.status(400).json({
+      error: err.message,
+      code: 'FILE_TYPE_NOT_ALLOWED',
+    });
+  }
+
   // Handle Supabase errors
   if (err.statusCode && err.error) {
     return res.status(err.statusCode).json({
