@@ -151,6 +151,7 @@ app.use('/api/v1/analytics', require('./routes/analytics'));
 app.use('/api/v1/reviews', require('./routes/reviews'));
 app.use('/api/v1/escrow', require('./routes/escrow'));
 app.use('/api/v1/notifications', require('./routes/notifications'));
+app.use('/api/v1/chat', require('./routes/chat'));
 
 // Static file serving (local uploads — deprecated in favor of Supabase)
 app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));

@@ -5,7 +5,7 @@ import {
   Alert, ScrollView, ActivityIndicator, RefreshControl, Platform,
 } from 'react-native';
 import { useAuthStore } from '../store/authStore';
-import api, { ordersAPI, certificatesAPI } from '../services/api';
+import { ownershipAPI, productsAPI } from '../services/api';
 
 interface ProfileStats {
   products: number;
@@ -58,14 +58,35 @@ export default function ProfileScreen({ navigation }: any) {
 
   const fetchProfile = async () => {
     try {
-      const [profileRes, ordersRes, certsRes] = await Promise.all([
-        api.get('/users/me'),
-        ordersAPI.getAll(),
-        certificatesAPI.mine(),
+      const [purchasesRes, myProductsRes] = await Promise.all([
+        ownershipAPI.myPurchases().catch(() => ({ data: { purchases: [] } })),
+        productsAPI.myProducts().catch(() => ({ data: { products: [] } })),
       ]);
-      setProfile(profileRes.data.data);
-      setOrders(ordersRes.data.data?.items || []);
-      setCertificates(certsRes.data.data || []);
+      const purchases = purchasesRes.data.purchases ?? [];
+      const products = myProductsRes.data.products ?? [];
+      setOrders(purchases.map((p: any) => ({
+        id: p.id,
+        amount: p.amountPaid ?? 0,
+        currency: 'usd',
+        status: 'completed',
+        created_at: p.purchasedAt,
+        order_items: p.product ? [{ product: { title: p.product.title, category: p.product.category } }] : [],
+      })));
+      setProfile({
+        id: user?.id ?? '',
+        username: user?.username ?? '',
+        display_name: user?.username ?? '',
+        email: user?.email ?? '',
+        avatar_url: null,
+        bio: null,
+        role: 'seller',
+        is_verified: false,
+        rating: 0,
+        github_url: null,
+        twitter_url: null,
+        website_url: null,
+        stats: { products: products.length, sales: 0, purchases: purchases.length, certificates: 0 },
+      });
     } catch (err) {
       console.error('[ProfileScreen] fetch error:', err);
     } finally {
@@ -269,34 +290,37 @@ export default function ProfileScreen({ navigation }: any) {
 
         {activeTab === 'settings' && (
           <View>
-            {(profile?.role === 'seller' || profile?.role === 'admin') && (
-              <TouchableOpacity
-                style={styles.menuItem}
-                onPress={() => navigation.navigate('CreateProduct')}
-              >
-                <Text style={styles.menuIcon}>📦</Text>
-                <Text style={styles.menuText}>My Products</Text>
-                <Text style={styles.menuArrow}>›</Text>
-              </TouchableOpacity>
-            )}
-
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuIcon}>✏️</Text>
-              <Text style={styles.menuText}>Edit Profile</Text>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('MyProposals')}>
+              <Text style={styles.menuIcon}>📋</Text>
+              <Text style={styles.menuText}>My Proposals</Text>
               <Text style={styles.menuArrow}>›</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('MyJobs')}>
+              <Text style={styles.menuIcon}>💼</Text>
+              <Text style={styles.menuText}>My Jobs</Text>
+              <Text style={styles.menuArrow}>›</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Notifications')}>
               <Text style={styles.menuIcon}>🔔</Text>
               <Text style={styles.menuText}>Notifications</Text>
               <Text style={styles.menuArrow}>›</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuIcon}>🔒</Text>
-              <Text style={styles.menuText}>Change Password</Text>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('ChatList')}>
+              <Text style={styles.menuIcon}>💬</Text>
+              <Text style={styles.menuText}>Messages</Text>
               <Text style={styles.menuArrow}>›</Text>
             </TouchableOpacity>
+
+            {(profile?.role === 'seller' || profile?.role === 'admin') && (
+              <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('CreateProduct')}>
+                <Text style={styles.menuIcon}>📦</Text>
+                <Text style={styles.menuText}>Create Product</Text>
+                <Text style={styles.menuArrow}>›</Text>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
               <Text style={styles.logoutText}>Logout</Text>

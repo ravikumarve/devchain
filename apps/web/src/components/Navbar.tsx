@@ -29,6 +29,7 @@ export default function Navbar() {
           <Link to="/jobs">Jobs</Link>
           {isAuthenticated && <Link to="/my-proposals">My Proposals</Link>}
           {isAuthenticated && <Link to="/my-jobs">My Jobs</Link>}
+          {isAuthenticated && <Link to="/chat">Messages</Link>}
           {isAuthenticated && <Link to="/profile">Profile</Link>}
         </div>
 

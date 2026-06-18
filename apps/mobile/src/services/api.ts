@@ -1,39 +1,28 @@
-// src/services/api.ts
-// ─────────────────────────────────────────────────────────────
-// Fixed: AsyncStorage import, correct certificate URL,
-// added gigsAPI alias as jobsAPI for CreateJobScreen compat
-// ─────────────────────────────────────────────────────────────
+// src/services/api.ts — Matches real backend routes
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
 const API_URL = __DEV__
-  ? 'http://localhost:3000/api'
-  : 'https://devchain.onrender.com/api';
+  ? 'http://localhost:10000/api/v1'
+  : 'https://web-vert-mu-22.vercel.app/api/v1';
 
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 10000,
+  timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
 });
 
-// ─── Token helpers — web safe ─────────────────────────────────
-
+// ─── Token helpers ──────────────────────────────────────────────
 const getToken = async (): Promise<string | null> => {
   try {
-    if (Platform.OS === 'web') {
-      // On web, AsyncStorage uses localStorage internally but
-      // must be awaited — never use localStorage directly
-      return await AsyncStorage.getItem('accessToken');
-    }
     return await AsyncStorage.getItem('accessToken');
-  } catch (err) {
-    console.error('[api] getToken error:', err);
+  } catch {
     return null;
   }
 };
 
-// ─── Request interceptor ──────────────────────────────────────
+// ─── Request interceptor ────────────────────────────────────────
 api.interceptors.request.use(async (config) => {
   try {
     const token = await getToken();
@@ -44,13 +33,12 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// ─── Response interceptor ─────────────────────────────────────
+// ─── Response interceptor ───────────────────────────────────────
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
       try {
-        // Fixed: use individual removes instead of multiRemove
         await AsyncStorage.removeItem('accessToken');
         await AsyncStorage.removeItem('refreshToken');
         await AsyncStorage.removeItem('user');
@@ -62,24 +50,18 @@ api.interceptors.response.use(
   }
 );
 
-// ─── Auth API ─────────────────────────────────────────────────
+// ─── Auth API ───────────────────────────────────────────────────
 export const authAPI = {
-  register: (data: {
-    username: string;
-    email: string;
-    password: string;
-    displayName: string;
-  }) => api.post('/auth/register', data),
+  register: (data: { username: string; email: string; password: string }) =>
+    api.post('/auth/register', data),
   login: (data: { email: string; password: string }) =>
     api.post('/auth/login', data),
-  logout: () => api.post('/auth/logout'),
+  getMe: () => api.get('/auth/me'),
   refresh: (refreshToken: string) =>
     api.post('/auth/refresh', { refreshToken }),
-  forgotPassword: (email: string) =>
-    api.post('/auth/forgot-password', { email }),
 };
 
-// ─── Products API ─────────────────────────────────────────────
+// ─── Products API ───────────────────────────────────────────────
 export const productsAPI = {
   getAll: (params?: object) => api.get('/products', { params }),
   search: (q: string, page = 1) =>
@@ -87,39 +69,107 @@ export const productsAPI = {
   trending: (limit = 10) =>
     api.get('/products/trending', { params: { limit } }),
   getOne: (id: string) => api.get(`/products/${id}`),
+  myProducts: () => api.get('/products/mine'),
   create: (data: object) => api.post('/products', data),
   update: (id: string, data: object) => api.put(`/products/${id}`, data),
   delete: (id: string) => api.delete(`/products/${id}`),
 };
 
-// ─── Gigs API ─────────────────────────────────────────────────
-export const gigsAPI = {
-  getAll: (params?: object) => api.get('/gigs', { params }),
-  search: (q: string) => api.get('/gigs/search', { params: { q } }),
-  getOne: (id: string) => api.get(`/gigs/${id}`),
-  create: (data: object) => api.post('/gigs', data),
-  update: (id: string, data: object) => api.put(`/gigs/${id}`, data),
-  delete: (id: string) => api.delete(`/gigs/${id}`),
+// ─── Jobs API ──────────────────────────────────────────────────
+export const jobsAPI = {
+  getAll: (params?: object) => api.get('/jobs', { params }),
+  getOne: (id: string) => api.get(`/jobs/${id}`),
+  create: (data: object) => api.post('/jobs', data),
+  myJobs: () => api.get('/jobs/me/jobs'),
+  myProposals: () => api.get('/jobs/me/proposals'),
+  submitProposal: (jobId: string, data: object) =>
+    api.post(`/jobs/${jobId}/proposals`, data),
+  getJobProposals: (jobId: string) =>
+    api.get(`/jobs/${jobId}/proposals`),
+  acceptProposal: (proposalId: string) =>
+    api.patch(`/jobs/proposals/${proposalId}/accept`),
+  rejectProposal: (proposalId: string) =>
+    api.patch(`/jobs/proposals/${proposalId}/reject`),
+  closeJob: (jobId: string) => api.patch(`/jobs/${jobId}/close`),
 };
 
-// ─── jobsAPI alias — keeps CreateJobScreen working ───────────
-// CreateJobScreen still uses jobsAPI — maps to gigsAPI
-export const jobsAPI = gigsAPI;
-
-// ─── Orders API ───────────────────────────────────────────────
-export const ordersAPI = {
-  getAll: (params?: object) => api.get('/orders', { params }),
-  getOne: (id: string) => api.get(`/orders/${id}`),
-  create: (data: { productId: string }) => api.post('/orders', data),
-  refund: (id: string) => api.post(`/orders/${id}/refund`),
+// ─── Ownership API ──────────────────────────────────────────────
+export const ownershipAPI = {
+  purchase: (data: { productId: string }) =>
+    api.post('/ownership/purchase', data),
+  verifyCertificate: (hash: string) =>
+    api.get(`/ownership/verify/${hash}`),
+  myPurchases: () => api.get('/ownership/my-purchases'),
+  mySales: () => api.get('/ownership/my-sales'),
 };
 
-// ─── Certificates API — FIXED URL ────────────────────────────
-export const certificatesAPI = {
-  mine: () => api.get('/certificates/mine'),           // was /certificates/user/me — WRONG
-  verify: (certId: string) =>
-    api.post('/certificates/verify', { certId }),
-  getOne: (id: string) => api.get(`/certificates/${id}`),
+// ─── Upload API ─────────────────────────────────────────────────
+export const uploadAPI = {
+  upload: (productId: string, formData: FormData) =>
+    api.post(`/uploads/product/${productId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  download: (productId: string) =>
+    api.get(`/uploads/product/${productId}/download`),
+  fileInfo: (productId: string) =>
+    api.get(`/uploads/product/${productId}/info`),
+};
+
+// ─── Payments API ───────────────────────────────────────────────
+export const paymentsAPI = {
+  createCheckoutSession: (productId: string) =>
+    api.post('/payments/create-checkout-session', { productId }),
+};
+
+// ─── Escrow API ────────────────────────────────────────────────
+export const escrowAPI = {
+  getMy: () => api.get('/escrow/mine'),
+  get: (proposalId: string) => api.get(`/escrow/${proposalId}`),
+  fund: (proposalId: string) => api.post(`/escrow/${proposalId}/fund`),
+  requestRelease: (proposalId: string) =>
+    api.post(`/escrow/${proposalId}/request-release`),
+  releasePayment: (proposalId: string) =>
+    api.post(`/escrow/${proposalId}/release`),
+};
+
+// ─── Notifications API ─────────────────────────────────────────
+export const notificationsAPI = {
+  getMy: () => api.get('/notifications'),
+  markRead: (id: string) => api.patch(`/notifications/${id}/read`),
+  markAllRead: () => api.patch('/notifications/read-all'),
+  delete: (id: string) => api.delete(`/notifications/${id}`),
+};
+
+// ─── Reviews API ────────────────────────────────────────────────
+export const reviewsAPI = {
+  create: (data: { productId: string; rating: number; comment?: string }) =>
+    api.post('/reviews', data),
+  getProductReviews: (productId: string) =>
+    api.get(`/reviews/product/${productId}`),
+  getMyReview: (productId: string) =>
+    api.get(`/reviews/product/${productId}/mine`),
+  update: (id: string, data: { rating?: number; comment?: string }) =>
+    api.put(`/reviews/${id}`, data),
+  delete: (id: string) => api.delete(`/reviews/${id}`),
+  getSellerReviews: (sellerId: string) =>
+    api.get(`/reviews/seller/${sellerId}`),
+};
+
+// ─── Chat API ──────────────────────────────────────────────────
+export const chatAPI = {
+  getConversations: () => api.get('/chat'),
+  createOrGetConversation: (data: { participantId: string; relatedJobId?: string }) =>
+    api.post('/chat', data),
+  getMessages: (conversationId: string, params?: { before?: string; limit?: number }) =>
+    api.get(`/chat/${conversationId}/messages`, { params }),
+  sendMessage: (conversationId: string, data: { content: string }) =>
+    api.post(`/chat/${conversationId}/messages`, data),
+};
+
+// ─── Analytics API ──────────────────────────────────────────────
+export const analyticsAPI = {
+  seller: () => api.get('/analytics/seller'),
+  reviews: () => api.get('/analytics/reviews'),
 };
 
 export default api;

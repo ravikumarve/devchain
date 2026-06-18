@@ -153,3 +153,13 @@ export const reviewsAPI = {
   getSellerReviews: (sellerId: string) =>
     api.get(`/reviews/seller/${sellerId}`),
 };
+
+export const chatAPI = {
+  getConversations: () => api.get('/chat'),
+  createOrGetConversation: (data: { participantId: string; relatedJobId?: string }) =>
+    api.post('/chat', data),
+  getMessages: (conversationId: string, params?: { before?: string; limit?: number }) =>
+    api.get(`/chat/${conversationId}/messages`, { params }),
+  sendMessage: (conversationId: string, data: { content: string }) =>
+    api.post(`/chat/${conversationId}/messages`, data),
+};

@@ -10,6 +10,12 @@ import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
 import JobsScreen from '../screens/JobsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import AnalyticsScreen from '../screens/AnalyticsScreen';
+import NotificationsScreen from '../screens/NotificationsScreen';
+import ChatListScreen from '../screens/ChatListScreen';
+import ChatThreadScreen from '../screens/ChatThreadScreen';
+import MyJobsScreen from '../screens/MyJobsScreen';
+import MyProposalsScreen from '../screens/MyProposalsScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
 import CreateProductScreen from '../screens/CreateProductScreen';
 import JobDetailScreen from '../screens/JobDetailScreen';
@@ -49,6 +55,11 @@ function MainTabs() {
         options={{ tabBarLabel: 'Jobs', tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, opacity: color === '#7C3AED' ? 1 : 0.5 }}>💼</Text> }}
       />
       <Tab.Screen
+        name="Analytics"
+        component={AnalyticsScreen}
+        options={{ tabBarLabel: 'Analytics', tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, opacity: color === '#7C3AED' ? 1 : 0.5 }}>📊</Text> }}
+      />
+      <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{ tabBarLabel: 'Profile', tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, opacity: color === '#7C3AED' ? 1 : 0.5 }}>👤</Text> }}
@@ -65,6 +76,11 @@ function MainStack() {
       <RootStack.Screen name="CreateProduct" component={CreateProductScreen} />
       <RootStack.Screen name="JobDetail" component={JobDetailScreen} />
       <RootStack.Screen name="CreateJob" component={CreateJobScreen} />
+      <RootStack.Screen name="Notifications" component={NotificationsScreen} />
+      <RootStack.Screen name="ChatList" component={ChatListScreen} />
+      <RootStack.Screen name="ChatThread" component={ChatThreadScreen} />
+      <RootStack.Screen name="MyJobs" component={MyJobsScreen} />
+      <RootStack.Screen name="MyProposals" component={MyProposalsScreen} />
     </RootStack.Navigator>
   );
 }

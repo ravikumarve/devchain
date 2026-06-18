@@ -18,6 +18,7 @@ import Analytics from './pages/Analytics';
 import CreateProduct from './pages/CreateProduct';
 import PurchaseSuccess from './pages/PurchaseSuccess';
 import PurchaseCancel from './pages/PurchaseCancel';
+import Chat from './pages/Chat';
 
 function App() {
   const { loadUser } = useAuthStore();
@@ -52,6 +53,7 @@ function App() {
         <Route path="/create-product" element={<CreateProduct />} />
         <Route path="/purchase-success" element={<PurchaseSuccess />} />
         <Route path="/purchase-cancel" element={<PurchaseCancel />} />
+        <Route path="/chat" element={<Chat />} />
       </Routes>
       </div>
     </BrowserRouter>

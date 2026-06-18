@@ -31,6 +31,9 @@ model User {
   escrowsAsClient  Escrow[]  @relation("EscrowClientRelation")
   escrowsAsFreelancer Escrow[] @relation("EscrowFreelancerRelation")
   notifications    Notification[]
+  conversationsAs1 Conversation[] @relation("ConvParticipant1")
+  conversationsAs2 Conversation[] @relation("ConvParticipant2")
+  messages         Message[]
 
   @@map("users")
 }
@@ -101,6 +104,7 @@ model Job {
 
   client          User       @relation(fields: [clientId], references: [id])
   proposals       Proposal[]
+  escrows         Escrow[]
 
   @@map("jobs")
 }
@@ -173,4 +177,34 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id])
 
   @@map("notifications")
+}
+
+model Conversation {
+  id              String    @id @default(uuid())
+  participant1Id  String
+  participant2Id  String
+  relatedJobId    String?
+  lastMessageAt   DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+
+  participant1    User      @relation("ConvParticipant1", fields: [participant1Id], references: [id])
+  participant2    User      @relation("ConvParticipant2", fields: [participant2Id], references: [id])
+  messages        Message[]
+
+  @@unique([participant1Id, participant2Id])
+  @@map("conversations")
+}
+
+model Message {
+  id              String    @id @default(uuid())
+  conversationId  String
+  senderId        String
+  content         String
+  readAt          DateTime?
+  createdAt       DateTime  @default(now())
+
+  conversation    Conversation @relation(fields: [conversationId], references: [id])
+  sender          User      @relation(fields: [senderId], references: [id])
+
+  @@map("messages")
 }
