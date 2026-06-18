@@ -27,6 +27,7 @@ function App() {
     <BrowserRouter>
       <div className="bg-mesh">
         <div className="bg-mesh-glow" />
+        <div className="bg-mesh-glow-bottom" />
         <div className="bg-mesh-grid" />
         <div className="bg-mesh-dots" />
       </div>
