@@ -492,9 +492,8 @@ export default function Landing() {
               flexWrap: 'wrap',
             }}
           >
-            <StatItem value={3} label="Products Listed" suffix="+" />
-            <StatItem value={2} label="Developers" suffix="+" />
-            <StatItem value={3} label="Transactions" suffix="+" />
+            <StatItem value={products.length} label="Products Listed" suffix="+" />
+            <StatItem value={jobs.length} label="Open Jobs" suffix="+" />
             <StatItem value={100} label="SHA-256 Verified" suffix="%" />
           </div>
         </section>
@@ -900,30 +899,6 @@ export default function Landing() {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* ─── STATS WITH COUNTER ─── */}
-        <section
-          style={{
-            padding: '6rem 0',
-            borderBottom: 'none',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              gap: 0,
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              borderTop: '1px solid var(--border-dim)',
-              paddingTop: '6rem',
-            }}
-          >
-            <StatItem value={3} label="Products Listed" suffix="+" />
-            <StatItem value={2} label="Developers" suffix="+" />
-            <StatItem value={3} label="Transactions" suffix="+" />
-            <StatItem value={100} label="SHA-256 Verified" suffix="%" />
           </div>
         </section>
 
