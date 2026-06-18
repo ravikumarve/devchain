@@ -173,6 +173,9 @@ export default function Jobs() {
               { title: 'Senior React Developer — DApp Frontend', description: 'Build a decentralized exchange interface with React, ethers.js, and Web3Modal. 3-month contract.', badge: 'FULL-TIME', meta: '$8K–$12K · by @defilabs' },
               { title: 'Rust Solidity Engineer — Smart Contract Audit', description: 'Audit 5 DeFi protocols for security vulnerabilities. Must have prior audit experience.', badge: 'CONTRACT', meta: '$5K–$15K · by @securechain' },
               { title: 'Full-Stack Python + Next.js Developer', description: 'Build an MVP for an AI-powered analytics platform. FastAPI backend, Next.js frontend, PostgreSQL.', badge: 'PART-TIME', meta: '$3K–$6K · by @aistartup' },
+              { title: 'Mobile UI/UX Engineer — React Native', description: 'Design and implement cross-platform UI for a fintech app. 10+ screens, complex animations, gestures.', badge: 'FREELANCE', meta: '$4K–$8K · by @fintechapp' },
+              { title: 'Go Backend Engineer — High-Throughput API', description: 'Build a real-time data ingestion API handling 100K+ req/s. Kafka, Redis, PostgreSQL sharding.', badge: 'FULL-TIME', meta: '$12K–$18K · by @datastream' },
+              { title: 'DevOps Engineer — Kubernetes Migration', description: 'Migrate 12 microservices from Docker Compose to k8s on AWS EKS. Terraform, Helm, ArgoCD.', badge: 'CONTRACT', meta: '$10K–$20K · by @cloudnative' },
             ]}
             features={(search || skillFilter) ? undefined : [
               { icon: '🔒', title: 'Escrow Protection', description: 'Funds held in smart contract escrow until work is verified and approved by both parties.' },

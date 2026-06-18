@@ -316,9 +316,13 @@ export default function Marketplace() {
             }
             demos={hasActiveFilters ? undefined : [
               { icon: '⚛️', title: 'React Component Library', description: 'A collection of 40+ accessible UI components built with TypeScript and Tailwind.', badge: 'UI KITS', meta: '$29 · by @componentlab' },
-              { icon: '🐍', title: 'ML Pipeline Toolkit', description: 'End-to-end machine learning pipeline with data processing, training, and deployment scripts.', badge: 'PYTHON-SCRIPTS', meta: '$49 · by @mlengineer' },
-              { icon: '📱', title: 'E-Commerce Mobile Template', description: 'React Native iOS/Android storefront with Stripe integration and admin dashboard.', badge: 'MOBILE TEMPLATES', meta: '$39 · by @mobilepro' },
-              { icon: '🔗', title: 'Solidity Smart Contract Pack', description: 'Audited ERC-721 + ERC-1155 contracts with deployment scripts and Hardhat config.', badge: 'BLOCKCHAIN', meta: '$149 · by @soliditydev' },
+              { icon: '🐍', title: 'ML Pipeline Toolkit', description: 'End-to-end ML pipeline with data processing, training, and deployment scripts.', badge: 'PYTHON-SCRIPTS', meta: '$49 · by @mlengineer' },
+              { icon: '📱', title: 'E-Commerce Mobile Template', description: 'React Native iOS/Android storefront with Stripe and admin dashboard.', badge: 'MOBILE-TEMPLATES', meta: '$39 · by @mobilepro' },
+              { icon: '🔗', title: 'Solidity Smart Contract Pack', description: 'Audited ERC-721 + ERC-1155 contracts with Hardhat config and tests.', badge: 'BLOCKCHAIN', meta: '$149 · by @soliditydev' },
+              { icon: '📦', title: 'Node.js API Boilerplate', description: 'Production-ready Express + Prisma + JWT auth scaffold. PostgreSQL, Redis caching, rate limiting.', badge: 'NODE-PACKAGES', meta: '$19 · by @backenddev' },
+              { icon: '🎨', title: 'Tailwind Dashboard Kit', description: '70+ responsive dashboard components — charts, tables, kanban, settings pages. Dark mode included.', badge: 'REACT-COMPONENTS', meta: '$34 · by @uiartist' },
+              { icon: '🤖', title: 'OpenAI Chat API Wrapper', description: 'TypeScript SDK for GPT-4o, DALL-E 3, and embeddings. Streaming, rate limits, error handling.', badge: 'APIS', meta: '$24 · by @aidev' },
+              { icon: '🛠️', title: 'GitHub Action Workflows', description: '30 reusable CI/CD workflows — deploy, test, lint, security scan, Docker build across Node/Python/Go.', badge: 'TOOLS', meta: '$15 · by @devopspro' },
             ]}
             features={hasActiveFilters ? undefined : [
               { icon: '🔐', title: 'SHA-256 Certified', description: 'Every purchase includes a cryptographic proof of ownership signed on the blockchain.' },
