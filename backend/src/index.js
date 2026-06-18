@@ -2,7 +2,7 @@ const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/../.env' });
 
 // ── Internal Modules ──
 const { validateEnv } = require('./config/env');

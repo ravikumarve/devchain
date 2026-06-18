@@ -41,6 +41,7 @@ model Product {
   tags        String[]
   fileKey     String?
   previewUrl  String?
+  isActive    Boolean  @default(true)
   sellerId    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
