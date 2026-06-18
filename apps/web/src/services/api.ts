@@ -14,12 +14,50 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (value: unknown) => void; reject: (reason: unknown) => void }> = [];
+
+function processQueue(error: unknown, token: string | null = null) {
+  failedQueue.forEach(prom => {
+    if (error) prom.reject(error);
+    else prom.resolve(token);
+  });
+  failedQueue = [];
+}
+
 api.interceptors.response.use(
   (res) => res,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
+  async (error) => {
+    const originalRequest = error.config;
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        });
+      }
+      originalRequest._retry = true;
+      isRefreshing = true;
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) throw new Error('No refresh token');
+        const res = await api.post('/auth/refresh', { refreshToken });
+        const { accessToken } = res.data;
+        localStorage.setItem('accessToken', accessToken);
+        processQueue(null, accessToken);
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
     return Promise.reject(error);
   }
@@ -30,6 +68,7 @@ export const authAPI = {
   register: (data: { username: string; email: string; password: string }) =>
     api.post('/auth/register', data),
   getMe: () => api.get('/auth/me'),
+  refresh: (data: { refreshToken: string }) => api.post('/auth/refresh', data),
 };
 
 export const productsAPI = {
@@ -83,6 +122,21 @@ export const uploadAPI = {
 export const paymentsAPI = {
   createCheckoutSession: (productId: string) =>
     api.post('/payments/create-checkout-session', { productId }),
+};
+
+export const escrowAPI = {
+  getMy: () => api.get('/escrow/mine'),
+  get: (proposalId: string) => api.get(`/escrow/${proposalId}`),
+  fund: (proposalId: string) => api.post(`/escrow/${proposalId}/fund`),
+  requestRelease: (proposalId: string) => api.post(`/escrow/${proposalId}/request-release`),
+  releasePayment: (proposalId: string) => api.post(`/escrow/${proposalId}/release`),
+};
+
+export const notificationsAPI = {
+  getMy: () => api.get('/notifications'),
+  markRead: (id: string) => api.patch(`/notifications/${id}/read`),
+  markAllRead: () => api.patch('/notifications/read-all'),
+  delete: (id: string) => api.delete(`/notifications/${id}`),
 };
 
 export const reviewsAPI = {

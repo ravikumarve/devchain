@@ -6,6 +6,11 @@ const {
   NotFoundError,
   ForbiddenError,
 } = require('../utils/errors');
+const {
+  notifyProposalReceived,
+  notifyProposalAccepted,
+  notifyProposalRejected,
+} = require('../services/notificationService');
 
 const log = getLogger('jobs');
 
@@ -202,6 +207,11 @@ const submitProposal = asyncHandler(async (req, res) => {
 
   log.info({ jobId, freelancerId }, 'Proposal submitted');
 
+  // Notify client about new proposal
+  notifyProposalReceived(job, proposal).catch(err =>
+    log.error({ err, jobId, freelancerId }, 'Failed to send proposal notification')
+  );
+
   res.status(201).json({
     message: 'Proposal submitted successfully!',
     proposal,
@@ -303,7 +313,7 @@ const acceptProposal = asyncHandler(async (req, res) => {
     throw new BadRequestError('This proposal has already been processed.');
   }
 
-  // Accept the proposal, reject all others, mark job as in_progress
+  // Accept the proposal, reject all others, mark job as in_progress, create escrow
   const [updatedProposal] = await prisma.$transaction([
     prisma.proposal.update({
       where: { id },
@@ -313,7 +323,7 @@ const acceptProposal = asyncHandler(async (req, res) => {
           select: { id: true, username: true, avatarUrl: true, reputationScore: true },
         },
         job: {
-          select: { id: true, title: true, status: true },
+          select: { id: true, title: true, status: true, clientId: true },
         },
       },
     }),
@@ -325,12 +335,36 @@ const acceptProposal = asyncHandler(async (req, res) => {
       where: { id: proposal.jobId },
       data: { status: 'in_progress' },
     }),
+    prisma.escrow.create({
+      data: {
+        proposalId: id,
+        jobId: proposal.jobId,
+        clientId: proposal.job.clientId,
+        freelancerId: proposal.freelancerId,
+        amount: proposal.proposedRate,
+      },
+    }),
   ]);
 
   log.info({ proposalId: id, jobId: proposal.jobId, freelancerId: proposal.freelancerId }, 'Proposal accepted');
 
+  // Notify accepted freelancer
+  notifyProposalAccepted(proposal, proposal.job).catch(err =>
+    log.error({ err }, 'Failed to send accepted notification')
+  );
+
+  // Notify rejected proposers
+  const rejectedProposals = await prisma.proposal.findMany({
+    where: { jobId: proposal.jobId, status: 'rejected' },
+  });
+  for (const rp of rejectedProposals) {
+    notifyProposalRejected(rp, proposal.job).catch(err =>
+      log.error({ err, proposalId: rp.id }, 'Failed to send rejection notification')
+    );
+  }
+
   res.json({
-    message: 'Proposal accepted! The freelancer has been notified.',
+    message: 'Proposal accepted! Escrow created. Client needs to deposit funds to start.',
     proposal: updatedProposal,
   });
 });
@@ -368,6 +402,11 @@ const rejectProposal = asyncHandler(async (req, res) => {
   });
 
   log.info({ proposalId: id, jobId: proposal.jobId }, 'Proposal rejected');
+
+  // Notify freelancer
+  notifyProposalRejected(proposal, proposal.job).catch(err =>
+    log.error({ err }, 'Failed to send rejection notification')
+  );
 
   res.json({
     message: 'Proposal rejected.',

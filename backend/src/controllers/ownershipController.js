@@ -7,6 +7,7 @@ const {
   BadRequestError,
   NotFoundError,
 } = require('../utils/errors');
+const { notifyNewSale } = require('../services/notificationService');
 
 const log = getLogger('ownership');
 
@@ -112,6 +113,13 @@ const purchaseProduct = asyncHandler(async (req, res) => {
   sendEmailNotifications(buyerId, product).catch(err =>
     log.warn({ err }, 'Email notification failed')
   );
+
+  // In-app notification for seller
+  notifyNewSale({
+    id: result.order.id,
+    amount: product.price,
+    product: { id: productId, title: product.title, sellerId: product.sellerId },
+  }).catch(err => log.warn({ err }, 'In-app notification failed'));
 });
 
 // ── Non-blocking email notifications ──

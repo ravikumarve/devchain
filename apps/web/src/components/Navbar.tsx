@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import NotificationBell from './NotificationBell';
 
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuthStore();
@@ -34,6 +35,7 @@ export default function Navbar() {
         <div className="nav-cta desktop-only">
           {isAuthenticated ? (
             <>
+              <NotificationBell />
               <Link to="/profile" className="nav-username">
                 @{user?.username}
               </Link>

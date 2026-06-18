@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { jobsAPI } from '../services/api';
+import { jobsAPI, escrowAPI } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 
 interface ProposalData {
@@ -25,15 +25,46 @@ export default function MyProposals() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
   const [proposals, setProposals] = useState<ProposalData[]>([]);
+  const [escrows, setEscrows] = useState<Record<string, { status: string; amount: number }>>({});
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) { navigate('/login'); return; }
-    jobsAPI.myProposals()
-      .then(res => setProposals(res.data.proposals || []))
+    Promise.all([
+      jobsAPI.myProposals(),
+      escrowAPI.getMy().catch(() => ({ data: { escrows: [] } })),
+    ])
+      .then(([propsRes, escrowRes]) => {
+        setProposals(propsRes.data.proposals || []);
+        const escrowMap: Record<string, { status: string; amount: number }> = {};
+        (escrowRes.data.escrows || []).forEach((e: { proposalId: string; status: string; amount: number }) => {
+          escrowMap[e.proposalId] = { status: e.status, amount: e.amount };
+        });
+        setEscrows(escrowMap);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [isAuthenticated, navigate]);
+
+  const handleRequestRelease = async (proposalId: string) => {
+    setActionLoading(proposalId);
+    try {
+      await escrowAPI.requestRelease(proposalId);
+      alert('Release requested! The client will review and release payment.');
+      // Refetch
+      const res = await escrowAPI.getMy().catch(() => ({ data: { escrows: [] } }));
+      const escrowMap: Record<string, { status: string; amount: number }> = {};
+      (res.data.escrows || []).forEach((e: { proposalId: string; status: string; amount: number }) => {
+        escrowMap[e.proposalId] = { status: e.status, amount: e.amount };
+      });
+      setEscrows(escrowMap);
+    } catch (err: unknown) {
+      alert('Failed: ' + ((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Unknown error'));
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const statusBadge = (status: string) => {
     const colors: Record<string, string> = {
@@ -106,6 +137,28 @@ export default function MyProposals() {
                     <div style={{ color: 'var(--text-faint)', fontSize: 11, fontFamily: 'var(--font-mono)', marginTop: 12 }}>
                       Submitted {new Date(p.createdAt).toLocaleDateString()}
                     </div>
+                    {/* Escrow status for accepted proposals */}
+                    {p.status === 'accepted' && escrows[p.id] && (
+                      <div style={{ marginTop: 12 }}>
+                        {escrows[p.id].status === 'funded' && (
+                          <button
+                            onClick={() => handleRequestRelease(p.id)}
+                            disabled={actionLoading === p.id}
+                            className="btn-primary"
+                            style={{ width: '100%', padding: '8px 12px', fontSize: 11, background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}
+                          >📦 Mark Complete & Request Release</button>
+                        )}
+                        {escrows[p.id].status === 'pending_release' && (
+                          <span style={{ color: '#f59e0b', fontSize: 11, fontFamily: 'var(--font-mono)', fontWeight: 700 }}>⏳ Awaiting Client Approval</span>
+                        )}
+                        {escrows[p.id].status === 'released' && (
+                          <span style={{ color: '#10b981', fontSize: 11, fontFamily: 'var(--font-mono)', fontWeight: 700 }}>✅ Payment Released</span>
+                        )}
+                        {escrows[p.id].status === 'funding_required' && (
+                          <span style={{ color: '#f59e0b', fontSize: 11, fontFamily: 'var(--font-mono)', fontWeight: 600 }}>⏳ Awaiting Client Deposit</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

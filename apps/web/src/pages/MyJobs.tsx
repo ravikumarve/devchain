@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { jobsAPI } from '../services/api';
+import { jobsAPI, escrowAPI } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 
 interface FreelancerInfo {
@@ -37,14 +37,25 @@ export default function MyJobs() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
   const [jobs, setJobs] = useState<JobItem[]>([]);
+  const [escrows, setEscrows] = useState<Record<string, { status: string; amount: number }>>({});
   const [loading, setLoading] = useState(true);
   const [expandedJob, setExpandedJob] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) { navigate('/login'); return; }
-    jobsAPI.myJobs()
-      .then(res => setJobs(res.data.jobs || []))
+    Promise.all([
+      jobsAPI.myJobs(),
+      escrowAPI.getMy().catch(() => ({ data: { escrows: [] } })),
+    ])
+      .then(([jobsRes, escrowRes]) => {
+        setJobs(jobsRes.data.jobs || []);
+        const escrowMap: Record<string, { status: string; amount: number }> = {};
+        (escrowRes.data.escrows || []).forEach((e: { proposalId: string; status: string; amount: number }) => {
+          escrowMap[e.proposalId] = { status: e.status, amount: e.amount };
+        });
+        setEscrows(escrowMap);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [isAuthenticated, navigate]);
@@ -71,6 +82,48 @@ export default function MyJobs() {
       setJobs(res.data.jobs || []);
     } catch (err: unknown) {
       alert('Failed to reject proposal: ' + ((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Unknown error'));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleFund = async (proposalId: string) => {
+    setActionLoading(proposalId);
+    try {
+      await escrowAPI.fund(proposalId);
+      const [jobsRes, escrowRes] = await Promise.all([
+        jobsAPI.myJobs(),
+        escrowAPI.getMy().catch(() => ({ data: { escrows: [] } })),
+      ]);
+      setJobs(jobsRes.data.jobs || []);
+      const escrowMap: Record<string, { status: string; amount: number }> = {};
+      (escrowRes.data.escrows || []).forEach((e: { proposalId: string; status: string; amount: number }) => {
+        escrowMap[e.proposalId] = { status: e.status, amount: e.amount };
+      });
+      setEscrows(escrowMap);
+    } catch (err: unknown) {
+      alert('Failed to fund escrow: ' + ((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Unknown error'));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRelease = async (proposalId: string) => {
+    setActionLoading(proposalId);
+    try {
+      await escrowAPI.releasePayment(proposalId);
+      const [jobsRes, escrowRes] = await Promise.all([
+        jobsAPI.myJobs(),
+        escrowAPI.getMy().catch(() => ({ data: { escrows: [] } })),
+      ]);
+      setJobs(jobsRes.data.jobs || []);
+      const escrowMap: Record<string, { status: string; amount: number }> = {};
+      (escrowRes.data.escrows || []).forEach((e: { proposalId: string; status: string; amount: number }) => {
+        escrowMap[e.proposalId] = { status: e.status, amount: e.amount };
+      });
+      setEscrows(escrowMap);
+    } catch (err: unknown) {
+      alert('Failed to release payment: ' + ((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Unknown error'));
     } finally {
       setActionLoading(null);
     }
@@ -200,6 +253,32 @@ export default function MyJobs() {
                                     className="btn-primary"
                                     style={{ padding: '8px 16px', fontSize: 12, background: 'linear-gradient(135deg, #10b981, #059669)' }}
                                   >✓ Accept</button>
+                                </div>
+                              )}
+                              {prop.status === 'accepted' && escrows[prop.id] && (
+                                <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
+                                  {escrows[prop.id].status === 'funding_required' && (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleFund(prop.id); }}
+                                      disabled={actionLoading === prop.id}
+                                      className="btn-primary"
+                                      style={{ padding: '8px 16px', fontSize: 12, background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}
+                                    >💰 Deposit ${escrows[prop.id].amount}</button>
+                                  )}
+                                  {escrows[prop.id].status === 'funded' && (
+                                    <span style={{ color: '#3b82f6', fontSize: 12, fontFamily: 'var(--font-mono)', fontWeight: 600 }}>⏳ Awaiting Delivery</span>
+                                  )}
+                                  {escrows[prop.id].status === 'pending_release' && (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleRelease(prop.id); }}
+                                      disabled={actionLoading === prop.id}
+                                      className="btn-primary"
+                                      style={{ padding: '8px 16px', fontSize: 12, background: 'linear-gradient(135deg, #10b981, #059669)' }}
+                                    >💵 Release ${escrows[prop.id].amount}</button>
+                                  )}
+                                  {escrows[prop.id].status === 'released' && (
+                                    <span style={{ color: '#10b981', fontSize: 12, fontFamily: 'var(--font-mono)', fontWeight: 700 }}>✅ Completed</span>
+                                  )}
                                 </div>
                               )}
                             </div>

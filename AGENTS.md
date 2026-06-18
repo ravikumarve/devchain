@@ -534,6 +534,22 @@ cd apps/web && npx shadcn@latest add <component-name>
 - **Commit**: `ccc67e6` — 12 files, 1470 insertions, 1 deletion.
 - **Next Turn Directive**: Add integration tests for remaining routes (jobs, ownership, uploads, payments, analytics), or begin frontend redesign.
 
+### [2026-06-18 23:30] - Proposal Lifecycle + Review Analytics
+- **State**: Success
+- **MCP Data Used**: explore agent for full codebase mapping, direct file reads/writes for all edits
+- **Agents Deployed**: Orchestrator (direct execution)
+- **Architectural Decision**:
+  - **Backend Proposal Endpoints**: Accept proposal → sets status='accepted', rejects all OTHER pending proposals via $transaction, marks job as 'in_progress'. Reject → single proposal status='rejected'. Routes reordered so `/me/jobs`, `/me/proposals` come BEFORE `/:id` to avoid Express param collision
+  - **deliveryDays field**: Added to Proposal model. Frontend was sending `deliveryDays` but backend never stored it — data loss fixed
+  - **getMyJobs enhanced**: Returns proposals with freelancer info so client can manage from a single page
+  - **Analytics reviews**: `averageRating`, `ratingBreakdown` (1-5 star counts), `topRatedProducts` (sorted by avg rating). Review-based insights (praise for 4.5+, warning for <3, nudge to encourage reviews)
+  - **MyProposals.tsx**: Freelancer dashboard — status badges (pending/accepted/rejected), bid amount, delivery days, job title, client info. Empty state with CTA
+  - **MyJobs.tsx**: Client dashboard — expandable accordion per job, shows proposals with accept/reject buttons, status badges. Rejects pending only, hides actions for processed proposals
+- **Files Changed**: 10 files — schema.prisma, jobController.js, jobs.js, analyticsController.js, api.ts, JobDetail.tsx, Analytics.tsx, MyProposals.tsx (new), MyJobs.tsx (new), App.tsx, Navbar.tsx, analytics.test.js, migration files
+- **Test Coverage**: 187 tests (14 suites) — all pass. Analytics test updated to mock `review.findMany`
+- **Commit**: `679be46` — 292 files (inc. agent registry), our changes: ~10 files
+- **Next Turn Directive**: Set up Stripe payment integration with real keys, or begin mobile app parity pass
+
 ### [2026-06-18 20:00] - Vercel + Supabase Full Deployment
 - **State**: Success
 - **MCP Data Used**: websearch for Supabase pooler docs, direct file reads/writes for .env edits, bash for Docker/psql/Vercel CLI operations

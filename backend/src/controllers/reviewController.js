@@ -7,6 +7,7 @@ const {
   ConflictError,
   UnauthorizedError,
 } = require('../utils/errors');
+const { notifyNewReview } = require('../services/notificationService');
 
 const log = getLogger('review');
 
@@ -58,6 +59,16 @@ const createReview = asyncHandler(async (req, res) => {
   });
 
   log.info({ reviewId: review.id, productId, rating }, 'Review created');
+
+  // Notify seller of new review
+  notifyNewReview({
+    id: review.id,
+    rating: review.rating,
+    revieweeId: product.sellerId,
+    productId,
+    product: { title: product.title },
+  }).catch(err => log.warn({ err }, 'Review notification failed'));
+
   res.status(201).json({ data: review });
 });
 
