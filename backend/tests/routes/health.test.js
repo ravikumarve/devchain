@@ -5,6 +5,25 @@
  * the health handler's inline `new PrismaClient()` uses the same mock
  * object we can control from the test.
  */
+
+// Mock Supabase config to prevent DNS lookup hanging on fake test URL
+jest.mock('../../src/config/supabase', () => ({
+  adminClient: {
+    auth: {
+      admin: {
+        listUsers: jest.fn().mockResolvedValue({ data: { users: [] }, error: null }),
+      },
+    },
+  },
+  anonClient: {},
+  supabase: {
+    auth: {
+      admin: {
+        listUsers: jest.fn().mockResolvedValue({ data: { users: [] }, error: null }),
+      },
+    },
+  },
+}));
 jest.mock('@prisma/client', () => {
   const mockModel = () => ({
     findUnique: jest.fn(),

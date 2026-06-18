@@ -34,12 +34,26 @@ jest.mock('@prisma/client', () => {
   };
   return { PrismaClient: jest.fn(() => prismaInstance) };
 });
-const bcrypt = require('bcryptjs');
+jest.mock('@supabase/supabase-js', () => {
+  const mockAuth = {
+    getUser: jest.fn(),
+    signInWithPassword: jest.fn(),
+    refreshSession: jest.fn(),
+    admin: {
+      createUser: jest.fn(),
+      deleteUser: jest.fn(),
+    },
+  };
+  const supabaseInstance = { auth: mockAuth };
+  return { createClient: jest.fn(() => supabaseInstance) };
+});
 const { PrismaClient } = require('@prisma/client');
 const request = require('supertest');
 const app = require('../../src/index');
 
 const prisma = new PrismaClient();
+const { createClient } = require('@supabase/supabase-js');
+const authMock = createClient().auth;
 
 const mockProduct = {
   id: '660e8400-e29b-41d4-a716-446655440001',
@@ -63,11 +77,22 @@ const mockProduct = {
 const mockUser = {
   id: '550e8400-e29b-41d4-a716-446655440000',
   email: 'test@test.com',
-  passwordHash: bcrypt.hashSync('password1', 8),
+  passwordHash: 'hashed_password_placeholder',
   isActive: true,
 };
 
 async function getAuthToken(overrideMock) {
+  const user = overrideMock || mockUser;
+  authMock.signInWithPassword.mockReset();
+  authMock.getUser.mockReset();
+  authMock.signInWithPassword.mockResolvedValue({
+    data: { session: { access_token: 'sb-token', refresh_token: 'sb-refresh' }, user: { id: user.id, email: user.email } },
+    error: null,
+  });
+  authMock.getUser.mockResolvedValue({
+    data: { user: { id: user.id, email: user.email } },
+    error: null,
+  });
   if (overrideMock) {
     prisma.user.findUnique.mockReset();
     prisma.user.findUnique.mockResolvedValue(overrideMock);
@@ -114,6 +139,8 @@ describe('GET /api/v1/products', () => {
 describe('GET /api/v1/products/:id', () => {
   beforeEach(() => {
     prisma.product.findUnique.mockReset();
+    prisma.review.aggregate.mockResolvedValue({ _avg: { rating: null } });
+    prisma.review.findMany.mockResolvedValue([]);
   });
 
   it('should return a product by ID', async () => {

@@ -1,7 +1,6 @@
-const { PrismaClient } = require('@prisma/client');
 const crypto = require('crypto');
 
-const prisma = new PrismaClient();
+const prisma = require('../config/database');
 const { getLogger } = require('../utils/logger');
 const asyncHandler = require('../utils/asyncHandler');
 const {

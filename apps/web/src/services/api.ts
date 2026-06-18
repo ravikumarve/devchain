@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = '/api/v1';
+const API_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -79,4 +79,18 @@ export const uploadAPI = {
 export const paymentsAPI = {
   createCheckoutSession: (productId: string) =>
     api.post('/payments/create-checkout-session', { productId }),
+};
+
+export const reviewsAPI = {
+  create: (data: { productId: string; rating: number; comment?: string }) =>
+    api.post('/reviews', data),
+  getProductReviews: (productId: string) =>
+    api.get(`/reviews/product/${productId}`),
+  getMyReview: (productId: string) =>
+    api.get(`/reviews/product/${productId}/mine`),
+  update: (id: string, data: { rating?: number; comment?: string }) =>
+    api.put(`/reviews/${id}`, data),
+  delete: (id: string) => api.delete(`/reviews/${id}`),
+  getSellerReviews: (sellerId: string) =>
+    api.get(`/reviews/seller/${sellerId}`),
 };

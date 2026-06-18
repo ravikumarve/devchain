@@ -11,6 +11,9 @@ const allowedOrigins = isProd
   ? [
       'https://devchain-app.vercel.app',
       'https://devchain.onrender.com',
+      'https://web-vert-mu-22.vercel.app',
+      // Allow all Vercel deployment preview URLs
+      /^https:\/\/web-[\w-]+-ravikumarves-projects\.vercel\.app$/,
       process.env.FRONTEND_URL,
     ].filter(Boolean)
   : [true]; // In development, allow all origins
@@ -21,7 +24,11 @@ const corsOptions = {
         // Allow requests with no origin (server-to-server, curl, etc.)
         if (!origin) return callback(null, true);
 
-        if (allowedOrigins.includes(origin) || allowedOrigins.some(a => typeof a === 'string' && origin.startsWith(a))) {
+        if (allowedOrigins.some(a => {
+          if (typeof a === 'string') return a === origin || origin.startsWith(a);
+          if (a instanceof RegExp) return a.test(origin);
+          return false;
+        })) {
           callback(null, true);
         } else {
           callback(new Error(`Origin ${origin} not allowed by DevChain CORS policy`));

@@ -1,10 +1,9 @@
 const multer = require('multer');
-const { createClient } = require('@supabase/supabase-js');
-const { PrismaClient } = require('@prisma/client');
 const path = require('path');
 const crypto = require('crypto');
 
-const prisma = new PrismaClient();
+const prisma = require('../config/database');
+const { adminClient: supabase } = require('../config/supabase');
 const { getLogger } = require('../utils/logger');
 const asyncHandler = require('../utils/asyncHandler');
 const {
@@ -14,11 +13,6 @@ const {
 } = require('../utils/errors');
 
 const log = getLogger('uploads');
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
 
 const BUCKET = 'devchain-files';
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB

@@ -1,8 +1,31 @@
 /**
- * Unit tests for authentication middleware
+ * Unit tests for authentication middleware (Supabase Auth)
  */
-const jwt = require('jsonwebtoken');
 const { protect, optionalAuth } = require('../../src/middleware/auth');
+
+// Mock @supabase/supabase-js BEFORE requiring anything that imports it
+jest.mock('@supabase/supabase-js', () => {
+  const mockAuth = {
+    getUser: jest.fn(),
+    signInWithPassword: jest.fn(),
+    refreshSession: jest.fn(),
+    admin: {
+      createUser: jest.fn(),
+      deleteUser: jest.fn(),
+    },
+  };
+  const supabaseInstance = { auth: mockAuth };
+  return { createClient: jest.fn(() => supabaseInstance) };
+});
+
+const { createClient } = require('@supabase/supabase-js');
+const supabaseMock = createClient();
+const authMock = supabaseMock.auth;
+
+// Reset mocks before each test
+beforeEach(() => {
+  authMock.getUser.mockReset();
+});
 
 function createReqRes(authHeader) {
   const req = {
@@ -13,19 +36,15 @@ function createReqRes(authHeader) {
   return { req, res, next };
 }
 
-function generateValidToken(payload = {}) {
-  return jwt.sign(
-    { userId: '550e8400-e29b-41d4-a716-446655440000', email: 'test@test.com', ...payload },
-    process.env.JWT_SECRET,
-    { expiresIn: '15m' }
-  );
-}
-
 describe('protect middleware', () => {
-  it('should set req.user and call next for valid token', () => {
-    const token = generateValidToken();
-    const { req, res, next } = createReqRes(`Bearer ${token}`);
-    protect(req, res, next);
+  it('should set req.user and call next for valid token', async () => {
+    authMock.getUser.mockResolvedValue({
+      data: { user: { id: '550e8400-e29b-41d4-a716-446655440000', email: 'test@test.com' } },
+      error: null,
+    });
+
+    const { req, res, next } = createReqRes('Bearer valid-supabase-token');
+    await protect(req, res, next);
 
     expect(req.user).toBeDefined();
     expect(req.user.userId).toBe('550e8400-e29b-41d4-a716-446655440000');
@@ -63,14 +82,14 @@ describe('protect middleware', () => {
     }));
   });
 
-  it('should reject expired token', () => {
-    const token = jwt.sign(
-      { userId: 'test-user', email: 'test@test.com' },
-      process.env.JWT_SECRET,
-      { expiresIn: '0s' }
-    );
-    const { req, res, next } = createReqRes(`Bearer ${token}`);
-    protect(req, res, next);
+  it('should reject expired token', async () => {
+    authMock.getUser.mockResolvedValue({
+      data: { user: null },
+      error: { message: 'expired' },
+    });
+
+    const { req, res, next } = createReqRes('Bearer expired-token');
+    await protect(req, res, next);
 
     expect(next).toHaveBeenCalledWith(expect.objectContaining({
       statusCode: 401,
@@ -79,9 +98,14 @@ describe('protect middleware', () => {
     }));
   });
 
-  it('should reject invalid token', () => {
-    const { req, res, next } = createReqRes('Bearer invalid-token-here');
-    protect(req, res, next);
+  it('should reject invalid token', async () => {
+    authMock.getUser.mockResolvedValue({
+      data: { user: null },
+      error: { message: 'Invalid token' },
+    });
+
+    const { req, res, next } = createReqRes('Bearer invalid-token');
+    await protect(req, res, next);
 
     expect(next).toHaveBeenCalledWith(expect.objectContaining({
       statusCode: 401,
@@ -90,13 +114,14 @@ describe('protect middleware', () => {
     }));
   });
 
-  it('should reject token signed with wrong secret', () => {
-    const token = jwt.sign(
-      { userId: 'test', email: 'test@test.com' },
-      'wrong-secret'
-    );
-    const { req, res, next } = createReqRes(`Bearer ${token}`);
-    protect(req, res, next);
+  it('should reject when getUser returns null user with no error', async () => {
+    authMock.getUser.mockResolvedValue({
+      data: { user: null },
+      error: null,
+    });
+
+    const { req, res, next } = createReqRes('Bearer token-with-no-user');
+    await protect(req, res, next);
 
     expect(next).toHaveBeenCalledWith(expect.objectContaining({
       statusCode: 401,
@@ -105,10 +130,14 @@ describe('protect middleware', () => {
 });
 
 describe('optionalAuth middleware', () => {
-  it('should set req.user for valid token', () => {
-    const token = generateValidToken();
-    const { req, res, next } = createReqRes(`Bearer ${token}`);
-    optionalAuth(req, res, next);
+  it('should set req.user for valid token', async () => {
+    authMock.getUser.mockResolvedValue({
+      data: { user: { id: '550e8400-e29b-41d4-a716-446655440000', email: 'test@test.com' } },
+      error: null,
+    });
+
+    const { req, res, next } = createReqRes('Bearer valid-supabase-token');
+    await optionalAuth(req, res, next);
 
     expect(req.user).toBeDefined();
     expect(req.user.userId).toBeDefined();
@@ -123,22 +152,27 @@ describe('optionalAuth middleware', () => {
     expect(next).toHaveBeenCalledWith();
   });
 
-  it('should not fail on invalid token', () => {
+  it('should not fail on invalid token', async () => {
+    authMock.getUser.mockResolvedValue({
+      data: { user: null },
+      error: { message: 'Invalid token' },
+    });
+
     const { req, res, next } = createReqRes('Bearer invalid-token');
-    optionalAuth(req, res, next);
+    await optionalAuth(req, res, next);
 
     expect(req.user).toBeUndefined();
     expect(next).toHaveBeenCalledWith();
   });
 
-  it('should not fail on expired token', () => {
-    const token = jwt.sign(
-      { userId: 'test', email: 'test@test.com' },
-      process.env.JWT_SECRET,
-      { expiresIn: '0s' }
-    );
-    const { req, res, next } = createReqRes(`Bearer ${token}`);
-    optionalAuth(req, res, next);
+  it('should not fail on expired token', async () => {
+    authMock.getUser.mockResolvedValue({
+      data: { user: null },
+      error: { message: 'expired' },
+    });
+
+    const { req, res, next } = createReqRes('Bearer expired-token');
+    await optionalAuth(req, res, next);
 
     expect(req.user).toBeUndefined();
     expect(next).toHaveBeenCalledWith();

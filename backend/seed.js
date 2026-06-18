@@ -1,60 +1,105 @@
 /**
- * DevChain — database seed script
+ * DevChain — database seed script (Supabase Auth)
  * Populates the database with demo users, products, and jobs.
+ * Creates users in Supabase Auth first, then profiles in public.users.
+ * 
  * Run: node seed.js
  */
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
+require('dotenv').config({ path: __dirname + '/.env' });
+const prisma = require('./src/config/database');
+const { adminClient: supabase } = require('./src/config/supabase');
 
-const prisma = new PrismaClient();
+const DEMO_PASSWORD = 'Demo1234';
+const DEMO_USERS = [
+  {
+    email: 'demo-seller@devchain.dev',
+    username: 'democreator',
+    bio: 'Full-stack developer & open-source contributor. Building tools for the developer economy.',
+    reputationScore: 42,
+  },
+  {
+    email: 'demo-client@devchain.dev',
+    username: 'democlient',
+    bio: 'Tech startup founder hiring blockchain and AI talent.',
+    reputationScore: 28,
+  },
+  {
+    email: 'demo-buyer@devchain.dev',
+    username: 'demobuyer',
+    bio: 'Indie developer always looking for quality code assets.',
+    reputationScore: 15,
+  },
+];
+
+async function upsertDemoUser({ email, username, bio, reputationScore }) {
+  // Step 1: ensure user exists in Supabase Auth
+  let authUserId;
+
+  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    email,
+    password: DEMO_PASSWORD,
+    email_confirm: true,
+    user_metadata: { username },
+  });
+
+  if (authError) {
+    // "already registered" means the user exists in Auth — fetch them
+    if (authError?.message?.includes('already been registered') || authError?.message?.includes('duplicate')) {
+      const { data: listData } = await supabase.auth.admin.listUsers();
+      const found = listData?.users?.find(u => u.email === email);
+      if (found) {
+        authUserId = found.id;
+        console.log(`  ℹ️  Auth user exists: ${email} (${authUserId.slice(0, 8)}…)`);
+      } else {
+        throw new Error(`Auth user ${email} not found after "already registered" error: ${authError.message}`);
+      }
+    } else {
+      throw new Error(`Supabase Auth error for ${email}: ${authError.message}`);
+    }
+  } else {
+    authUserId = authData.user.id;
+    console.log(`  ✅ Auth user created: ${email} (${authUserId.slice(0, 8)}…)`);
+  }
+
+  // Step 2: upsert profile in public.users
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: {
+      id: authUserId,
+      username,
+      bio,
+      reputationScore,
+      isEmailVerified: true,
+    },
+    create: {
+      id: authUserId,
+      username,
+      email,
+      bio,
+      reputationScore,
+      isEmailVerified: true,
+    },
+  });
+
+  console.log(`  ✅ Profile: @${user.username} (${user.id.slice(0, 8)}…)`);
+  return user;
+}
 
 async function main() {
   console.log('🌱 Seeding DevChain database...\n');
 
-  // ── Demo Users ──
-  const passwordHash = await bcrypt.hash('Demo1234', 10);
+  // ── Demo Users (via Supabase Auth) ──
+  const seller = await upsertDemoUser(DEMO_USERS[0]);
+  const client = await upsertDemoUser(DEMO_USERS[1]);
+  const buyer = await upsertDemoUser(DEMO_USERS[2]);
 
-  const seller = await prisma.user.upsert({
-    where: { email: 'demo-seller@devchain.dev' },
-    update: {},
-    create: {
-      username: 'democreator',
-      email: 'demo-seller@devchain.dev',
-      passwordHash,
-      bio: 'Full-stack developer & open-source contributor. Building tools for the developer economy.',
-      isEmailVerified: true,
-      reputationScore: 42,
-    },
-  });
-  console.log(`  ✅ Seller: @${seller.username} (${seller.id.slice(0, 8)}…)`);
-
-  const client = await prisma.user.upsert({
-    where: { email: 'demo-client@devchain.dev' },
-    update: {},
-    create: {
-      username: 'democlient',
-      email: 'demo-client@devchain.dev',
-      passwordHash,
-      bio: 'Tech startup founder hiring blockchain and AI talent.',
-      isEmailVerified: true,
-      reputationScore: 28,
-    },
-  });
-  console.log(`  ✅ Client: @${client.username} (${client.id.slice(0, 8)}…)`);
-
-  const buyer = await prisma.user.upsert({
-    where: { email: 'demo-buyer@devchain.dev' },
-    update: {},
-    create: {
-      username: 'demobuyer',
-      email: 'demo-buyer@devchain.dev',
-      passwordHash,
-      bio: 'Indie developer always looking for quality code assets.',
-      isEmailVerified: true,
-      reputationScore: 15,
-    },
-  });
-  console.log(`  ✅ Buyer: @${buyer.username} (${buyer.id.slice(0, 8)}…)`);
+  // ── Clean existing products & jobs (for idempotency) ──
+  await prisma.review.deleteMany({});
+  await prisma.ownershipRecord.deleteMany({});
+  await prisma.proposal.deleteMany({});
+  await prisma.order.deleteMany({});
+  await prisma.product.deleteMany({});
+  await prisma.job.deleteMany({});
 
   // ── Demo Products ──
   const products = [
@@ -171,7 +216,7 @@ async function main() {
   }
 
   console.log(`\n✨ Seeding complete!`);
-  console.log(`   Demo login credentials:`);
+  console.log(`   Demo login credentials (all use Supabase Auth):`);
   console.log(`   Seller: democreator / Demo1234`);
   console.log(`   Client: democlient / Demo1234`);
   console.log(`   Buyer:  demobuyer  / Demo1234`);

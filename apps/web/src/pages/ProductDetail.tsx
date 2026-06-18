@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { productsAPI, paymentsAPI } from '../services/api';
+import { productsAPI, paymentsAPI, reviewsAPI } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import FileManager from '../components/FileManager';
 
@@ -197,11 +197,22 @@ export default function ProductDetail() {
     seller?: { id: string; username: string; reputationScore: number };
     category: string; description: string; tags: string[];
     techStack: string[]; downloadsCount: number;
+    reviews?: Array<{
+      id: string; rating: number; comment: string | null;
+      createdAt: string;
+      reviewer: { id: string; username: string; avatarUrl: string | null };
+    }>;
+    averageRating?: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState('about');
   const [purchased, setPurchased] = useState(false);
+  const [myReview, setMyReview] = useState<{
+    id: string; rating: number; comment: string | null;
+  } | null>(null);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     productsAPI.getOne(id!)
@@ -209,6 +220,36 @@ export default function ProductDetail() {
       .catch(() => navigate('/marketplace'))
       .finally(() => setLoading(false));
   }, [id, navigate]);
+
+  // Check if user has already reviewed this product
+  useEffect(() => {
+    if (!isAuthenticated || !id) return;
+    reviewsAPI.getMyReview(id!)
+      .then((res) => setMyReview(res.data.data))
+      .catch(() => {});
+  }, [isAuthenticated, id]);
+
+  const handleSubmitReview = async () => {
+    if (!id) return;
+    setSubmittingReview(true);
+    try {
+      if (myReview) {
+        await reviewsAPI.update(myReview.id, reviewForm);
+      } else {
+        const res = await reviewsAPI.create({ productId: id, ...reviewForm });
+        setMyReview(res.data.data);
+      }
+      setReviewForm({ rating: 5, comment: '' });
+      // Refresh product to get new reviews
+      const res = await productsAPI.getOne(id);
+      setProduct(res.data.product);
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      alert(error.response?.data?.error || 'Failed to submit review.');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   if (loading) return (
     <div style={{
@@ -270,6 +311,14 @@ export default function ProductDetail() {
                   <span style={{ color: 'var(--text-faint)', fontSize: 14 }}>
                     ⬇️ {product.downloadsCount} sales
                   </span>
+                  {product.averageRating ? (
+                    <>
+                      <span style={{ color: 'var(--text-faint)' }}>·</span>
+                      <span style={{ color: '#f59e0b', fontSize: 14 }}>
+                        ★ {product.averageRating.toFixed(1)}
+                      </span>
+                    </>
+                  ) : null}
                 </div>
               </div>
 
@@ -333,9 +382,134 @@ export default function ProductDetail() {
               )}
 
               {activeTab === 'reviews' && (
-                <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '40px 0' }}>
-                  <p style={{ fontSize: 40, marginBottom: 12 }}>⭐</p>
-                  <p>No reviews yet. Be the first to purchase!</p>
+                <div>
+                  {/* Average Rating */}
+                  {product.reviews && product.reviews.length > 0 && (
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: 16,
+                      marginBottom: 28, padding: '16px 20px',
+                      background: 'var(--bg-surface)', borderRadius: 12,
+                      border: '1px solid var(--border-dim)',
+                    }}>
+                      <div style={{ fontSize: 36, fontWeight: 900, color: '#f59e0b' }}>
+                        {product.averageRating?.toFixed(1)}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 18 }}>
+                          {'★'.repeat(Math.round(product.averageRating || 0))}
+                          {'☆'.repeat(5 - Math.round(product.averageRating || 0))}
+                        </div>
+                        <div style={{ color: 'var(--text-faint)', fontSize: 12, fontFamily: 'var(--font-mono)' }}>
+                          {product.reviews.length} review{product.reviews.length !== 1 ? 's' : ''}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Review Form (show if authenticated and purchased) */}
+                  {isAuthenticated && (
+                    <div style={{
+                      marginBottom: 28, padding: '20px 24px',
+                      background: 'var(--bg-surface)', borderRadius: 12,
+                      border: '1px solid var(--border-dim)',
+                    }}>
+                      <div style={{
+                        color: 'var(--text-main)', fontWeight: 700, fontSize: 15,
+                        marginBottom: 12,
+                      }}>
+                        {myReview ? 'Edit Your Review' : 'Write a Review'}
+                      </div>
+                      <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button key={star} onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                            style={{
+                              background: 'none', border: 'none', cursor: 'pointer',
+                              fontSize: 24, padding: 2, lineHeight: 1,
+                              color: star <= reviewForm.rating ? '#f59e0b' : 'var(--border-dim)',
+                              transition: 'color 0.15s',
+                            }}>
+                            {star <= reviewForm.rating ? '★' : '☆'}
+                          </button>
+                        ))}
+                      </div>
+                      <textarea
+                        value={reviewForm.comment}
+                        onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                        placeholder="Share your experience with this product..."
+                        maxLength={2000}
+                        rows={3}
+                        style={{
+                          width: '100%', padding: '10px 14px', borderRadius: 10,
+                          background: 'var(--bg-panel)', border: '1px solid var(--border-dim)',
+                          color: 'var(--text-main)', fontSize: 14, resize: 'vertical',
+                          fontFamily: 'inherit', marginBottom: 12,
+                        }}
+                      />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ color: 'var(--text-faint)', fontSize: 12 }}>
+                          {myReview ? 'Update your review' : 'Only purchasers can review'}
+                        </span>
+                        <button onClick={handleSubmitReview} disabled={submittingReview}
+                          className="btn-primary"
+                          style={{
+                            padding: '8px 20px', fontSize: 14,
+                            opacity: submittingReview ? 0.6 : 1,
+                          }}>
+                          {submittingReview ? 'Submitting...' : myReview ? 'Update Review' : 'Submit Review'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Reviews List */}
+                  {product.reviews && product.reviews.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      {product.reviews.map((rev) => (
+                        <div key={rev.id} style={{
+                          padding: '16px 20px',
+                          background: 'var(--bg-surface)', borderRadius: 12,
+                          border: '1px solid var(--border-dim)',
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div style={{
+                                width: 28, height: 28, borderRadius: 8,
+                                background: 'var(--eth-purple)', display: 'flex',
+                                alignItems: 'center', justifyContent: 'center',
+                                fontSize: 12, fontWeight: 800, color: '#fff',
+                              }}>
+                                {rev.reviewer?.username?.[0]?.toUpperCase()}
+                              </div>
+                              <span style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: 14 }}>
+                                @{rev.reviewer?.username}
+                              </span>
+                            </div>
+                            <div style={{ color: '#f59e0b', fontSize: 14, letterSpacing: 1 }}>
+                              {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)}
+                            </div>
+                          </div>
+                          {rev.comment && (
+                            <p style={{ color: 'var(--text-muted)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+                              {rev.comment}
+                            </p>
+                          )}
+                          <div style={{
+                            color: 'var(--text-faint)', fontSize: 11, fontFamily: 'var(--font-mono)',
+                            marginTop: 8,
+                          }}>
+                            {new Date(rev.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric', month: 'short', day: 'numeric',
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '40px 0' }}>
+                      <p style={{ fontSize: 40, marginBottom: 12 }}>⭐</p>
+                      <p>No reviews yet. Be the first!</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

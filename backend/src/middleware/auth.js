@@ -1,18 +1,18 @@
 /**
  * Authentication middleware for DevChain API
- * JWT verification with enhanced error handling
+ * Verifies Supabase JWT tokens via supabase.auth.getUser()
  */
-const jwt = require('jsonwebtoken');
 const { UnauthorizedError, ForbiddenError } = require('../utils/errors');
 const { getLogger } = require('../utils/logger');
+const { adminClient: supabase } = require('../config/supabase');
 
 const log = getLogger('auth');
 
 /**
- * Protect route — requires valid JWT access token
+ * Protect route — requires valid Supabase JWT access token
  * Sets req.user = { userId, email } on success
  */
-const protect = (req, res, next) => {
+const protect = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -26,12 +26,19 @@ const protect = (req, res, next) => {
       throw new UnauthorizedError('Token is empty. Please login again.');
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { data: { user: authUser }, error } = await supabase.auth.getUser(token);
+
+    if (error || !authUser) {
+      if (error?.message?.includes('expired')) {
+        throw new UnauthorizedError('Your session has expired. Please login again.');
+      }
+      throw new UnauthorizedError('Invalid token. Please login again.');
+    }
 
     // Attach user info to request
     req.user = {
-      userId: decoded.userId,
-      email: decoded.email,
+      userId: authUser.id,
+      email: authUser.email,
     };
 
     next();
@@ -39,18 +46,6 @@ const protect = (req, res, next) => {
     // Re-throw our custom errors
     if (err instanceof UnauthorizedError) {
       return next(err);
-    }
-
-    if (err.name === 'TokenExpiredError') {
-      return next(new UnauthorizedError('Your session has expired. Please login again.'));
-    }
-
-    if (err.name === 'JsonWebTokenError') {
-      return next(new UnauthorizedError('Invalid token. Please login again.'));
-    }
-
-    if (err.name === 'NotBeforeError') {
-      return next(new UnauthorizedError('Token is not yet active.'));
     }
 
     log.error({ err }, 'Unexpected auth error');
@@ -62,17 +57,19 @@ const protect = (req, res, next) => {
  * Optional auth — attaches user if token present, but doesn't block
  * Useful for endpoints that work differently for authenticated users
  */
-const optionalAuth = (req, res, next) => {
+const optionalAuth = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = {
-        userId: decoded.userId,
-        email: decoded.email,
-      };
+      const { data: { user: authUser }, error } = await supabase.auth.getUser(token);
+      if (!error && authUser) {
+        req.user = {
+          userId: authUser.id,
+          email: authUser.email,
+        };
+      }
     }
   } catch (err) {
     // Silently continue — auth is optional

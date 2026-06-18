@@ -6,23 +6,23 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/your-org/devchain/stargazers">
-    <img src="https://img.shields.io/github/stars/your-org/devchain?style=social" alt="GitHub Stars" />
+  <a href="https://github.com/ravikumarve/devchain/stargazers">
+    <img src="https://img.shields.io/github/stars/ravikumarve/devchain?style=social" alt="GitHub Stars" />
   </a>
-  <a href="https://devchain-app.vercel.app">
+  <a href="https://web-vert-mu-22.vercel.app">
     <img src="https://img.shields.io/badge/demo-live-7C3AED?style=for-the-badge&logo=vercel" alt="Live Demo" />
   </a>
-  <a href="https://devchain.onrender.com/api/v1">
+  <a href="https://web-vert-mu-22.vercel.app/api/v1">
     <img src="https://img.shields.io/badge/API-live-059669?style=for-the-badge" alt="API Live" />
   </a>
-  <a href="https://github.com/your-org/devchain/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/your-org/devchain" alt="License" />
+  <a href="https://github.com/ravikumarve/devchain/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/ravikumarve/devchain" alt="License" />
   </a>
   <img src="https://img.shields.io/badge/typescript-5.0+-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/node.js-20+-339933?logo=node.js&logoColor=white" alt="Node.js" />
   <img src="https://img.shields.io/badge/react-19-61DAFB?logo=react&logoColor=white" alt="React 19" />
   <img src="https://img.shields.io/badge/SHA--256-Ownership-8B5CF6?logo=cryptography&logoColor=white" alt="SHA-256 Ownership" />
-  <img src="https://img.shields.io/badge/tests-183%20passing-22C55E" alt="183 tests passing" />
+  <img src="https://img.shields.io/badge/tests-187%20passing-22C55E" alt="187 tests passing" />
 </p>
 
 <p align="center">
@@ -111,7 +111,7 @@ devchain/
 | **Database**   | PostgreSQL + Prisma          | Type-safe database operations    |
 | **Storage**    | Supabase Storage             | Secure file upload/download      |
 | **Auth**       | JWT + bcrypt                 | Secure authentication system     |
-| **Deployment** | Vercel + Render              | Scalable cloud infrastructure    |
+| **Deployment** | Vercel + Supabase            | Scalable cloud infrastructure    |
 
 ## 🎯 Core Features
 
@@ -133,6 +133,14 @@ devchain/
 - Apply with proposals
 - Hire developers securely
 
+### ⭐ Reviews & Ratings
+
+- Rate products after verified purchase (1-5 stars)
+- Write detailed reviews with optional images
+- Aggregate ratings shown on product cards and detail pages
+- Seller reputation scoring based on review history
+- Prevents duplicate reviews and abuse with purchase verification
+
 ### 🔐 Authentication
 
 - JWT-based auth with refresh tokens
@@ -146,7 +154,7 @@ The REST API follows consistent patterns:
 ### Base URL
 
 ```
-https://devchain.onrender.com/api/v1
+https://web-vert-mu-22.vercel.app/api/v1
 ```
 
 ### Key Endpoints
@@ -157,6 +165,9 @@ https://devchain.onrender.com/api/v1
 | `POST` | `/products`           | Create new product         | ✅ Seller     |
 | `GET`  | `/products/:id`       | Get product details        | ❌            |
 | `GET`  | `/products/seller/me` | Get seller's products      | ✅ Seller     |
+| `POST` | `/reviews`            | Submit a review (verified purchase) | ✅ Buyer      |
+| `GET`  | `/reviews/product/:productId` | Get product reviews      | ❌            |
+| `GET`  | `/reviews/user/:userId` | Get user's reviews         | ✅            |
 | `POST` | `/auth/login`         | User login                 | ❌            |
 | `POST` | `/auth/register`      | User registration          | ❌            |
 | `GET`  | `/auth/me`            | Get current user           | ✅            |
@@ -203,7 +214,7 @@ Content-Type: application/json
 
 ## 🧪 Testing
 
-The backend has **183 integration tests** across **14 test suites** covering every API endpoint.
+The backend has **187 integration tests** across **14 test suites** covering every API endpoint.
 
 ### Backend Testing
 
@@ -220,7 +231,7 @@ cd backend && npx jest tests/routes/jobs.test.js
 cd backend && npx jest tests/routes/ownership.test.js
 ```
 
-**Test suites (14 total, 183 tests):**
+**Test suites (14 total, 187 tests):**
 
 | Suite | Tests | Covering |
 |-------|-------|----------|
@@ -288,18 +299,25 @@ node seed-products.js
 - [ ] **Monitoring**: Set up error tracking and analytics
 - [ ] **Documentation**: Verify all docs are up to date
 
-### Web App (Vercel)
+### Web App + API (Vercel)
 
+- Frontend and API deployed together as serverless functions
 - Connected to `main` branch
 - Automatic deployments on push
 - Environment variables in Vercel dashboard
 
-### Backend API (Render)
+### Database (Supabase PostgreSQL)
 
-- Connected to `main` branch
-- Automatic deployments on push
-- PostgreSQL database provisioned
-- Environment variables in Render dashboard
+- Supabase project: `https://igrrgytacxqsetksrmqs.supabase.co`
+- Storage bucket: `devchain-files`
+- Connection via Supabase pooler (direct or transaction modes)
+
+### CI/CD
+
+- **Continuous Deployment**: Every push to `main` triggers an automatic Vercel deployment
+- **Test Gate**: Run `npm test` locally before pushing to ensure all 187 tests pass
+- **Environment Promotion**: Variables managed in Vercel dashboard per environment
+- **Rollback**: Quick rollback via Vercel deploy history if needed
 
 ### Database Migrations
 
@@ -354,7 +372,7 @@ npx prisma studio      # Open database admin UI
 ### 🔜 Phase 2: Enhanced Features (Q2 2025)
 
 - [ ] Advanced analytics dashboard
-- [ ] Review and rating system
+- [x] Review and rating system
 - [ ] Seller verification (KYC)
 - [ ] Email notifications
 - [ ] Refund management system
@@ -401,15 +419,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 💬 Support
 
 - 📖 **[Documentation](docs/)** - Detailed guides and API references
-- 🐛 **[Issue Tracker](https://github.com/your-org/devchain/issues)** - Report bugs or request features
-- 💬 **[Discussions](https://github.com/your-org/devchain/discussions)** - Questions and community support
-- 📧 **Email**: [your-email@example.com](mailto:your-email@example.com)
+- 🐛 **[Issue Tracker](https://github.com/ravikumarve/devchain/issues)** - Report bugs or request features
+- 💬 **[Discussions](https://github.com/ravikumarve/devchain/discussions)** - Questions and community support
+- 📧 **Email**: [support@devchain.dev](mailto:support@devchain.dev)
 
 ### Need Help?
 
 - Check the [docs](docs/) first for common questions
-- Search existing [issues](https://github.com/your-org/devchain/issues) before creating new ones
-- Join our community [discussions](https://github.com/your-org/devchain/discussions) for help
+- Search existing [issues](https://github.com/ravikumarve/devchain/issues) before creating new ones
+- Join our community [discussions](https://github.com/ravikumarve/devchain/discussions) for help
 
 ## 🙏 Acknowledgments
 

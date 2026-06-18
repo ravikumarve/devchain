@@ -36,18 +36,32 @@ jest.mock('stripe', () => {
   return jest.fn(() => mockStripeInstance);
 });
 jest.mock('@prisma/client', () => require('../helpers/prismaMock')());
-const bcrypt = require('bcryptjs');
+jest.mock('@supabase/supabase-js', () => {
+  const mockAuth = {
+    getUser: jest.fn(),
+    signInWithPassword: jest.fn(),
+    refreshSession: jest.fn(),
+    admin: {
+      createUser: jest.fn(),
+      deleteUser: jest.fn(),
+    },
+  };
+  const supabaseInstance = { auth: mockAuth };
+  return { createClient: jest.fn(() => supabaseInstance) };
+});
 const { PrismaClient } = require('@prisma/client');
 const request = require('supertest');
 const app = require('../../src/index');
 
 const prisma = new PrismaClient();
+const { createClient } = require('@supabase/supabase-js');
+const authMock = createClient().auth;
 
 const mockUser = {
   id: '550e8400-e29b-41d4-a716-446655440000',
   email: 'test@test.com',
   username: 'testuser',
-  passwordHash: bcrypt.hashSync('password1', 8),
+  passwordHash: 'hashed_password_placeholder',
   isActive: true,
 };
 
@@ -64,6 +78,16 @@ const mockProduct = {
 };
 
 async function getAuthToken() {
+  authMock.signInWithPassword.mockReset();
+  authMock.getUser.mockReset();
+  authMock.signInWithPassword.mockResolvedValue({
+    data: { session: { access_token: 'sb-token', refresh_token: 'sb-refresh' }, user: { id: mockUser.id, email: mockUser.email } },
+    error: null,
+  });
+  authMock.getUser.mockResolvedValue({
+    data: { user: { id: mockUser.id, email: mockUser.email } },
+    error: null,
+  });
   prisma.user.findUnique.mockReset();
   prisma.user.findUnique.mockResolvedValue(mockUser);
   const res = await request(app)

@@ -1,6 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-
+const prisma = require('../config/database');
 const { getLogger } = require('../utils/logger');
 const asyncHandler = require('../utils/asyncHandler');
 const {
@@ -107,13 +105,6 @@ const getProduct = asyncHandler(async (req, res) => {
       seller: {
         select: { id: true, username: true, avatarUrl: true, reputationScore: true, bio: true },
       },
-      reviews: {
-        include: {
-          reviewer: { select: { id: true, username: true, avatarUrl: true } },
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-      },
       _count: { select: { orders: true } },
     },
   });
@@ -122,10 +113,26 @@ const getProduct = asyncHandler(async (req, res) => {
     throw new NotFoundError('Product not found.');
   }
 
+  // Fetch reviews separately (Product model has no direct reviews relation)
+  const [reviews, avgResultRaw] = await Promise.all([
+    prisma.review.findMany({
+      where: { productId: id },
+      include: {
+        reviewer: { select: { id: true, username: true, avatarUrl: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    }),
+    prisma.review.aggregate({ where: { productId: id }, _avg: { rating: true } })
+      .catch(() => ({ _avg: { rating: null } })),
+  ]);
+  const avgResult = avgResultRaw || { _avg: { rating: null } };
+
   res.json({
     product: {
       ...safeProduct(product),
-      reviews: product.reviews,
+      reviews,
+      averageRating: avgResult._avg.rating || 0,
       totalSales: product._count.orders,
     },
   });

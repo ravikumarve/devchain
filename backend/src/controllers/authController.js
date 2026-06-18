@@ -1,9 +1,5 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
-const crypto = require('crypto');
-
-const prisma = new PrismaClient();
+const prisma = require('../config/database');
+const { supabase } = require('../config/supabase');
 const { getLogger } = require('../utils/logger');
 const asyncHandler = require('../utils/asyncHandler');
 const {
@@ -14,27 +10,7 @@ const {
 
 const log = getLogger('auth');
 
-// ── Constants ──
-const BCRYPT_ROUNDS = 12;
-const ACCESS_TOKEN_EXPIRY = process.env.JWT_EXPIRES_IN || '15m';
-const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
-
-// ── Helper: generate token pair ──
-const generateTokens = (userId, email) => {
-  const accessToken = jwt.sign(
-    { userId, email },
-    process.env.JWT_SECRET,
-    { expiresIn: ACCESS_TOKEN_EXPIRY }
-  );
-  const refreshToken = jwt.sign(
-    { userId, email, tokenId: crypto.randomUUID() },
-    process.env.JWT_REFRESH_SECRET,
-    { expiresIn: REFRESH_TOKEN_EXPIRY }
-  );
-  return { accessToken, refreshToken };
-};
-
-// ── Helper: safe user object (never expose password) ──
+// ── Helper: safe user object (never expose sensitive fields) ──
 const safeUser = (user) => ({
   id: user.id,
   username: user.username,
@@ -72,42 +48,84 @@ const register = asyncHandler(async (req, res) => {
     throw new BadRequestError('Password must contain at least 1 letter and 1 number.');
   }
 
-  // ── Check uniqueness ──
+  const normalizedEmail = email.toLowerCase();
+  const normalizedUsername = username.toLowerCase();
+
+  // ── Check uniqueness in public.users ──
   const existingUser = await prisma.user.findFirst({
     where: {
       OR: [
-        { email: email.toLowerCase() },
-        { username: username.toLowerCase() },
+        { email: normalizedEmail },
+        { username: normalizedUsername },
       ],
     },
   });
 
   if (existingUser) {
-    if (existingUser.email === email.toLowerCase()) {
+    if (existingUser.email === normalizedEmail) {
       throw new ConflictError('An account with this email already exists.');
     }
     throw new ConflictError('This username is already taken.');
   }
 
-  // ── Create user ──
-  const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-  const user = await prisma.user.create({
-    data: {
-      username: username.toLowerCase(),
-      email: email.toLowerCase(),
-      passwordHash,
-    },
+  // ── Create user in Supabase Auth ──
+  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    email: normalizedEmail,
+    password,
+    email_confirm: true, // auto-confirm so they can login immediately
+    user_metadata: { username: normalizedUsername },
   });
 
-  const { accessToken, refreshToken } = generateTokens(user.id, user.email);
+  if (authError) {
+    // Handle Supabase-specific errors (e.g., duplicate email in auth.users)
+    if (authError.message?.includes('already registered') || authError.message?.includes('duplicate')) {
+      throw new ConflictError('An account with this email already exists.');
+    }
+    log.error({ err: authError }, 'Supabase Auth createUser failed');
+    throw new BadRequestError('Registration failed. Please try again.');
+  }
+
+  const authUserId = authData.user.id;
+
+  // ── Create profile in public.users ──
+  const user = await prisma.user.create({
+    data: {
+      id: authUserId, // same ID as auth.users for JOINs
+      username: normalizedUsername,
+      email: normalizedEmail,
+      // passwordHash handled by Supabase Auth
+    },
+  }).catch(async (prismaErr) => {
+    // Rollback: delete the auth user if profile creation fails
+    log.error({ err: prismaErr }, 'Profile creation failed, rolling back auth user');
+    await supabase.auth.admin.deleteUser(authUserId).catch(() => {});
+    throw new BadRequestError('Registration failed. Please try again.');
+  });
+
+  // ── Sign them in to get session tokens ──
+  const { data: sessionData, error: sessionError } = await supabase.auth.signInWithPassword({
+    email: normalizedEmail,
+    password,
+  });
+
+  if (sessionError) {
+    // User was created but we can't sign them in — rare edge case
+    log.error({ err: sessionError }, 'Auto-login after registration failed');
+    // Return user data but tell them to login manually
+    return res.status(201).json({
+      message: 'Account created successfully! Please login to continue.',
+      user: safeUser(user),
+      autoLoginFailed: true,
+    });
+  }
 
   log.info({ userId: user.id }, 'User registered successfully');
 
   res.status(201).json({
     message: 'Account created successfully! Welcome to DevChain.',
     user: safeUser(user),
-    accessToken,
-    refreshToken,
+    accessToken: sessionData.session.access_token,
+    refreshToken: sessionData.session.refresh_token,
   });
 });
 
@@ -121,28 +139,37 @@ const login = asyncHandler(async (req, res) => {
     throw new BadRequestError('Email and password are required.');
   }
 
+  // ── Authenticate via Supabase Auth ──
+  const { data: sessionData, error: authError } = await supabase.auth.signInWithPassword({
+    email: email.toLowerCase(),
+    password,
+  });
+
+  if (authError) {
+    log.warn({ email: email.toLowerCase() }, 'Login failed');
+    throw new UnauthorizedError('Invalid email or password.');
+  }
+
+  const authUserId = sessionData.user.id;
+
+  // ── Fetch profile from public.users ──
   const user = await prisma.user.findUnique({
-    where: { email: email.toLowerCase() },
+    where: { id: authUserId },
   });
 
   if (!user || !user.isActive) {
+    // User exists in auth.users but not in public.users or is deactivated
+    log.warn({ authUserId }, 'User authenticated but profile missing or inactive');
     throw new UnauthorizedError('Invalid email or password.');
   }
-
-  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-  if (!isPasswordValid) {
-    throw new UnauthorizedError('Invalid email or password.');
-  }
-
-  const { accessToken, refreshToken } = generateTokens(user.id, user.email);
 
   log.info({ userId: user.id }, 'User logged in');
 
   res.json({
     message: 'Welcome back to DevChain!',
     user: safeUser(user),
-    accessToken,
-    refreshToken,
+    accessToken: sessionData.session.access_token,
+    refreshToken: sessionData.session.refresh_token,
   });
 });
 
@@ -163,6 +190,7 @@ const getMe = asyncHandler(async (req, res) => {
 
 // ────────────────────────────────────────────────
 // REFRESH TOKEN
+// Uses Supabase session refresh instead of custom JWT rotation
 // ────────────────────────────────────────────────
 const refreshToken = asyncHandler(async (req, res) => {
   const { refreshToken: token } = req.body;
@@ -171,24 +199,23 @@ const refreshToken = asyncHandler(async (req, res) => {
     throw new BadRequestError('Refresh token is required.');
   }
 
-  let decoded;
-  try {
-    decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-  } catch (err) {
-    if (err.name === 'TokenExpiredError') {
+  const { data: sessionData, error } = await supabase.auth.refreshSession({
+    refresh_token: token,
+  });
+
+  if (error || !sessionData.session) {
+    if (error?.message?.includes('expired') || error?.message?.includes('invalid')) {
       throw new UnauthorizedError('Session expired. Please login again.');
     }
+    log.error({ err: error }, 'Token refresh failed');
     throw new UnauthorizedError('Invalid refresh token. Please login again.');
   }
 
-  // Issue new token pair (rotation)
-  const tokens = generateTokens(decoded.userId, decoded.email);
-
-  log.info({ userId: decoded.userId }, 'Tokens refreshed');
+  log.info('Tokens refreshed');
 
   res.json({
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
+    accessToken: sessionData.session.access_token,
+    refreshToken: sessionData.session.refresh_token,
   });
 });
 

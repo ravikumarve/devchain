@@ -48,25 +48,26 @@ app.use(corsMiddleware);
 app.use(httpLogger);
 
 // ══════════════════════════════════════════════
-//  RATE LIMITING
+//  RATE LIMITING (disabled in test mode)
 // ══════════════════════════════════════════════
-const globalLimiter = rateLimit({
+const globalLimiter = process.env.NODE_ENV !== 'test' ? rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests, please try again later.', code: 'RATE_LIMIT' },
-});
+}) : (req, res, next) => next();
+
 app.use('/api/', globalLimiter);
 
-// Stricter rate limit for auth routes
-const authLimiter = rateLimit({
+// Stricter rate limit for auth routes (disabled in test mode)
+const authLimiter = process.env.NODE_ENV !== 'test' ? rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many login attempts, please try again later.', code: 'AUTH_RATE_LIMIT' },
-});
+}) : (req, res, next) => next();
 
 // ══════════════════════════════════════════════
 //  BODY PARSER
@@ -88,6 +89,17 @@ app.get('/', (req, res) => {
 });
 
 app.get('/health', async (req, res) => {
+  const health = await getHealth();
+  res.status(health.status === 'ok' ? 200 : 503).json(health);
+});
+
+// Vercel-only: health + debug at /api/ namespace (Vercel rewrites /api/* to function)
+app.get('/api/health', async (req, res) => {
+  const health = await getHealth();
+  res.status(health.status === 'ok' ? 200 : 503).json(health);
+});
+
+async function getHealth() {
   const health = {
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -96,10 +108,8 @@ app.get('/health', async (req, res) => {
     version: '1.0.0',
   };
 
-  // Check database connectivity
   try {
-    const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient();
+    const prisma = require('./config/database');
     await prisma.$queryRaw`SELECT 1`;
     await prisma.$disconnect();
     health.database = 'connected';
@@ -109,9 +119,24 @@ app.get('/health', async (req, res) => {
     logger.error('Health check — database unreachable');
   }
 
-  const statusCode = health.status === 'ok' ? 200 : 503;
-  res.status(statusCode).json(health);
-});
+  try {
+    const { adminClient: sb } = require('./config/supabase');
+    // Timeout after 5s to prevent hanging (e.g., fake URLs in tests)
+    const healthResult = await Promise.race([
+      sb.auth.admin.listUsers({ page: 1, perPage: 1 }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timed out')), 5000)),
+    ]);
+    const { data, error } = healthResult;
+    health.supabaseAuth = error ? `error: ${error.message}` : `connected (${data?.users?.length || 0} users)`;
+    if (error) health.status = 'degraded';
+  } catch (err) {
+    health.supabaseAuth = `error: ${err.message === 'timed out' ? 'Supabase Auth unreachable (timeout)' : err.message}`;
+    health.status = 'degraded';
+    logger.error({ err }, 'Health check — Supabase Auth unreachable');
+  }
+
+  return health;
+}
 
 // ══════════════════════════════════════════════
 //  API ROUTES
@@ -123,6 +148,7 @@ app.use('/api/v1/jobs', require('./routes/jobs'));
 app.use('/api/v1/uploads', require('./routes/uploads'));
 app.use('/api/v1/payments', require('./routes/payments'));
 app.use('/api/v1/analytics', require('./routes/analytics'));
+app.use('/api/v1/reviews', require('./routes/reviews'));
 
 // Static file serving (local uploads — deprecated in favor of Supabase)
 app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
@@ -145,38 +171,45 @@ app.use(errorHandler);
 // ══════════════════════════════════════════════
 //  GRACEFUL SHUTDOWN
 // ══════════════════════════════════════════════
-const server = app.listen(PORT, '0.0.0.0', () => {
-  logger.info({
-    port: PORT,
-    environment: process.env.NODE_ENV || 'development',
-    frontend: process.env.FRONTEND_URL || 'http://localhost:5173',
-  }, 'DevChain API started');
-});
+let server;
 
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM received — shutting down gracefully');
-  server.close(() => {
-    logger.info('HTTP server closed');
-    process.exit(0);
+// Only start listening if run directly (not imported as module)
+if (require.main === module) {
+  server = app.listen(PORT, '0.0.0.0', () => {
+    logger.info({
+      port: PORT,
+      environment: process.env.NODE_ENV || 'development',
+      frontend: process.env.FRONTEND_URL || 'http://localhost:5173',
+    }, 'DevChain API started');
   });
-});
+}
 
-process.on('SIGINT', () => {
-  logger.info('SIGINT received — shutting down gracefully');
-  server.close(() => {
-    logger.info('HTTP server closed');
-    process.exit(0);
+if (server) {
+  process.on('SIGTERM', () => {
+    logger.info('SIGTERM received — shutting down gracefully');
+    server.close(() => {
+      logger.info('HTTP server closed');
+      process.exit(0);
+    });
   });
-});
 
-// Handle uncaught errors
-process.on('uncaughtException', (err) => {
-  logger.error({ err }, 'Uncaught exception');
-  server.close(() => process.exit(1));
-});
+  process.on('SIGINT', () => {
+    logger.info('SIGINT received — shutting down gracefully');
+    server.close(() => {
+      logger.info('HTTP server closed');
+      process.exit(0);
+    });
+  });
 
-process.on('unhandledRejection', (reason) => {
-  logger.error({ err: reason }, 'Unhandled rejection');
-});
+  // Handle uncaught errors
+  process.on('uncaughtException', (err) => {
+    logger.error({ err }, 'Uncaught exception');
+    server.close(() => process.exit(1));
+  });
+
+  process.on('unhandledRejection', (reason) => {
+    logger.error({ err: reason }, 'Unhandled rejection');
+  });
+}
 
 module.exports = app;
