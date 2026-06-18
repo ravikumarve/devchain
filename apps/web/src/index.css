@@ -297,6 +297,84 @@ textarea::placeholder {
   text-decoration: none;
 }
 
+/* Hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 110;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text-main);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+.hamburger.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Mobile overlay */
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: flex-end;
+}
+.mobile-menu {
+  width: 280px;
+  max-width: 80vw;
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-dim);
+  height: 100%;
+  padding: 96px 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: slideIn 0.2s ease;
+}
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.mobile-menu a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 0;
+}
+.mobile-menu a:hover {
+  color: var(--text-main);
+}
+.mobile-menu-divider {
+  height: 1px;
+  background: var(--border-dim);
+  margin: 8px 0;
+}
+.mobile-user {
+  color: var(--eth-purple) !important;
+  font-weight: 700;
+}
+
 .app-nav .btn-outline,
 .app-nav .btn-primary {
   padding: 0.5rem 1.5rem;
@@ -838,6 +916,12 @@ textarea::placeholder {
 @media (max-width: 768px) {
   .app-nav .nav-links {
     display: none;
+  }
+  .desktop-only {
+    display: none !important;
+  }
+  .hamburger {
+    display: flex;
   }
   .app-nav .nav-cta .btn-outline,
   .app-nav .nav-cta .btn-primary {

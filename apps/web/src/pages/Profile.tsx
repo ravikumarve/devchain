@@ -3,25 +3,11 @@ import { useNavigate, type NavigateFunction } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { ownershipAPI, jobsAPI, productsAPI } from '../services/api';
 
-interface ProductData {
-  id: string; title: string; category: string; downloadsCount: number;
-  price: number; isActive: boolean; seller?: { username: string };
-  tags?: string[]; description?: string;
-}
+interface ProductData { id: string; title: string; category: string; downloadsCount: number; price: number; isActive: boolean; seller?: { username: string }; tags?: string[]; description?: string; }
 interface UserRef { id: string; username: string; reputationScore?: number; }
-interface PurchaseData {
-  id: string; product?: ProductData & { seller?: UserRef };
-  purchasedAt: string; amountPaid: number;
-  certificate?: { ownershipHash: string; verifyUrl: string; };
-}
-interface SaleData {
-  id: string; product?: ProductData; buyer?: UserRef;
-  purchasedAt: string; amountPaid: number;
-}
-interface JobData {
-  id: string; title: string; budgetMin: number; budgetMax: number;
-  proposalCount: number; status: string; client?: UserRef;
-}
+interface PurchaseData { id: string; product?: ProductData & { seller?: UserRef }; purchasedAt: string; amountPaid: number; certificate?: { ownershipHash: string; verifyUrl: string; }; }
+interface SaleData { id: string; product?: ProductData; buyer?: UserRef; purchasedAt: string; amountPaid: number; }
+interface JobData { id: string; title: string; budgetMin: number; budgetMax: number; proposalCount: number; status: string; client?: UserRef; }
 
 export default function Profile() {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -41,81 +27,59 @@ export default function Profile() {
   const loadTab = async (t: string) => {
     setLoading(true);
     try {
-      if (t === 'purchases') {
-        const res = await ownershipAPI.myPurchases();
-        setPurchases(res.data.purchases || []);
-      } else if (t === 'sales') {
-        const res = await ownershipAPI.mySales();
-        setSales(res.data.sales || []);
-      } else if (t === 'products') {
-        const res = await productsAPI.getMine();
-        setProducts(res.data.products || []);
-      } else if (t === 'jobs') {
-        const res = await jobsAPI.myJobs();
-        setJobs(res.data.jobs || []);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+      if (t === 'purchases') { const res = await ownershipAPI.myPurchases(); setPurchases(res.data.purchases || []); }
+      else if (t === 'sales') { const res = await ownershipAPI.mySales(); setSales(res.data.sales || []); }
+      else if (t === 'products') { const res = await productsAPI.getMine(); setProducts(res.data.products || []); }
+      else if (t === 'jobs') { const res = await jobsAPI.myJobs(); setJobs(res.data.jobs || []); }
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
   };
 
   const handleLogout = () => { logout(); navigate('/'); };
-
   if (!isAuthenticated) return null;
 
   return (
-    <div style={styles.container}>
-      <div style={styles.inner}>
-
+    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'var(--bg-void)' }}>
+      <div className="container" style={{ padding: '48px 2rem' }}>
         {/* Profile Header */}
-        <div style={styles.profileCard}>
-          <div style={styles.avatarWrap}>
-            <div style={styles.avatar}>
+        <div className="card" style={{ padding: 32, display: 'flex', alignItems: 'center', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative' }}>
+            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--eth-purple), #9F67FF)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 800, color: '#fff' }}>
               {user?.username?.[0]?.toUpperCase()}
             </div>
-            <div style={styles.onlineDot} />
+            <div style={{ position: 'absolute', bottom: 4, right: 4, width: 14, height: 14, borderRadius: '50%', background: '#10b981', border: '2px solid var(--bg-surface)' }} />
           </div>
-          <div style={styles.profileInfo}>
-            <h1 style={styles.username}>@{user?.username}</h1>
-            <p style={styles.email}>{user?.email}</p>
-            <div style={styles.repBadge}>
-              <span>⭐</span>
-              <span>{user?.reputationScore} Reputation Score</span>
+          <div style={{ flex: 1 }}>
+            <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.03em', marginBottom: 4 }}>@{user?.username}</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 10 }}>{user?.email}</p>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--bg-panel)', border: '1px solid var(--crypto-gold-dim)', borderRadius: 20, padding: '4px 12px', color: 'var(--crypto-gold)', fontSize: 13, fontWeight: 600 }}>
+              ⭐ {user?.reputationScore} Reputation Score
             </div>
           </div>
-          <button
-            className="btn-secondary"
-            onClick={handleLogout}
-            style={{ marginLeft: 'auto', padding: '10px 20px' }}
-          >
+          <button className="btn-outline" onClick={handleLogout} style={{ padding: '10px 20px', fontSize: 13 }}>
             Logout
           </button>
         </div>
 
         {/* Tabs */}
-        <div style={styles.tabs}>
+        <div style={{ display: 'flex', gap: 4, background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 12, padding: 4, marginBottom: 32, flexWrap: 'wrap' }}>
           {[
             { key: 'purchases', label: '🧾 My Purchases' },
             { key: 'sales', label: '💰 My Sales' },
             { key: 'products', label: '📦 My Products' },
             { key: 'jobs', label: '💼 My Jobs' },
           ].map(t => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key as 'purchases' | 'sales' | 'products' | 'jobs')}
-              style={{ ...styles.tab, ...(tab === t.key ? styles.tabActive : {}) }}
-            >
+            <button key={t.key} onClick={() => setTab(t.key as 'purchases' | 'sales' | 'products' | 'jobs')}
+              style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: 'none', background: tab === t.key ? 'var(--eth-purple)' : 'transparent', color: tab === t.key ? '#fff' : 'var(--text-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer', transition: 'all 0.2s', fontFamily: 'var(--font-display)', minWidth: 120 }}>
               {t.label}
             </button>
           ))}
         </div>
 
         {/* Content */}
-        <div style={styles.content}>
+        <div style={{ minHeight: 300 }}>
           {loading ? (
-            <div style={styles.loading}>Loading...</div>
+            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>Loading...</div>
           ) : tab === 'purchases' ? (
             <PurchasesList purchases={purchases} />
           ) : tab === 'sales' ? (
@@ -126,7 +90,6 @@ export default function Profile() {
             <JobsList jobs={jobs} navigate={navigate} />
           )}
         </div>
-
       </div>
     </div>
   );
@@ -135,22 +98,22 @@ export default function Profile() {
 function PurchasesList({ purchases }: { purchases: PurchaseData[] }) {
   if (purchases.length === 0) return <Empty icon="🧾" text="No purchases yet" sub="Browse the marketplace to find something amazing" />;
   return (
-    <div style={listStyles.list}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {purchases.map(p => (
-        <div key={p.id} className="card" style={listStyles.item}>
-          <div style={listStyles.itemTop}>
+        <div key={p.id} className="card" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
             <div>
-              <h3 style={listStyles.itemTitle}>{p.product?.title}</h3>
-              <p style={listStyles.itemSub}>by @{p.product?.seller?.username} · {new Date(p.purchasedAt).toLocaleDateString()}</p>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-main)', marginBottom: 4 }}>{p.product?.title}</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>by @{p.product?.seller?.username} · {new Date(p.purchasedAt).toLocaleDateString()}</p>
             </div>
-            <span style={listStyles.amount}>${p.amountPaid?.toFixed(2)}</span>
+            <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--eth-purple)', whiteSpace: 'nowrap', fontFamily: 'var(--font-mono)' }}>${p.amountPaid?.toFixed(2)}</span>
           </div>
           {p.certificate?.ownershipHash && (
-            <div style={listStyles.certBox}>
-              <div style={listStyles.certLabel}>🔐 BLOCKCHAIN CERTIFICATE</div>
-              <div style={listStyles.certHash}>{p.certificate.ownershipHash}</div>
-              <div style={listStyles.certVerify}>
-                <a href={`https://devchain.onrender.com${p.certificate.verifyUrl}`} target="_blank" rel="noreferrer" style={{ color: '#7C3AED', fontSize: 12 }}>
+            <div style={{ marginTop: 16, background: 'var(--bg-void)', border: '1px solid var(--eth-purple-dim)', borderRadius: 10, padding: 14 }}>
+              <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--eth-purple)', letterSpacing: 2, marginBottom: 8, fontFamily: 'var(--font-mono)' }}>🔐 SHA-256 CERTIFICATE</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#9F67FF', wordBreak: 'break-all', lineHeight: 1.6 }}>{p.certificate.ownershipHash}</div>
+              <div style={{ marginTop: 8 }}>
+                <a href={`https://devchain.onrender.com${p.certificate.verifyUrl}`} target="_blank" rel="noreferrer" style={{ color: 'var(--eth-purple)', fontSize: 12, fontFamily: 'var(--font-mono)' }}>
                   Verify on-chain →
                 </a>
               </div>
@@ -167,19 +130,19 @@ function SalesList({ sales }: { sales: SaleData[] }) {
   const total = sales.reduce((sum: number, s: SaleData) => sum + (s.amountPaid || 0), 0);
   return (
     <div>
-      <div style={listStyles.totalBox}>
-        <span style={listStyles.totalLabel}>Total Revenue</span>
-        <span style={listStyles.totalValue}>${total.toFixed(2)}</span>
+      <div style={{ background: 'linear-gradient(135deg, var(--bg-void), var(--bg-surface))', border: '1px solid var(--eth-purple-dim)', borderRadius: 16, padding: 24, marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: 16, color: 'var(--text-muted)', fontWeight: 600 }}>Total Revenue</span>
+        <span style={{ fontSize: 40, fontWeight: 900, color: 'var(--eth-purple)', fontFamily: 'var(--font-mono)' }}>${total.toFixed(2)}</span>
       </div>
-      <div style={listStyles.list}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {sales.map((s: SaleData) => (
-          <div key={s.id} className="card" style={listStyles.item}>
-            <div style={listStyles.itemTop}>
+          <div key={s.id} className="card" style={{ padding: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
               <div>
-                <h3 style={listStyles.itemTitle}>{s.product?.title}</h3>
-                <p style={listStyles.itemSub}>bought by @{s.buyer?.username} · {new Date(s.purchasedAt).toLocaleDateString()}</p>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-main)', marginBottom: 4 }}>{s.product?.title}</h3>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>bought by @{s.buyer?.username} · {new Date(s.purchasedAt).toLocaleDateString()}</p>
               </div>
-              <span style={listStyles.amount}>+${s.amountPaid?.toFixed(2)}</span>
+              <span style={{ fontSize: 22, fontWeight: 800, color: '#10b981', whiteSpace: 'nowrap', fontFamily: 'var(--font-mono)' }}>+${s.amountPaid?.toFixed(2)}</span>
             </div>
           </div>
         ))}
@@ -191,18 +154,18 @@ function SalesList({ sales }: { sales: SaleData[] }) {
 function ProductsList({ products }: { products: ProductData[] }) {
   if (!products.length) return <Empty icon="📦" text="No products listed" sub="Start selling your code on DevChain" />;
   return (
-    <div style={listStyles.list}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {products.map((p: ProductData) => (
-        <div key={p.id} className="card" style={listStyles.item}>
-          <div style={listStyles.itemTop}>
+        <div key={p.id} className="card" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
             <div>
-              <h3 style={listStyles.itemTitle}>{p.title}</h3>
-              <p style={listStyles.itemSub}>{p.category} · {p.downloadsCount} sales</p>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-main)', marginBottom: 4 }}>{p.title}</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{p.category} · {p.downloadsCount} sales</p>
             </div>
-            <span style={listStyles.amount}>${p.price?.toFixed(2)}</span>
+            <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--eth-purple)', whiteSpace: 'nowrap', fontFamily: 'var(--font-mono)' }}>${p.price?.toFixed(2)}</span>
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            <span style={{ ...listStyles.badge, background: p.isActive ? '#05966922' : '#DC262622', color: p.isActive ? '#059669' : '#DC2626' }}>
+            <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-mono)', background: p.isActive ? '#10b98122' : '#DC262622', color: p.isActive ? '#10b981' : '#DC2626' }}>
               {p.isActive ? 'Active' : 'Inactive'}
             </span>
           </div>
@@ -215,15 +178,17 @@ function ProductsList({ products }: { products: ProductData[] }) {
 function JobsList({ jobs, navigate }: { jobs: JobData[]; navigate: NavigateFunction }) {
   if (!jobs.length) return <Empty icon="💼" text="No jobs posted" sub="Post a job to hire DevChain developers" />;
   return (
-    <div style={listStyles.list}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {jobs.map((j: JobData) => (
-        <div key={j.id} className="card" style={{ ...listStyles.item, cursor: 'pointer' }} onClick={() => navigate(`/job/${j.id}`)}>
-          <div style={listStyles.itemTop}>
+        <div key={j.id} className="card interactive" style={{ padding: 24, cursor: 'pointer' }} onClick={() => navigate(`/job/${j.id}`)}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
             <div>
-              <h3 style={listStyles.itemTitle}>{j.title}</h3>
-              <p style={listStyles.itemSub}>${j.budgetMin}–${j.budgetMax} · {j.proposalCount} proposals</p>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-main)', marginBottom: 4 }}>{j.title}</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>${j.budgetMin}–${j.budgetMax} · {j.proposalCount} proposals</p>
             </div>
-            <span style={{ ...listStyles.badge, background: '#05966922', color: '#059669' }}>{j.status}</span>
+            <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-mono)', background: '#10b98122', color: '#10b981' }}>
+              {j.status}
+            </span>
           </div>
         </div>
       ))}
@@ -234,44 +199,9 @@ function JobsList({ jobs, navigate }: { jobs: JobData[]; navigate: NavigateFunct
 function Empty({ icon, text, sub }: { icon: string; text: string; sub: string }) {
   return (
     <div style={{ textAlign: 'center', padding: '60px 0' }}>
-      <div style={{ fontSize: 48, marginBottom: 16 }}>{icon}</div>
-      <h3 style={{ fontSize: 20, marginBottom: 8 }}>{text}</h3>
-      <p style={{ color: '#9898b0' }}>{sub}</p>
+      <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.3 }}>{icon}</div>
+      <h3 style={{ fontSize: 20, color: 'var(--text-main)', marginBottom: 8 }}>{text}</h3>
+      <p style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>{sub}</p>
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  container: { paddingTop: 64, minHeight: '100vh' },
-  inner: { maxWidth: 900, margin: '0 auto', padding: '48px 24px' },
-  profileCard: { background: '#0d0d12', border: '1px solid #1e1e2e', borderRadius: 20, padding: 32, display: 'flex', alignItems: 'center', gap: 24, marginBottom: 32, flexWrap: 'wrap' },
-  avatarWrap: { position: 'relative' },
-  avatar: { width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, #7C3AED, #9F67FF)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 800, color: '#fff' },
-  onlineDot: { position: 'absolute', bottom: 4, right: 4, width: 14, height: 14, borderRadius: '50%', background: '#059669', border: '2px solid #0d0d12' },
-  profileInfo: { flex: 1 },
-  username: { fontSize: 28, fontWeight: 800, marginBottom: 4 },
-  email: { color: '#9898b0', fontSize: 15, marginBottom: 10 },
-  repBadge: { display: 'inline-flex', alignItems: 'center', gap: 6, background: '#1a1400', border: '1px solid #F59E0B44', borderRadius: 20, padding: '4px 12px', color: '#F59E0B', fontSize: 13, fontWeight: 600 },
-  tabs: { display: 'flex', gap: 4, background: '#0d0d12', border: '1px solid #1e1e2e', borderRadius: 12, padding: 4, marginBottom: 32, flexWrap: 'wrap' },
-  tab: { flex: 1, padding: '10px 16px', borderRadius: 8, border: 'none', background: 'transparent', color: '#9898b0', fontWeight: 600, fontSize: 14, cursor: 'pointer', transition: 'all 0.2s', fontFamily: 'Inter, sans-serif', minWidth: 120 },
-  tabActive: { background: '#7C3AED', color: '#fff' },
-  content: { minHeight: 300 },
-  loading: { textAlign: 'center', padding: '60px 0', color: '#9898b0' },
-};
-
-const listStyles: Record<string, React.CSSProperties> = {
-  list: { display: 'flex', flexDirection: 'column', gap: 16 },
-  item: { padding: 24 },
-  itemTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 },
-  itemTitle: { fontSize: 18, fontWeight: 700, marginBottom: 4 },
-  itemSub: { fontSize: 13, color: '#9898b0' },
-  amount: { fontSize: 22, fontWeight: 800, color: '#7C3AED', whiteSpace: 'nowrap' },
-  certBox: { marginTop: 16, background: '#0a0a12', border: '1px solid #7C3AED33', borderRadius: 10, padding: 14 },
-  certLabel: { fontSize: 10, fontWeight: 800, color: '#7C3AED', letterSpacing: 2, marginBottom: 8 },
-  certHash: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#9F67FF', wordBreak: 'break-all', lineHeight: 1.6 },
-  certVerify: { marginTop: 8 },
-  totalBox: { background: 'linear-gradient(135deg, #1a0a2e, #0d0d12)', border: '1px solid #7C3AED44', borderRadius: 16, padding: 24, marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  totalLabel: { fontSize: 16, color: '#9898b0', fontWeight: 600 },
-  totalValue: { fontSize: 40, fontWeight: 900, color: '#7C3AED' },
-  badge: { padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700 },
-};
