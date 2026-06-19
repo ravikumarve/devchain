@@ -79,7 +79,7 @@ export default function Chat() {
 
   // Create conversation if preselectedUserId and no existing found
   useEffect(() => {
-    if (!preselectedUserId || loadingConv || conversations.length === 0) return;
+    if (!preselectedUserId || loadingConv) return;
     const exists = conversations.find((c) => c.otherUser.id === preselectedUserId);
     if (!exists && !selectedConv) {
       chatAPI
