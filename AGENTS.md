@@ -21,6 +21,18 @@ devchain/
 
 ---
 
+### [2026-06-19 15:10] - Chat Auto-Create Bug Fixed
+- **State**: Success
+- **Bug**: `Chat.tsx` line 82 had `if (!preselectedUserId || loadingConv || conversations.length === 0) return;` — the `conversations.length === 0` guard prevented auto-creating a conversation when the user had zero existing conversations (first-time users). First-time clickers got a blank "Select a conversation" screen with no input box.
+- **Fix**: Removed `conversations.length === 0` guard from the auto-create useEffect so users with no conversations can still start one via `?userId=` param
+- **Verification**: Full send/receive flow tested ✅ | TypeScript ✅ | Vite build ✅ | 187/187 tests ✅
+
+### [2026-06-19 15:00] - Jobs/Products Rendering Fixed
+- **State**: Success  
+- **Root Cause**: Previous deployment hadn't fully propagated on Vercel — the Prisma schema changes (`@map` annotations, Review→Product relation) needed a clean build cycle to regenerate the Prisma client on the serverless runtime.
+- **Fix**: Waited for Vercel deployment to complete; pushed a diagnostic commit which triggered a fresh build + deploy cycle.
+- **Verification**: Products (8) ✅ | Jobs (6) ✅
+
 ### [2026-06-19 15:00] - Chat Functionality Complete — Message Buttons Added
 - **State**: Success
 - **Summary**: Added "Message Client" and "Message Seller" buttons on job/product detail pages to initiate conversations

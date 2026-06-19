@@ -140,7 +140,7 @@ function handlePrismaError(err, res) {
   return res.status(500).json({
     error: 'Database error',
     code: 'DATABASE_ERROR',
-    details: err.message,
+    ...(process.env.NODE_ENV === 'development' && { details: err.message }),
   });
 }
 
