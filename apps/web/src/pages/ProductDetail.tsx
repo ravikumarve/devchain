@@ -612,6 +612,21 @@ export default function ProductDetail() {
                       </div>
                     </div>
                   </div>
+                  {/* Message Seller button — only for non-owners */}
+                  {!isOwner && (
+                    <div style={{ marginTop: 14 }}>
+                      <button
+                        onClick={() => {
+                          if (!isAuthenticated) return navigate('/login');
+                          navigate(`/chat?userId=${product.seller?.id}`);
+                        }}
+                        className="btn-outline"
+                        style={{ width: '100%', padding: '12px', fontSize: 14 }}
+                      >
+                        💬 Message Seller
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

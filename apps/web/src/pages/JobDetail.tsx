@@ -126,6 +126,22 @@ export default function JobDetail() {
                   )}
                 </div>
 
+                {/* Message Client button — only for non-owners */}
+                {!isOwner && (
+                  <div style={{ padding: '0 24px 20px' }}>
+                    <button
+                      onClick={() => {
+                        if (!isAuthenticated) return navigate('/login');
+                        navigate(`/chat?userId=${job.client?.id}&jobId=${job.id}`);
+                      }}
+                      className="btn-outline"
+                      style={{ width: '100%', padding: '12px', fontSize: 14 }}
+                    >
+                      💬 Message Client
+                    </button>
+                  </div>
+                )}
+
                 <div style={{ padding: '20px 24px', borderTop: '1px solid var(--border-dim)' }}>
                   <div style={{ color: 'var(--text-faint)', fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 12 }}>Client</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
