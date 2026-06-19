@@ -1,5 +1,4 @@
 // src/screens/RegisterScreen.tsx
-// Fixed — adds displayName field required by our backend
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
@@ -9,14 +8,13 @@ import {
 import { useAuthStore } from '../store/authStore';
 
 export default function RegisterScreen({ navigation }: any) {
-  const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { register, isLoading } = useAuthStore();
 
   const handleRegister = async () => {
-    if (!displayName || !username || !email || !password) {
+    if (!username || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
@@ -29,7 +27,7 @@ export default function RegisterScreen({ navigation }: any) {
       return;
     }
     try {
-      await register({ displayName, username, email: email.trim(), password });
+      await register({ username, email: email.trim(), password });
     } catch (err: any) {
       Alert.alert('Registration Failed', err.response?.data?.error || 'Something went wrong.');
     }
@@ -49,17 +47,6 @@ export default function RegisterScreen({ navigation }: any) {
         <View style={styles.form}>
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Join the developer marketplace</Text>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Display Name</Text>
-            <TextInput
-              style={styles.input}
-              value={displayName}
-              onChangeText={setDisplayName}
-              placeholder="Ravi Kumar"
-              placeholderTextColor="#555"
-            />
-          </View>
 
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Username</Text>

@@ -91,7 +91,7 @@ export default function NotificationsScreen() {
     >
       <Text style={styles.icon}>{TYPE_ICONS[item.type] ?? '🔔'}</Text>
       <View style={{ flex: 1 }}>
-        <Text style={[styles.title, !item.isRead && styles.unreadText]}>{item.title}</Text>
+        <Text style={[styles.notifTitle, !item.isRead && styles.unreadText]}>{item.title}</Text>
         {item.message && <Text style={styles.message}>{item.message}</Text>}
         <Text style={styles.time}>{relativeTime(item.createdAt)}</Text>
       </View>
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   },
   unread: { borderColor: '#7C3AED' },
   icon: { fontSize: 24 },
-  title: { fontSize: 14, fontWeight: '600', color: '#ddd', marginBottom: 2 },
+  notifTitle: { fontSize: 14, fontWeight: '600', color: '#ddd', marginBottom: 2 },
   unreadText: { color: '#fff', fontWeight: '700' },
   message: { fontSize: 12, color: '#888', marginBottom: 4 },
   time: { fontSize: 11, color: '#555' },

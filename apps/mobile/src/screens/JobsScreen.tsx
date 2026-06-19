@@ -5,7 +5,7 @@ import {
   View, Text, FlatList, TouchableOpacity,
   StyleSheet, ActivityIndicator, RefreshControl, TextInput,
 } from 'react-native';
-import { gigsAPI } from '../services/api';
+import { jobsAPI } from '../services/api';
 
 interface Gig {
   id: string;
@@ -49,9 +49,8 @@ export default function JobsScreen({ navigation }: any) {
       const params: any = { page: 1, limit: 20 };
       if (activeFilter !== 'All') params.category = activeFilter;
 
-      const res = await gigsAPI.getAll(params);
-      // Our backend: { success: true, data: { items, total, hasMore } }
-      setGigs(res.data.data.items);
+      const res = await jobsAPI.getAll(params);
+      setGigs(res.data.jobs ?? res.data.data?.items ?? []);
     } catch (err) {
       console.error('[JobsScreen] fetch error:', err);
     } finally {
@@ -64,8 +63,8 @@ export default function JobsScreen({ navigation }: any) {
     if (!search.trim()) { fetchGigs(); return; }
     try {
       setLoading(true);
-      const res = await gigsAPI.search(search.trim());
-      setGigs(res.data.data.items);
+      const res = await jobsAPI.getAll({ q: search.trim() });
+      setGigs(res.data.jobs ?? res.data.data?.items ?? []);
     } catch (err) {
       console.error('[JobsScreen] search error:', err);
     } finally {

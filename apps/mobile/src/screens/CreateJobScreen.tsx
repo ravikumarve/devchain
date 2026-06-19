@@ -7,7 +7,7 @@ import {
   StyleSheet, ScrollView, ActivityIndicator,
   KeyboardAvoidingView, Platform, Alert,
 } from 'react-native';
-import { gigsAPI } from '../services/api';
+import { jobsAPI } from '../services/api';
 
 export default function CreateJobScreen({ navigation }: any) {
   const [title, setTitle] = useState('');
@@ -43,7 +43,7 @@ export default function CreateJobScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      await gigsAPI.create({
+      await jobsAPI.create({
         title: title.trim(),
         description: description.trim(),
         priceFrom: priceFromCents,

@@ -56,7 +56,6 @@ export default function ChatThreadScreen() {
 
     const optimistic: Message = {
       id: 'temp-' + Date.now(),
-      conversationId,
       senderId: user?.id ?? '',
       content,
       createdAt: new Date().toISOString(),

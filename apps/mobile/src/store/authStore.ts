@@ -10,8 +10,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  displayName: string;
-  role: 'buyer' | 'seller' | 'admin';
+  role?: string;
   avatarUrl?: string | null;
   bio?: string | null;
 }
@@ -27,7 +26,6 @@ interface AuthState {
     username: string;
     email: string;
     password: string;
-    displayName: string;
   }) => Promise<void>;
   logout: () => Promise<void>;
   loadUser: () => Promise<void>;
@@ -86,10 +84,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  register: async ({ username, email, password, displayName }) => {
+  register: async ({ username, email, password }) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await authAPI.register({ username, email, password, displayName });
+      const res = await authAPI.register({ username, email, password });
       const { user, accessToken, refreshToken } = res.data.data;
       await saveAuth(accessToken, refreshToken, user);
       set({ user, token: accessToken, isAuthenticated: true });
@@ -104,12 +102,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
-    try {
-      await authAPI.logout();
-    } catch (err) {
-      // Best effort — log but don't block logout
-      console.warn('[authStore] logout API call failed:', err);
-    }
     await clearAuth();
     set({ user: null, token: null, isAuthenticated: false, error: null });
 

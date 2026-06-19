@@ -5,7 +5,7 @@ import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, ActivityIndicator, Alert, Modal,
 } from 'react-native';
-import { productsAPI, ordersAPI } from '../services/api';
+import { productsAPI, ownershipAPI } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 
 interface Product {
@@ -101,9 +101,8 @@ export default function ProductDetailScreen({ route, navigation }: any) {
   const processPurchase = async () => {
     setBuying(true);
     try {
-      const res = await ordersAPI.create({ productId: product!.id });
-      // Our backend: { success: true, data: { order, certificate, product } }
-      const result = res.data.data as PurchaseResult;
+      const res = await ownershipAPI.purchase({ productId: product!.id });
+      const result = res.data as PurchaseResult;
       setPurchaseResult(result);
       setCertModal(true);
     } catch (err: any) {

@@ -65,6 +65,9 @@ export default function AnalyticsScreen() {
     { label: 'Avg. Rating', value: reviews?.averageRating?.toFixed(1) ?? '—' },
   ];
 
+  // Narrow reviews type for JSX
+  const rev = reviews as ReviewMetric | null;
+
   return (
     <ScrollView
       style={styles.container}
@@ -84,13 +87,13 @@ export default function AnalyticsScreen() {
       </View>
 
       {/* Rating breakdown */}
-      {reviews?.totalReviews > 0 && (
+      {rev?.totalReviews != null && rev.totalReviews > 0 && (
         <>
           <Text style={styles.sectionTitle}>Ratings Breakdown</Text>
           <View style={styles.card}>
             {[5, 4, 3, 2, 1].map((star) => {
-              const count = reviews.ratingBreakdown[star] ?? 0;
-              const pct = reviews.totalReviews > 0 ? (count / reviews.totalReviews) * 100 : 0;
+              const count = (rev!.ratingBreakdown[star] ?? 0);
+              const pct = rev!.totalReviews > 0 ? (count / rev!.totalReviews) * 100 : 0;
               return (
                 <View key={star} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
                   <Text style={{ width: 30, color: '#999', fontSize: 13 }}>{star}★</Text>
@@ -106,10 +109,10 @@ export default function AnalyticsScreen() {
       )}
 
       {/* Insights */}
-      {reviews?.insights?.length > 0 && (
+      {rev?.insights != null && rev.insights.length > 0 && (
         <>
           <Text style={styles.sectionTitle}>Insights</Text>
-          {reviews.insights.map((ins, i) => (
+          {rev.insights.map((ins, i) => (
             <View key={i} style={[styles.card, { borderLeftWidth: 3, borderLeftColor: ins.type === 'praise' ? '#10b981' : ins.type === 'warning' ? '#f59e0b' : '#7C3AED' }]}>
               <Text style={{ color: '#ccc', fontSize: 13 }}>{ins.message}</Text>
             </View>

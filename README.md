@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">DevChain 🚀</h1>
   <p align="center">
-    <strong>The Developer Marketplace with SHA-256 Verified Ownership</strong> — Sell digital products & services with verifiable ownership certificates
+    <strong>Gumroad + Fiverr + GitHub Marketplace</strong> — Sell digital products, offer services, hire talent, all secured by SHA-256 cryptographic ownership verification
   </p>
 </p>
 
@@ -21,426 +21,398 @@
   <img src="https://img.shields.io/badge/typescript-5.0+-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/node.js-20+-339933?logo=node.js&logoColor=white" alt="Node.js" />
   <img src="https://img.shields.io/badge/react-19-61DAFB?logo=react&logoColor=white" alt="React 19" />
+  <img src="https://img.shields.io/badge/React%20Native-Expo-000020?logo=expo&logoColor=white" alt="React Native Expo" />
   <img src="https://img.shields.io/badge/SHA--256-Ownership-8B5CF6?logo=cryptography&logoColor=white" alt="SHA-256 Ownership" />
   <img src="https://img.shields.io/badge/tests-187%20passing-22C55E" alt="187 tests passing" />
+  <img src="https://img.shields.io/badge/CI-Passing-22C55E?logo=githubactions" alt="CI Passing" />
 </p>
 
-<p align="center">
-  <img src="assets/demo-placeholder.png" alt="DevChain Demo" width="800" />
-  <br>
-  <em>🎥 Demo: Browse products, purchase with Stripe, and get instant SHA-256 ownership certificates</em>
-  <br>
-  <small><a href="assets/demo-instructions.md">📹 Learn how to create the full demo GIF</a></small>
-</p>
-
-DevChain is a next-generation marketplace where developers can sell digital products, offer services, and connect with clients — all secured by SHA-256 cryptographic ownership verification.
-
-## ✨ Features
-
-- **🛍️ Sell Digital Products**: Templates, tools, courses, scripts, design assets with instant delivery
-- **🔐 SHA-256 Verified Ownership**: Every purchase gets a verifiable cryptographic certificate
-- **📊 Real-time Analytics**: Track sales, revenue, and performance metrics
-- **⚡ Instant File Delivery**: Automated upload/download via Supabase Storage
-- **🌐 Full-Stack TypeScript**: Web + mobile apps with end-to-end type safety
-- **💼 Services Marketplace**: Post jobs, hire developers, manage projects securely
-
-## 🚀 Quick Start
-
-Get up and running in **3 simple steps**:
-
-### Step 1: Install Dependencies
-
-```bash
-# Install all workspace dependencies
-npm run install:all
-```
-
-### Step 2: Configure Environment
-
-```bash
-# Copy environment templates
-cp .env.example .env
-cp backend/.env.example backend/.env
-
-# Edit backend/.env with your credentials:
-# - DATABASE_URL (PostgreSQL connection string)
-# - JWT_SECRET & JWT_REFRESH_SECRET
-# - SUPABASE_URL & SUPABASE_SERVICE_KEY
-# - STRIPE_SECRET_KEY & STRIPE_WEBHOOK_SECRET
-```
-
-### Step 3: Start Development Servers
-
-```bash
-# Terminal 1: Backend API
-npm start              # http://localhost:10000
-
-# Terminal 2: Web App
-cd apps/web
-npm run dev            # http://localhost:5173
-
-# Terminal 3: Mobile App (optional)
-cd apps/mobile
-npm run start          # Expo dev server
-```
-
-**🎉 That's it!** You're now running DevChain locally. Visit `http://localhost:5173` to see the marketplace in action.
+DevChain is a next-generation developer marketplace where you can **sell digital products**, **offer freelance services**, **hire developers**, and **manage projects** — all secured by SHA-256 cryptographic ownership verification.
 
 ---
 
-## 🏗️ Architecture Overview
+## ✨ Features
 
-```
-devchain/
-├── apps/
-│   ├── web/           # React 19 + TypeScript + Vite
-│   └── mobile/        # React Native + Expo
-├── backend/           # Node.js + Express + Prisma
-├── packages/
-│   └── shared/        # Shared types and utilities
-└── docs/              # Documentation
-```
+### 🛍️ Product Marketplace
+- Sell digital products (templates, tools, courses, scripts, design assets)
+- Instant file delivery via Supabase Storage (signed URLs)
+- SHA-256 ownership certificates for every purchase
+- Reviews & ratings system with verified-purchase enforcement
 
-### 📊 Tech Stack
+### 💼 Job Board & Escrow
+- Post development jobs with budget ranges and skill requirements
+- Freelancers submit proposals with rates and delivery timelines
+- **Escrow-based payment protection** — fund held until work is released
+- Full lifecycle: propose → accept → fund → work → release
 
-| Layer          | Technology                   | Purpose                          |
-| -------------- | ---------------------------- | -------------------------------- |
-| **Frontend**   | React 19 + TypeScript + Vite | Modern web app with type safety  |
-| **Mobile**     | React Native + Expo          | Cross-platform mobile experience |
-| **Backend**    | Node.js + Express            | RESTful API server               |
-| **Database**   | PostgreSQL + Prisma          | Type-safe database operations    |
-| **Storage**    | Supabase Storage             | Secure file upload/download      |
-| **Auth**       | JWT + bcrypt                 | Secure authentication system     |
-| **Deployment** | Vercel + Supabase            | Scalable cloud infrastructure    |
+### 🔔 In-App Notifications
+- Real-time alerts for: proposals received/accepted/rejected, new sales, new reviews, escrow events
+- Notification bell in navbar with unread badge
+- Auto-created on all key events (fire-and-forget, non-blocking)
 
-## 🎯 Core Features
+### 💬 Direct Messaging
+- Real-time chat between clients and freelancers
+- Conversation list with last message preview
+- Optimistic sends with error recovery
+- Message read tracking (mark as read on open)
 
-### 🛒 Marketplace
+### 👤 User Profiles
+- Bio, avatar, reputation score display
+- Tabbed view: purchases, sales, products, jobs
+- Edit profile (bio) from the web UI
 
-- Browse and search digital products
-- Filter by category, price, tags
-- Secure checkout with SHA-256 ownership verification
-
-### 👨‍💼 Seller Dashboard
-
-- **Analytics**: Revenue tracking, sales performance
-- **Product Management**: Create, edit, manage listings
-- **File Delivery**: Automated upload/download system
-
-### 💼 Job Board
-
-- Post development jobs
-- Apply with proposals
-- Hire developers securely
-
-### ⭐ Reviews & Ratings
-
-- Rate products after verified purchase (1-5 stars)
-- Write detailed reviews with optional images
-- Aggregate ratings shown on product cards and detail pages
-- Seller reputation scoring based on review history
-- Prevents duplicate reviews and abuse with purchase verification
+### 📊 Seller Analytics
+- Revenue tracking, sales performance, product metrics
+- Rating breakdown (1-5 star distribution)
+- Top-rated products with average ratings
+- Insight cards (praise, warnings, nudges)
 
 ### 🔐 Authentication
+- JWT access + refresh tokens (15m / 7d)
+- Automatic silent token refresh on 401
+- Axios interceptor queues failed requests during refresh
 
-- JWT-based auth with refresh tokens
-- Protected routes with role-based access
-- Secure file access controls
+### 📱 Mobile App (React Native + Expo)
+- Cross-platform iOS/Android/web from one codebase
+- All core screens: Marketplace, Jobs, Analytics, Profile
+- Notifications, Chat, My Jobs, My Proposals
+- Auth flow with token persistence (AsyncStorage)
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# 1. Install dependencies (from monorepo root)
+npm ci
+
+# 2. Configure environment
+cp backend/.env.example backend/.env
+# Edit backend/.env with your Supabase credentials, JWT secrets, etc.
+
+# 3. Start backend + web app
+npm start                # Backend on :10000
+cd apps/web && npm run dev  # Web on :5173
+
+# 4. (Optional) Start mobile app
+cd apps/mobile && npm run start  # Expo dev server
+```
+
+---
+
+## 🏗️ Architecture
+
+```
+devchain/                          (npm workspaces monorepo)
+├── apps/
+│   ├── web/                       # React 19 + TypeScript + Vite
+│   │   └── src/
+│   │       ├── pages/             # 16 pages (Marketplace, Jobs, Profile, Chat, etc.)
+│   │       ├── components/        # Navbar, NotificationBell, EmptyState, etc.
+│   │       ├── services/api.ts    # Axios client with token refresh interceptor
+│   │       └── store/authStore.ts # Zustand auth store
+│   └── mobile/                    # React Native + Expo (SDK 55)
+│       └── src/
+│           ├── screens/           # 14 screens (native parity with web)
+│           ├── navigation/        # Stack + Tab navigator
+│           ├── services/api.ts    # Mobile API client
+│           └── store/authStore.ts # Zustand with AsyncStorage persistence
+├── backend/                       # Node.js + Express + Prisma
+│   └── src/
+│       ├── controllers/           # 11 controllers (auth, products, jobs, escrow, chat, etc.)
+│       ├── routes/                # 11 route files with Joi validation
+│       ├── middleware/            # auth, errorHandler, cors, validate, rateLimit
+│       ├── services/              # emailService, notificationService
+│       ├── utils/                 # errors, logger, asyncHandler
+│       └── config/                # env validation, database, supabase
+├── .github/workflows/
+│   └── ci.yml                     # Lint → TypeCheck → Audit → Test → Deploy
+└── docs/                          # Documentation
+```
+
+### Tech Stack
+
+| Layer          | Technology                           | Purpose                             |
+| -------------- | ------------------------------------ | ----------------------------------- |
+| **Web**        | React 19 + TypeScript + Vite         | Modern web SPA                      |
+| **Mobile**     | React Native 0.83 + Expo SDK 55      | Cross-platform mobile app           |
+| **Backend**    | Node.js 20 + Express + CommonJS      | RESTful API with Joi validation     |
+| **Database**   | PostgreSQL (Supabase) + Prisma ORM   | Type-safe queries + migrations      |
+| **Storage**    | Supabase Storage                      | Signed URL file access              |
+| **Auth**       | JWT (access + refresh) + bcrypt      | Stateless auth with silent refresh  |
+| **Payments**   | Stripe (simulated for development)   | Escrow + product checkout           |
+| **Realtime**   | Supabase Realtime                     | Live chat (configured, ready)       |
+| **Deploy**     | Vercel (web + API) + Supabase (DB)   | Serverless functions at edge        |
+| **CI/CD**      | GitHub Actions                        | Test gate → auto-deploy on main     |
+
+---
 
 ## 📋 API Reference
 
-The REST API follows consistent patterns:
+**Base URL (production):** `https://web-vert-mu-22.vercel.app/api/v1`
 
-### Base URL
+### Authentication
 
-```
-https://web-vert-mu-22.vercel.app/api/v1
-```
+| Method | Endpoint          | Description          | Auth |
+| ------ | ----------------- | -------------------- | ---- |
+| POST   | `/auth/register`  | Create account       | ❌   |
+| POST   | `/auth/login`     | Log in               | ❌   |
+| GET    | `/auth/me`        | Get current user     | ✅   |
+| PUT    | `/auth/me`        | Update profile (bio) | ✅   |
+| POST   | `/auth/refresh`   | Refresh JWT tokens   | ❌   |
 
-### Key Endpoints
+### Products
 
-| Method | Endpoint              | Description                | Auth Required |
-| ------ | --------------------- | -------------------------- | ------------- |
-| `GET`  | `/products`           | List products with filters | ❌            |
-| `POST` | `/products`           | Create new product         | ✅ Seller     |
-| `GET`  | `/products/:id`       | Get product details        | ❌            |
-| `GET`  | `/products/seller/me` | Get seller's products      | ✅ Seller     |
-| `POST` | `/reviews`            | Submit a review (verified purchase) | ✅ Buyer      |
-| `GET`  | `/reviews/product/:productId` | Get product reviews      | ❌            |
-| `GET`  | `/reviews/user/:userId` | Get user's reviews         | ✅            |
-| `POST` | `/auth/login`         | User login                 | ❌            |
-| `POST` | `/auth/register`      | User registration          | ❌            |
-| `GET`  | `/auth/me`            | Get current user           | ✅            |
+| Method | Endpoint              | Description              | Auth     |
+| ------ | --------------------- | ------------------------ | -------- |
+| GET    | `/products`           | List products (paginated)| ❌       |
+| GET    | `/products/search`    | Search products          | ❌       |
+| GET    | `/products/trending`  | Top products             | ❌       |
+| GET    | `/products/:id`       | Product details          | ❌       |
+| GET    | `/products/mine`      | Seller's own products    | ✅ Seller|
+| POST   | `/products`           | Create product           | ✅ Seller|
+| PUT    | `/products/:id`       | Update product           | ✅ Owner |
+| DELETE | `/products/:id`       | Delete product           | ✅ Owner |
 
-### Example: Create Product
+### Jobs & Proposals
 
-```javascript
-POST /api/v1/products
-Authorization: Bearer <token>
-Content-Type: application/json
+| Method | Endpoint                                  | Description              | Auth     |
+| ------ | ----------------------------------------- | ------------------------ | -------- |
+| GET    | `/jobs`                                   | List jobs (paginated)    | ❌       |
+| GET    | `/jobs/:id`                               | Job details              | ❌       |
+| POST   | `/jobs`                                   | Create job               | ✅ Client|
+| GET    | `/jobs/me/jobs`                           | My posted jobs           | ✅ Client|
+| GET    | `/jobs/me/proposals`                      | My proposals             | ✅ User  |
+| POST   | `/jobs/:id/proposals`                     | Submit proposal          | ✅ User  |
+| GET    | `/jobs/:id/proposals`                     | Job's proposals          | ✅ Owner |
+| PATCH  | `/jobs/proposals/:id/accept`              | Accept proposal          | ✅ Client|
+| PATCH  | `/jobs/proposals/:id/reject`              | Reject proposal          | ✅ Client|
+| PATCH  | `/jobs/:id/close`                         | Close job                | ✅ Client|
 
-{
-  "title": "React Dashboard Template",
-  "description": "Modern dashboard with dark mode support",
-  "price": 29.99,
-  "category": "templates",
-  "tags": ["react", "dashboard", "typescript"],
-  "previewUrl": "https://github.com/example/repo"
-}
-```
+### Escrow (Job Payments)
 
-## ⚙️ Configuration
+| Method | Endpoint                              | Description                | Auth     |
+| ------ | ------------------------------------- | -------------------------- | -------- |
+| GET    | `/escrow/mine`                        | My escrows                 | ✅ User  |
+| GET    | `/escrow/:proposalId`                 | Get escrow details         | ✅ User  |
+| POST   | `/escrow/:proposalId/fund`            | Fund escrow (client)       | ✅ Client|
+| POST   | `/escrow/:proposalId/request-release` | Request release (freelancer)| ✅ Freelancer|
+| POST   | `/escrow/:proposalId/release`         | Release payment (client)   | ✅ Client|
 
-### Environment Variables
+### Ownership Certificates
 
-#### Root (.env)
+| Method | Endpoint                      | Description                      | Auth |
+| ------ | ----------------------------- | -------------------------------- | ---- |
+| POST   | `/ownership/purchase`         | Purchase product + get cert      | ✅   |
+| GET    | `/ownership/verify/:hash`     | Verify ownership certificate     | ❌   |
+| GET    | `/ownership/my-purchases`     | My purchased products            | ✅   |
+| GET    | `/ownership/my-sales`         | My sales                         | ✅ Seller|
 
-| Variable   | Description      | Default       |
-| ---------- | ---------------- | ------------- |
-| `NODE_ENV` | Environment mode | `development` |
+### Reviews & Ratings
 
-#### Backend (backend/.env)
+| Method | Endpoint                           | Description                | Auth  |
+| ------ | ---------------------------------- | -------------------------- | ----- |
+| POST   | `/reviews`                         | Create review              | ✅    |
+| GET    | `/reviews/product/:productId`      | Product reviews            | ❌    |
+| GET    | `/reviews/product/:productId/mine` | My review for this product | ✅    |
+| GET    | `/reviews/seller/:sellerId`        | Seller's reviews           | ❌    |
+| PUT    | `/reviews/:id`                     | Update review              | ✅    |
+| DELETE | `/reviews/:id`                     | Delete review              | ✅    |
 
-| Variable                 | Description                  | Required |
-| ------------------------ | ---------------------------- | -------- |
-| `DATABASE_URL`           | PostgreSQL connection string | ✅       |
-| `JWT_SECRET`             | JWT signing secret           | ✅       |
-| `JWT_REFRESH_SECRET`     | Refresh token secret         | ✅       |
-| `JWT_EXPIRES_IN`         | Access token expiry          | `15m`    |
-| `JWT_REFRESH_EXPIRES_IN` | Refresh token expiry         | `7d`     |
-| `PORT`                   | Server port                  | `10000`  |
-| `SUPABASE_URL`           | Supabase project URL         | ✅       |
-| `SUPABASE_SERVICE_KEY`   | Supabase service role key    | ✅       |
+### Notifications
+
+| Method | Endpoint                    | Description          | Auth |
+| ------ | --------------------------- | -------------------- | ---- |
+| GET    | `/notifications`            | My notifications     | ✅   |
+| PATCH  | `/notifications/read-all`   | Mark all as read     | ✅   |
+| PATCH  | `/notifications/:id/read`   | Mark one as read     | ✅   |
+| DELETE | `/notifications/:id`        | Delete notification  | ✅   |
+
+### Chat
+
+| Method | Endpoint                              | Description               | Auth |
+| ------ | ------------------------------------- | ------------------------- | ---- |
+| GET    | `/chat`                               | My conversations          | ✅   |
+| POST   | `/chat`                               | Create/find conversation  | ✅   |
+| GET    | `/chat/:conversationId/messages`      | Get messages (paginated)  | ✅   |
+| POST   | `/chat/:conversationId/messages`      | Send message (optmistic)  | ✅   |
+
+### Payments
+
+| Method | Endpoint                            | Description               | Auth |
+| ------ | ----------------------------------- | ------------------------- | ---- |
+| POST   | `/payments/create-checkout-session` | Stripe checkout link      | ✅   |
+| POST   | `/payments/webhook`                 | Stripe webhook handler    | ❌   |
+
+### Analytics
+
+| Method | Endpoint                | Description              | Auth     |
+| ------ | ----------------------- | ------------------------ | -------- |
+| GET    | `/analytics/seller`     | Seller dashboard metrics | ✅ Seller|
+| GET    | `/analytics/reviews`    | Review insights           | ✅ Seller|
+
+### Files (Upload/Download)
+
+| Method | Endpoint                             | Description             | Auth     |
+| ------ | ------------------------------------ | ----------------------- | -------- |
+| POST   | `/uploads/product/:productId`        | Upload product file     | ✅ Owner |
+| GET    | `/uploads/product/:productId/download`| Download purchased file | ✅ Buyer |
+| GET    | `/uploads/product/:productId/info`   | File metadata           | ✅ Buyer |
+
+---
 
 ## 🧪 Testing
 
-The backend has **187 integration tests** across **14 test suites** covering every API endpoint.
+**187 integration tests** across **14 test suites** covering every API endpoint.
 
-### Backend Testing
+### Run Tests
 
 ```bash
-# Run all backend tests (from monorepo root or backend/)
+# All backend tests (from monorepo root)
 npm test
 
-# Run with coverage report
+# With coverage
 cd backend && npx jest --coverage
 
-# Run a specific test suite
-cd backend && npx jest tests/routes/auth.test.js
+# Single test suite
 cd backend && npx jest tests/routes/jobs.test.js
-cd backend && npx jest tests/routes/ownership.test.js
 ```
 
-**Test suites (14 total, 187 tests):**
+### Test Suites
 
-| Suite | Tests | Covering |
-|-------|-------|----------|
-| `errors` | 24 | 8 error classes (BadRequest, Unauthorized, etc.) |
-| `asyncHandler` | 3 | Success & error forwarding |
-| `validate` | 13 | Body/query/params Joi validation |
-| `auth` | 11 | JWT protect + optionalAuth middleware |
-| `errorHandler` | 20 | Prisma, JWT, Stripe, Multer, Supabase errors |
-| `cors` | 3 | Dev mode, preflight |
-| `health` | 3 | DB health check, API info |
-| `auth` routes | 17 | Register, login, me, refresh |
-| `products` | 14 | CRUD, search, filter, seller dashboard |
-| `jobs` | 33 | List/search/filter, get, create, proposals, close |
-| `ownership` | 15 | Certificate verify, purchase, purchases, sales |
-| `uploads` | 17 | Upload/download/info, multer, access control |
-| `payments` | 10 | Checkout session, webhooks |
-| `analytics` | 4 | Seller analytics, comparisons, empty state |
+| Suite          | Tests | Coverage                                |
+| -------------- | ----- | --------------------------------------- |
+| errors         | 24    | 8 custom error classes                  |
+| asyncHandler   | 3     | Success & error forwarding              |
+| validate       | 13    | Joi body/query/params validation        |
+| auth middleware | 11   | JWT protect + optionalAuth              |
+| errorHandler   | 20    | Prisma, JWT, Stripe, Multer errors      |
+| cors           | 3     | Dev mode, preflight                     |
+| health         | 3     | DB health check                         |
+| auth routes    | 17    | Register, login, me, refresh            |
+| products       | 14    | CRUD, search, filter                    |
+| jobs           | 33    | CRUD, proposals, accept/reject          |
+| ownership      | 15    | Purchase, verify, purchases, sales      |
+| uploads        | 17    | Upload/download/info, access control    |
+| payments       | 10    | Checkout session, webhooks              |
+| analytics      | 4     | Seller analytics, review insights       |
 
 ### Frontend
 
 ```bash
 cd apps/web
-npm run lint          # Run ESLint
-npm run lint -- --fix # Auto-fix lint issues
+npm run lint          # ESLint
+npx tsc --noEmit      # TypeScript check
 ```
 
-### End-to-End Testing
-
-```bash
-# Test the complete purchase flow
-# 1. Start backend server
-npm start
-
-# 2. Start web app
-cd apps/web && npm run dev
-
-# 3. Test in browser:
-#    - Browse products
-#    - Create account/login
-#    - Purchase a product (use Stripe test mode)
-#    - Verify ownership certificate
-#    - Download purchased files
-```
-
-### Database Seeding
-
-```bash
-# Populate database with sample products
-cd backend
-node seed-products.js
-```
+---
 
 ## 🚀 Deployment
 
-### Pre-Launch Checklist
-
-- [ ] **Environment Variables**: Configure all required env vars
-- [ ] **Database**: Run migrations and seed sample data
-- [ ] **Stripe**: Set up Stripe account and configure webhooks
-- [ ] **Supabase**: Configure storage bucket and permissions
-- [ ] **Testing**: Complete end-to-end testing of purchase flow
-- [ ] **Security**: Review authentication and authorization
-- [ ] **Performance**: Test load times and optimize assets
-- [ ] **SEO**: Add meta tags and social preview images
-- [ ] **Monitoring**: Set up error tracking and analytics
-- [ ] **Documentation**: Verify all docs are up to date
-
 ### Web App + API (Vercel)
-
 - Frontend and API deployed together as serverless functions
-- Connected to `main` branch
-- Automatic deployments on push
-- Environment variables in Vercel dashboard
+- Connected to `main` branch — automatic deployments on push
+- Environment variables configured in Vercel dashboard
 
 ### Database (Supabase PostgreSQL)
-
-- Supabase project: `https://igrrgytacxqsetksrmqs.supabase.co`
+- Project: `igrrgytacxqsetksrmqs` (South Asia / Mumbai)
 - Storage bucket: `devchain-files`
-- Connection via Supabase pooler (direct or transaction modes)
-
-### CI/CD
-
-- **Continuous Deployment**: Every push to `main` triggers an automatic Vercel deployment
-- **Test Gate**: Run `npm test` locally before pushing to ensure all 187 tests pass
-- **Environment Promotion**: Variables managed in Vercel dashboard per environment
-- **Rollback**: Quick rollback via Vercel deploy history if needed
 
 ### Database Migrations
-
 ```bash
 cd backend
-npx prisma migrate deploy
-npx prisma generate
+npx prisma migrate deploy    # Apply pending migrations
+npx prisma generate          # Regenerate client
 ```
 
-## 🛠️ Development Commands
+### CI/CD Pipeline (GitHub Actions)
+On push to `main`:
+1. ✅ ESLint linting
+2. ✅ TypeScript type check
+3. 🔒 Security audit (npm audit)
+4. 🧪 Run 187 integration tests
+5. 🚀 Auto-deploy to Vercel
 
-### Root Workspace
-
-```bash
-npm run install:all    # Install all dependencies
-npm run build          # Build backend + generate Prisma client
-npm start              # Start backend server
-```
-
-### Web App
-
-```bash
-cd apps/web
-npm run dev            # Start dev server (port 5173)
-npm run build          # Build for production
-npm run lint           # Run ESLint
-npm run preview        # Preview production build
-```
-
-### Backend
-
-```bash
-cd backend
-npm run dev            # Start with nodemon (auto-reload)
-npm run start          # Start production server
-npx prisma generate    # Regenerate Prisma client
-npx prisma studio      # Open database admin UI
-```
+---
 
 ## 🗺️ Roadmap
 
-### ✅ Phase 1: Core Marketplace (Completed)
-
-- [x] User authentication system
+### ✅ Phase 1: Core Marketplace
+- [x] User authentication (JWT + refresh tokens)
 - [x] Product marketplace with search/filter
-- [x] Seller dashboard with analytics
-- [x] File upload/download system
-- [x] Job board for services
-- [x] Stripe payment processing
+- [x] Seller analytics dashboard
+- [x] File upload/download via Supabase Storage
+- [x] Job board with proposals
 - [x] SHA-256 ownership certificates
+- [x] Reviews & ratings with verified-purchase enforcement
 
-### 🔜 Phase 2: Enhanced Features (Q2 2025)
+### ✅ Phase 2: Enhanced Features
+- [x] In-app notifications (bell + auto-create on events)
+- [x] Escrow-based job payments (fund → release)
+- [x] Direct messaging (conversations + real-time ready)
+- [x] User profile editing (bio)
+- [x] Mobile app parity (14 React Native screens)
+- [x] Token refresh (silent 401 recovery)
+- [x] CI/CD pipeline (GitHub Actions → Vercel)
 
-- [ ] Advanced analytics dashboard
-- [x] Review and rating system
-- [ ] Seller verification (KYC)
-- [ ] Email notifications
-- [ ] Refund management system
+### 🔜 Phase 3: Growth & Polish
+- [ ] Stripe live keys (real PaymentIntents)
+- [ ] Push notifications (mobile)
+- [ ] Email notifications (welcome, purchase receipt, etc.)
+- [ ] Supabase Realtime for live chat (WebSocket)
+- [ ] Mobile app store deployment
+- [ ] Advanced search (full-text, filters)
 
-### 💰 Phase 3: Mobile App (Q3 2025)
+---
 
-- [ ] Complete React Native mobile app
-- [ ] Push notifications
-- [ ] Mobile-optimized checkout
-- [ ] Offline mode support
+## 🛠️ Dev Commands Quick Reference
 
-### 🚀 Phase 4: Growth (Q4 2025)
+```bash
+# Monorepo root
+npm test                    # Run all backend tests
+npm run lint                # Run ESLint across workspace
+npm run typecheck           # TypeScript type check all workspaces
 
-- [ ] Affiliate program
-- [ ] Subscription models
-- [ ] Escrow services for jobs
-- [ ] Advanced search algorithms
+# Backend
+cd backend
+npm run dev                 # Nodemon auto-reload
+npx prisma studio           # Prisma admin UI
+npx prisma migrate dev      # Create new migration
+
+# Web App
+cd apps/web
+npm run dev                 # Vite dev server (:5173)
+npm run build               # Production build
+
+# Mobile App
+cd apps/mobile
+npm run start               # Expo dev server
+npm run android             # Run on Android
+npm run ios                 # Run on iOS
+npm run web                 # Run in browser
+```
+
+---
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.md) for details.
-
-### Quick Contribution Guide
-
 1. **Fork** the repository
 2. **Create a feature branch**: `git checkout -b feat/amazing-feature`
-3. **Make your changes** following our code style
-4. **Commit**: Use [Conventional Commits](https://conventionalcommits.org) format
+3. **Make changes** following existing patterns (CommonJS backend, inline styles)
+4. **Commit** using [Conventional Commits](https://conventionalcommits.org)
 5. **Push**: `git push origin feat/amazing-feature`
-6. **Open a Pull Request** with a clear description
+6. **Open a Pull Request**
 
-### What We're Looking For
-
-- 🐛 Bug fixes with reproduction steps
-- ⚡ Performance improvements with benchmarks
-- 📚 Documentation improvements
-- 🎨 UI/UX enhancements
-- 🔧 New features (please discuss in an issue first)
+---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 💬 Support
-
-- 📖 **[Documentation](docs/)** - Detailed guides and API references
-- 🐛 **[Issue Tracker](https://github.com/ravikumarve/devchain/issues)** - Report bugs or request features
-- 💬 **[Discussions](https://github.com/ravikumarve/devchain/discussions)** - Questions and community support
-- 📧 **Email**: [support@devchain.dev](mailto:support@devchain.dev)
-
-### Need Help?
-
-- Check the [docs](docs/) first for common questions
-- Search existing [issues](https://github.com/ravikumarve/devchain/issues) before creating new ones
-- Join our community [discussions](https://github.com/ravikumarve/devchain/discussions) for help
-
-## 🙏 Acknowledgments
-
-- Built with ❤️ by developers, for developers
-- Inspired by Gumroad, Fiverr, and GitHub Marketplace
-- Powered by modern web technologies and cryptographic verification
+MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
 <p align="center">
-  <strong>DevChain</strong> - Where code meets commerce, secured by SHA-256 cryptography. 🚀
-</p>
-
-<p align="center">
-  <sub>Made with love for the developer community</sub>
+  <strong>DevChain</strong> — Where code meets commerce, secured by SHA-256.
+  <br>
+  <sub>Built with ❤️ by developers, for developers</sub>
 </p>
