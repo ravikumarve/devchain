@@ -115,7 +115,7 @@ model Proposal {
   freelancerId  String
   coverLetter   String
   proposedRate  Float
-  deliveryDays  Int?
+  deliveryDays  Int?  @map("delivery_days")
   status        String   @default("pending")
   createdAt     DateTime @default(now())
 
@@ -143,18 +143,18 @@ model Review {
 
 model Escrow {
   id                      String    @id @default(uuid())
-  proposalId              String    @unique
-  jobId                   String
-  clientId                String
-  freelancerId            String
+  proposalId              String    @unique @map("proposal_id")
+  jobId                   String    @map("job_id")
+  clientId                String    @map("client_id")
+  freelancerId            String    @map("freelancer_id")
   amount                  Float
   status                  String    @default("funding_required")
-  stripePaymentIntentId   String?
-  stripeTransferId        String?
-  fundedAt                DateTime?
-  releasedAt              DateTime?
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
+  stripePaymentIntentId   String?   @map("stripe_payment_intent_id")
+  stripeTransferId        String?   @map("stripe_transfer_id")
+  fundedAt                DateTime? @map("funded_at")
+  releasedAt              DateTime? @map("released_at")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
 
   proposal                Proposal  @relation(fields: [proposalId], references: [id])
   job                     Job       @relation(fields: [jobId], references: [id])
@@ -166,13 +166,13 @@ model Escrow {
 
 model Notification {
   id        String   @id @default(uuid())
-  userId    String
+  userId    String   @map("user_id")
   type      String
   title     String
   message   String?
   data      Json?
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
 
   user      User     @relation(fields: [userId], references: [id])
 
@@ -181,11 +181,11 @@ model Notification {
 
 model Conversation {
   id              String    @id @default(uuid())
-  participant1Id  String
-  participant2Id  String
-  relatedJobId    String?
-  lastMessageAt   DateTime  @default(now())
-  createdAt       DateTime  @default(now())
+  participant1Id  String    @map("participant1_id")
+  participant2Id  String    @map("participant2_id")
+  relatedJobId    String?   @map("related_job_id")
+  lastMessageAt   DateTime  @default(now()) @map("last_message_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
 
   participant1    User      @relation("ConvParticipant1", fields: [participant1Id], references: [id])
   participant2    User      @relation("ConvParticipant2", fields: [participant2Id], references: [id])
@@ -197,11 +197,11 @@ model Conversation {
 
 model Message {
   id              String    @id @default(uuid())
-  conversationId  String
-  senderId        String
+  conversationId  String    @map("conversation_id")
+  senderId        String    @map("sender_id")
   content         String
-  readAt          DateTime?
-  createdAt       DateTime  @default(now())
+  readAt          DateTime? @map("read_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
 
   conversation    Conversation @relation(fields: [conversationId], references: [id])
   sender          User      @relation(fields: [senderId], references: [id])
