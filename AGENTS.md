@@ -21,6 +21,15 @@ devchain/
 
 ---
 
+### [2026-06-19 15:00] - Chat Functionality Complete — Message Buttons Added
+- **State**: Success
+- **Summary**: Added "Message Client" and "Message Seller" buttons on job/product detail pages to initiate conversations
+- **Job Detail**: "💬 Message Client" button appears for non-owners in the sidebar, links to `/chat?userId=<client-id>&jobId=<job-id>`, redirects unauthenticated users to login
+- **Product Detail**: "💬 Message Seller" button appears for non-owners in the Seller section of the sidebar, links to `/chat?userId=<seller-id>`
+- **Files Changed**: `apps/web/src/pages/JobDetail.tsx` (+16 lines), `apps/web/src/pages/ProductDetail.tsx` (+15 lines)
+- **Verification**: TypeScript ✅ | Vite build ✅ | 187/187 tests ✅
+- **How it works**: Clicking either button navigates to the Chat page with `?userId=` param → Chat page auto-creates a conversation via `POST /api/v1/chat` if one doesn't exist → user can send messages immediately
+
 ### [2026-06-19 14:50] - All APIs Restored + Schema Fixed + Chat/Analytics Working
 - **State**: Success
 - **Root Causes Fixed**:
