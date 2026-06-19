@@ -91,7 +91,7 @@ function errorHandler(err, req, res, _next) {
   // Default 500 for unexpected errors
   const statusCode = err.status || err.statusCode || 500;
   const message = process.env.NODE_ENV === 'production' && statusCode === 500
-    ? err.message || 'Internal server error'
+    ? 'Internal server error'
     : err.message || 'Internal server error';
 
   res.status(statusCode).json({
@@ -140,7 +140,7 @@ function handlePrismaError(err, res) {
   return res.status(500).json({
     error: 'Database error',
     code: 'DATABASE_ERROR',
-    ...(process.env.NODE_ENV === 'development' && { details: err.message }),
+    details: err.message,
   });
 }
 
