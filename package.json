@@ -11,7 +11,7 @@
   "scripts": {
     "mobile": "npm run start --workspace=apps/mobile",
     "backend": "npm run dev --workspace=apps/backend",
-    "vercel-build": "cd apps/web && npm run build",
+    "vercel-build": "cd backend && npx prisma generate --schema=prisma/schema.prisma && cd ../apps/web && npm run build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "npm run typecheck --workspaces --if-present",
