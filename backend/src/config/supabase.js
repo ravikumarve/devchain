@@ -7,8 +7,8 @@
  */
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_KEY;
+const supabaseUrl = (process.env.SUPABASE_URL || '').trim();
+const serviceRoleKey = (process.env.SUPABASE_SERVICE_KEY || '').trim();
 
 if (!supabaseUrl || !serviceRoleKey) {
   console.error('Missing Supabase credentials — SUPABASE_URL and SUPABASE_SERVICE_KEY required');
@@ -34,6 +34,6 @@ const sharedOptions = {
 const adminClient = createClient(supabaseUrl, serviceRoleKey, sharedOptions);
 
 // Anon client for operations that should respect RLS
-const anonClient = createClient(supabaseUrl, process.env.SUPABASE_ANON_KEY || serviceRoleKey, sharedOptions);
+const anonClient = createClient(supabaseUrl, (process.env.SUPABASE_ANON_KEY || serviceRoleKey).trim(), sharedOptions);
 
 module.exports = { supabase: adminClient, adminClient, anonClient };

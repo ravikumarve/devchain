@@ -91,7 +91,7 @@ function errorHandler(err, req, res, _next) {
   // Default 500 for unexpected errors
   const statusCode = err.status || err.statusCode || 500;
   const message = process.env.NODE_ENV === 'production' && statusCode === 500
-    ? 'Internal server error'
+    ? err.message || 'Internal server error'
     : err.message || 'Internal server error';
 
   res.status(statusCode).json({
