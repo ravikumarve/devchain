@@ -1,28 +1,53 @@
 // Load env
 require('dotenv').config({ path: require('path').resolve(__dirname, '../backend/.env') });
 
+// ── Pre-test: verify env var integrity and supabase client creation ──
+let supaTest = null;
+try {
+  const suVal = process.env.SUPABASE_SERVICE_KEY;
+  // Validate the key character by character
+  const keyInfo = {
+    exists: suVal !== undefined,
+    type: typeof suVal,
+    len: suVal ? suVal.length : 0,
+    isString: typeof suVal === 'string',
+    startsCorrectly: suVal ? suVal.startsWith('eyJ') : false,
+    endsCorrectly: suVal ? suVal.endsWith('EfA') : false,
+    hasNewline: suVal ? suVal.includes('\n') : false,
+    charCodes: suVal ? [suVal.charCodeAt(0), suVal.charCodeAt(1), suVal.charCodeAt(suVal.length-1)] : [],
+    equalsLocal: false,
+    localTest: null,
+  };
+  
+  // Try creating a supabase client
+  try {
+    const { createClient } = require('@supabase/supabase-js');
+    const testOpts = { auth: { autoRefreshToken: false, persistSession: false }, realtime: { enabled: false } };
+    createClient(process.env.SUPABASE_URL || '', suVal || '', testOpts);
+    keyInfo.clientOk = true;
+  } catch (clientErr) {
+    keyInfo.clientOk = false;
+    keyInfo.clientError = clientErr.message;
+  }
+  
+  supaTest = keyInfo;
+} catch (e) {
+  supaTest = { error: e.message };
+}
+
 // The Express app IS a request handler — export it directly
 let app;
 try {
   app = require('../backend/src/index');
 } catch (err) {
   console.error('Vercel function: FAILED to load backend module:', err.message, err.stack);
-  // Log env summary for debugging
-  console.error('Vercel function env summary:', JSON.stringify({
-    NODE_ENV: process.env.NODE_ENV,
-    hasJWT: !!process.env.JWT_SECRET,
-    hasDB: !!process.env.DATABASE_URL,
-    hasSU: !!process.env.SUPABASE_URL,
-    hasSUKey: !!process.env.SUPABASE_SERVICE_KEY,
-    SU_len: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.length : 0,
-    SUKey_len: process.env.SUPABASE_SERVICE_KEY ? process.env.SUPABASE_SERVICE_KEY.length : 0,
-  }));
   // Fallback handler for initialization failures
   app = (req, res) => {
     res.status(500).json({
       error: 'Backend module failed to initialize',
       code: 'MODULE_INIT_ERROR',
       message: err.message,
+      diagnostics: supaTest,
     });
   };
 }
