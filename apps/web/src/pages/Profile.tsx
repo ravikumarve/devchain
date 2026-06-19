@@ -56,14 +56,14 @@ export default function Profile() {
             <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.03em', marginBottom: 4 }}>@{user?.username}</h1>
             <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 6 }}>{user?.email}</p>
             <p style={{ color: 'var(--text-faint)', fontSize: 13, fontStyle: 'italic', marginBottom: 10 }}>
-              {(user as Record<string, unknown>)?.bio || 'No bio yet'}
+              {user?.bio || 'No bio yet'}
             </p>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--bg-panel)', border: '1px solid var(--crypto-gold-dim)', borderRadius: 20, padding: '4px 12px', color: 'var(--crypto-gold)', fontSize: 13, fontWeight: 600 }}>
               ⭐ {user?.reputationScore} Reputation Score
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn-outline" onClick={() => { setBio((user as Record<string, unknown>)?.bio as string || ''); setEditOpen(true); }} style={{ padding: '10px 20px', fontSize: 13 }}>
+            <button className="btn-outline" onClick={() => { setBio(user?.bio || ''); setEditOpen(true); }} style={{ padding: '10px 20px', fontSize: 13 }}>
               ✏️ Edit Profile
             </button>
             <button className="btn-outline" onClick={handleLogout} style={{ padding: '10px 20px', fontSize: 13 }}>
@@ -106,7 +106,7 @@ export default function Profile() {
                 <button onClick={async () => {
                   setSaving(true);
                   try {
-                    const res = await authAPI.updateProfile({ bio });
+                    await authAPI.updateProfile({ bio });
                     setEditOpen(false);
                   } catch (err: unknown) {
                     alert('Failed: ' + ((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Unknown error'));

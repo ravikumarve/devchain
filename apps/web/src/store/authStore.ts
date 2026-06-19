@@ -5,7 +5,10 @@ interface User {
   id: string;
   username: string;
   email: string;
+  bio?: string;
+  avatarUrl?: string;
   reputationScore: number;
+  createdAt?: string;
 }
 
 interface AuthState {
