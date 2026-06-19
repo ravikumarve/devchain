@@ -1,4 +1,3 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const crypto = require('crypto');
 
 const prisma = require('../config/database');
@@ -11,6 +10,25 @@ const {
 } = require('../utils/errors');
 
 const log = getLogger('payments');
+
+// Lazy Stripe initialization — avoids crash at module load when STRIPE_SECRET_KEY is missing
+let _stripe = null;
+function getStripe() {
+  if (!_stripe) {
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeKey) {
+      log.error('STRIPE_SECRET_KEY is not set — Stripe operations will fail');
+    }
+    _stripe = stripeKey ? require('stripe')(stripeKey) : null;
+  }
+  return _stripe;
+}
+function assertStripe() {
+  if (!getStripe()) {
+    throw new Error('Payment processing unavailable: STRIPE_SECRET_KEY is not configured');
+  }
+  return _stripe;
+}
 
 // ── Generate unique ownership hash ──
 const generateOwnershipHash = (buyerId, productId, timestamp) => {
@@ -47,7 +65,7 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
   }
 
   // Create Stripe checkout session
-  const session = await stripe.checkout.sessions.create({
+  const session = await assertStripe().checkout.sessions.create({
     mode: 'payment',
     payment_method_types: ['card'],
     line_items: [
@@ -99,7 +117,7 @@ const handleWebhook = asyncHandler(async (req, res) => {
 
   let event;
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = assertStripe().webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     log.error({ err }, 'Stripe webhook signature verification failed');
     return res.status(400).send(`Webhook Error: ${err.message}`);
