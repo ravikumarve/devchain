@@ -14,7 +14,7 @@ const allowedOrigins = isProd
       'https://web-vert-mu-22.vercel.app',
       // Allow all Vercel deployment preview URLs
       /^https:\/\/web-[\w-]+-ravikumarves-projects\.vercel\.app$/,
-      process.env.FRONTEND_URL,
+      process.env.FRONTEND_URL?.trim(),
     ].filter(Boolean)
   : [true]; // In development, allow all origins
 
