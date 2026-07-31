@@ -550,6 +550,24 @@ cd apps/web && npx shadcn@latest add <component-name>
 
 ## 💾 Session Memory Ledger
 
+### [2026-07-31 14:30] - Midnight Monolith Commits 2-5 + Purchase Pipeline Fix
+- **State**: Success — 5 commits pushed (`cba8478`, `d1e3431`, `fe1ee8c`, `98f0313`, `671d5b3`)
+- **MCP Data Used**: agent-browser DOM verification (dashboard/analytics/profile/login flows), direct file reads/writes, curl smoke tests, jest regression
+- **Agents Deployed**: Orchestrator (direct execution)
+- **Architectural Decision**:
+  - **Purchase pipeline bug fixed (production-breaking)**: `Order.create` crashed in local AND cloud — controller sent `amountPaid` but Order model has `amount Int`; `stripeSessionId` is required+unique; `paymentMethod`/`ownershipHash` aren't Order columns; `Product` lacked `downloadsCount` (used by 4 controllers). Fix: `amount: product.price` + unique `sim_<hex>` stripeSessionId, drop phantom fields, add `downloadsCount Int @default(0)` to BOTH schemas, revenue sums read `o.amount`. 187/187 tests green (mocks updated).
+  - **Commit 2 — Overview dashboard** (`d1e3431`): KPI row + Active Contracts/Recent Messages grid + full-width Recent Product Sales. Fixed `salesData.orders` → `salesData.sales` during verification. `/dashboard` route, Navbar links, deferred auth redirect.
+  - **Commit 3 — Analytics** (`fe1ee8c`): rebuilt on `analyticsAPI.getSeller()` (summary/products/reviews) + mySales (7-day chart, recent sales). New CSS: `.status-dot.hot/.stale/.new/.active`, `.mini-bar`, `.bar-chart`, `.stars`, `.dash-section-sub`.
+  - **Commit 4 — Profile** (`98f0313`): header card + `.dash-tabs` pill switcher + per-tab dash-tables. Certificate verify link now `window.location.origin` (was hardcoded to dead onrender.com). New CSS: `.dash-tabs/.dash-tab`, `.cert-block`.
+  - **Commit 5 — Auth** (`671d5b3`): Login rebuilt with demo-account one-click fill (Seller/Client/Buyer) per mockup; Register token cleanup. Verified: Buyer fill → login → marketplace.
+- **Key Gotchas**:
+  - `mySales()` returns `{ sales: [...] }` NOT `{ orders: [...] }` (Overview bug)
+  - demo-seller@devchain.dev has username **democreator** — nav showing @democreator is correct
+  - Product `downloadsCount` needed `prisma generate` (sqlite schema) + `db push` before purchase worked
+  - Seed products are `isActive: false` → Product Performance table shows Inactive (seed data, not UI bug)
+- **Not rebuilt (token-compatible, leave per no-refactor rule)**: Chat (working auto-create/optimistic logic), Landing (912 lines, `.text-purple` class name stale but resolves blue), Marketplace, Jobs, ProductDetail, JobDetail, Sell, PostJob, MyJobs, MyProposals, CreateProduct, PurchaseSuccess/Cancel. All use `--eth-purple` alias → `#3b82f6` (blue) from Commit 1.
+- **Next Turn Directive**: Rebuild remaining pages into `.dash-*` where needed (Marketplace/CreateProduct/MyJobs are highest value), or full mockup-alignment pass on Landing (912 lines), or Gumroad launch prep (verify `devchain.gumroad.com`, LICENSE, README).
+
 ### [2026-07-31 12:40] - MarketFoundry → DevChain Rebrand + Auth Pages + Mockup Set Complete
 - **State**: Success — 4 mockup HTMLs ready, pending commit/push
 - **MCP Data Used**: agent-browser DOM verification (login→dashboard→sign-out flow), direct file edits, grep for stale references
