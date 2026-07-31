@@ -19,7 +19,7 @@ const sampleProducts = [
     description: 'A modern, responsive dashboard component library built with React 18 and TypeScript. Includes beautiful dark mode UI components, fully responsive design, optimized performance, and easy customization.',
     price: 29.99,
     category: 'react-components',
-    tags: ['react', 'dashboard', 'typescript', 'ui', 'components'],
+    tags: serializeArray(['react', 'dashboard', 'typescript', 'ui', 'components']),
     techStack: ['React 18', 'TypeScript', 'CSS3'],
     sourceDir: '/tmp/devchain-sample-products/react-dashboard-kit',
     mainFile: 'components.tsx'
@@ -29,7 +29,7 @@ const sampleProducts = [
     description: 'A production-ready Node.js API boilerplate with Express, TypeScript, and best practices. Features JWT authentication, OpenAPI/Swagger documentation, Jest testing setup, request validation with Joi, and ready for deployment.',
     price: 19.99,
     category: 'node-packages',
-    tags: ['nodejs', 'express', 'api', 'boilerplate', 'typescript'],
+    tags: serializeArray(['nodejs', 'express', 'api', 'boilerplate', 'typescript']),
     techStack: ['Node.js', 'Express', 'TypeScript'],
     sourceDir: '/tmp/devchain-sample-products/node-api-starter',
     mainFile: 'server.js'
@@ -39,7 +39,7 @@ const sampleProducts = [
     description: 'A collection of useful Python automation scripts for developers. Includes file organization automation, data processing utilities, task scheduling, text processing tools, and web scraping helpers.',
     price: 14.99,
     category: 'python-scripts',
-    tags: ['python', 'automation', 'scripts', 'tools', 'productivity'],
+    tags: serializeArray(['python', 'automation', 'scripts', 'tools', 'productivity']),
     techStack: ['Python 3.7+'],
     sourceDir: '/tmp/devchain-sample-products/python-automation-scripts',
     mainFile: 'file_organizer.py'
@@ -106,7 +106,7 @@ async function seedProducts() {
           description: productData.description,
           price: productData.price,
           category: productData.category,
-          tags: productData.tags,
+          tags: serializeArray(productData.tags),
           sellerId: seller.id,
           fileUrl,
           downloadsCount: Math.floor(Math.random() * 50) + 10, // Random initial sales

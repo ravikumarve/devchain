@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { deserializeJson } = require('../utils/dbCompat');
 const asyncHandler = require('../utils/asyncHandler');
 const { NotFoundError } = require('../utils/errors');
 
@@ -18,7 +19,10 @@ const getMyNotifications = asyncHandler(async (req, res) => {
     where: { userId, isRead: false },
   });
 
-  res.json({ notifications, unreadCount });
+  res.json({
+    notifications: notifications.map(n => ({ ...n, data: deserializeJson(n.data) })),
+    unreadCount,
+  });
 });
 
 // ────────────────────────────────────────────────

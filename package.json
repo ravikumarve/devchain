@@ -11,6 +11,10 @@
   "scripts": {
     "mobile": "npm run start --workspace=apps/mobile",
     "backend": "npm run dev --workspace=apps/backend",
+    "db:sqlite": "node scripts/db-mode.js sqlite",
+    "db:postgres": "node scripts/db-mode.js postgres",
+    "seed:demo": "node backend/seed.js",
+    "setup:local": "node scripts/setup.js",
     "vercel-build": "cd backend && npx prisma generate --schema=prisma/schema.prisma && cd ../apps/web && npm run build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

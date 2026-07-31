@@ -58,7 +58,7 @@ const mockProduct = {
   price: 2999,
   category: 'react-components',
   sellerId: mockUser.id,
-  fileUrl: null,
+  fileKey: null,
   isActive: true,
   deletedAt: null,
   downloadsCount: 5,
@@ -67,7 +67,7 @@ const mockProduct = {
 
 const mockProductWithFile = {
   ...mockProduct,
-  fileUrl: 'devchain-files/products/660e8400/test-file.zip',
+  fileKey: 'devchain-files/products/660e8400/test-file.zip',
 };
 
 async function getAuthToken(userOverride) {
@@ -100,7 +100,7 @@ describe('POST /api/v1/uploads/product/:productId', () => {
     prisma.user.findUnique.mockReset();
     prisma.user.findUnique.mockResolvedValue(mockUser);
     prisma.product.findUnique.mockResolvedValue(mockProduct);
-    prisma.product.update.mockResolvedValue({ ...mockProduct, fileUrl: 'devchain-files/products/test.zip' });
+    prisma.product.update.mockResolvedValue({ ...mockProduct, fileKey: 'devchain-files/products/test.zip' });
   });
 
   it('should reject when not authenticated', async () => {
@@ -192,7 +192,7 @@ describe('GET /api/v1/uploads/product/:productId/download', () => {
   });
 
   it('should reject download when no file uploaded yet', async () => {
-    prisma.product.findUnique.mockResolvedValue(mockProduct); // fileUrl: null
+    prisma.product.findUnique.mockResolvedValue(mockProduct); // fileKey: null
     const token = await getAuthToken();
     const res = await request(app)
       .get(`/api/v1/uploads/product/${mockProduct.id}/download`)
@@ -241,7 +241,7 @@ describe('GET /api/v1/uploads/product/:productId/info', () => {
     prisma.user.findUnique.mockResolvedValue(mockUser);
     prisma.product.findUnique.mockResolvedValue({
       id: mockProduct.id,
-      fileUrl: 'devchain-files/products/test.zip',
+      fileKey: 'devchain-files/products/test.zip',
       sellerId: mockUser.id,
       title: mockProduct.title,
     });

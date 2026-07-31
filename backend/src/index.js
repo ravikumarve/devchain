@@ -120,15 +120,20 @@ async function getHealth() {
   }
 
   try {
-    const { adminClient: sb } = require('./config/supabase');
-    // Timeout after 5s to prevent hanging (e.g., fake URLs in tests)
-    const healthResult = await Promise.race([
-      sb.auth.admin.listUsers({ page: 1, perPage: 1 }),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timed out')), 5000)),
-    ]);
-    const { data, error } = healthResult;
-    health.supabaseAuth = error ? `error: ${error.message}` : `connected (${data?.users?.length || 0} users)`;
-    if (error) health.status = 'degraded';
+    const { adminClient: sb, isCloudAuth } = require('./config/supabase');
+    if (!isCloudAuth) {
+      // Local mode: auth is handled by localAuthProvider, not Supabase
+      health.supabaseAuth = 'local (bcrypt + JWT)';
+    } else {
+      // Timeout after 5s to prevent hanging (e.g., fake URLs in tests)
+      const healthResult = await Promise.race([
+        sb.auth.admin.listUsers({ page: 1, perPage: 1 }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timed out')), 5000)),
+      ]);
+      const { data, error } = healthResult;
+      health.supabaseAuth = error ? `error: ${error.message}` : `connected (${data?.users?.length || 0} users)`;
+      if (error) health.status = 'degraded';
+    }
   } catch (err) {
     health.supabaseAuth = `error: ${err.message === 'timed out' ? 'Supabase Auth unreachable (timeout)' : err.message}`;
     health.status = 'degraded';

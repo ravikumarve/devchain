@@ -5,10 +5,8 @@
 const { logger } = require('../utils/logger');
 
 const REQUIRED_VARS = [
-  { name: 'DATABASE_URL', description: 'PostgreSQL connection string (Prisma)' },
+  { name: 'DATABASE_URL', description: 'Database connection string (PostgreSQL or SQLite file:)' },
   { name: 'JWT_SECRET', description: 'JWT signing secret (min 32 chars)' },
-  { name: 'SUPABASE_URL', description: 'Supabase project URL' },
-  { name: 'SUPABASE_SERVICE_KEY', description: 'Supabase service role key' },
 ];
 
 const OPTIONAL_VARS = [
@@ -18,6 +16,10 @@ const OPTIONAL_VARS = [
   { name: 'PORT', description: 'Server port', default: '10000' },
   { name: 'NODE_ENV', description: 'Environment', default: 'development' },
   { name: 'FRONTEND_URL', description: 'Frontend URL for CORS', default: 'http://localhost:5173' },
+  { name: 'STORAGE_PROVIDER', description: 'Storage backend: local (disk) or supabase', default: '' },
+  { name: 'EMAIL_PROVIDER', description: 'Email backend: console (log) or smtp', default: 'smtp' },
+  { name: 'SUPABASE_URL', description: 'Supabase project URL (required for cloud mode)' },
+  { name: 'SUPABASE_SERVICE_KEY', description: 'Supabase service role key (required for cloud mode)' },
   { name: 'STRIPE_SECRET_KEY', description: 'Stripe secret key' },
   { name: 'STRIPE_WEBHOOK_SECRET', description: 'Stripe webhook signing secret' },
   { name: 'OWNERSHIP_HASH_SECRET', description: 'Secret for ownership hash generation' },
@@ -29,6 +31,19 @@ const OPTIONAL_VARS = [
 
 function validateEnv() {
   const missing = [];
+  const isProd = process.env.NODE_ENV === 'production';
+  const isCloudAuth = Boolean(
+    (process.env.SUPABASE_URL || '').trim() && (process.env.SUPABASE_SERVICE_KEY || '').trim()
+  );
+  const storageProvider = (process.env.STORAGE_PROVIDER || '').trim().toLowerCase();
+
+  // Supabase credentials are only required in cloud mode
+  if (isProd || storageProvider === 'supabase') {
+    REQUIRED_VARS.push(
+      { name: 'SUPABASE_URL', description: 'Supabase project URL' },
+      { name: 'SUPABASE_SERVICE_KEY', description: 'Supabase service role key' },
+    );
+  }
 
   for (const varDef of REQUIRED_VARS) {
     if (!process.env[varDef.name]) {

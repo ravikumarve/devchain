@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { serializeArray, deserializeArray, arrayHas } = require('../utils/dbCompat');
 const { getLogger } = require('../utils/logger');
 const asyncHandler = require('../utils/asyncHandler');
 const {
@@ -24,7 +25,7 @@ const safeProduct = (product) => ({
   price: product.price,
   category: product.category,
   previewUrl: product.previewUrl,
-  tags: product.tags,
+  tags: deserializeArray(product.tags),
   downloadsCount: product.downloadsCount,
   createdAt: product.createdAt,
   seller: product.seller ? {
@@ -57,7 +58,7 @@ const getProducts = asyncHandler(async (req, res) => {
     where.OR = [
       { title: { contains: search, mode: 'insensitive' } },
       { description: { contains: search, mode: 'insensitive' } },
-      { tags: { has: search.toLowerCase() } },
+      { ...arrayHas('tags', search.toLowerCase()) },
     ];
   }
 
@@ -173,7 +174,7 @@ const createProduct = asyncHandler(async (req, res) => {
       description: description.trim(),
       price: parseFloat(price),
       category,
-      tags: cleanTags,
+      tags: serializeArray(cleanTags),
       previewUrl: previewUrl || null,
     },
     include: {
@@ -218,7 +219,7 @@ const updateProduct = asyncHandler(async (req, res) => {
       ...(description && { description: description.trim() }),
       ...(price !== undefined && { price: parseFloat(price) }),
       ...(category && { category }),
-      ...(tags && { tags: tags.map(t => t.toLowerCase().trim()).slice(0, 10) }),
+      ...(tags && { tags: serializeArray(tags.map(t => t.toLowerCase().trim()).slice(0, 10)) }),
       ...(previewUrl !== undefined && { previewUrl }),
     },
     include: {

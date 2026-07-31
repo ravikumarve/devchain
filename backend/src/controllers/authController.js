@@ -1,5 +1,6 @@
 const prisma = require('../config/database');
-const { supabase } = require('../config/supabase');
+const bcrypt = require('bcryptjs');
+const { supabase, isCloudAuth } = require('../config/supabase');
 const { getLogger } = require('../utils/logger');
 const asyncHandler = require('../utils/asyncHandler');
 const {
@@ -93,7 +94,8 @@ const register = asyncHandler(async (req, res) => {
       id: authUserId, // same ID as auth.users for JOINs
       username: normalizedUsername,
       email: normalizedEmail,
-      // passwordHash handled by Supabase Auth
+      // Local mode: store the bcrypt hash here (Supabase Auth does this in cloud mode)
+      ...(isCloudAuth ? {} : { passwordHash: await bcrypt.hash(password, 10) }),
     },
   }).catch(async (prismaErr) => {
     // Rollback: delete the auth user if profile creation fails

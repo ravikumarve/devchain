@@ -3,7 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const prisma = require('../config/database');
-const { adminClient: supabase } = require('../config/supabase');
+const storage = require('../services/storageService');
 const { getLogger } = require('../utils/logger');
 const asyncHandler = require('../utils/asyncHandler');
 const {
@@ -14,7 +14,7 @@ const {
 
 const log = getLogger('uploads');
 
-const BUCKET = 'devchain-files';
+const BUCKET = storage.BUCKET || 'devchain-files';
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 // ── Allowed MIME types and extensions ──
@@ -72,25 +72,23 @@ const uploadProductFile = asyncHandler(async (req, res) => {
   const storagePath = `products/${productId}/${Date.now()}-${crypto.randomBytes(4).toString('hex')}${ext}`;
 
   // Remove old file if exists
-  if (product.fileUrl) {
-    const oldPath = product.fileUrl.replace(`${BUCKET}/`, '');
-    const { error: removeError } = await supabase.storage.from(BUCKET).remove([oldPath]);
+  if (product.fileKey) {
+    const oldPath = product.fileKey.replace(`${BUCKET}/`, '');
+    const { error: removeError } = await storage.remove(oldPath);
     if (removeError) {
       log.warn({ error: removeError }, 'Failed to remove old file');
     }
   }
 
-  // Upload to Supabase
-  const { error: uploadError } = await supabase.storage
-    .from(BUCKET)
-    .upload(storagePath, req.file.buffer, {
-      contentType: req.file.mimetype || 'application/octet-stream',
-      upsert: true,
-      cacheControl: '3600',
-    });
+  // Upload to active storage provider (local disk or Supabase)
+  const { error: uploadError } = await storage.upload(
+    req.file.buffer,
+    storagePath,
+    req.file.mimetype || 'application/octet-stream'
+  );
 
   if (uploadError) {
-    log.error({ error: uploadError }, 'Supabase upload failed');
+    log.error({ error: uploadError }, 'File upload failed');
     throw new Error('File upload to storage failed');
   }
 
@@ -98,7 +96,7 @@ const uploadProductFile = asyncHandler(async (req, res) => {
 
   await prisma.product.update({
     where: { id: productId },
-    data: { fileUrl },
+    data: { fileKey: fileUrl },
   });
 
   log.info({ productId, fileSize: req.file.size, storagePath }, 'File uploaded');
@@ -108,7 +106,7 @@ const uploadProductFile = asyncHandler(async (req, res) => {
     fileUrl,
     originalName: req.file.originalname,
     fileSize: req.file.size,
-    message: 'File uploaded to Supabase Storage',
+    message: `File uploaded to ${storage.provider} storage`,
   });
 });
 
@@ -125,7 +123,7 @@ const downloadProductFile = asyncHandler(async (req, res) => {
   });
 
   if (!product) throw new NotFoundError('Product not found');
-  if (!product.fileUrl) throw new NotFoundError('No file uploaded for this product');
+  if (!product.fileKey) throw new NotFoundError('No file uploaded for this product');
 
   // Check access: seller or buyer with completed order
   const isSeller = product.seller.id === userId;
@@ -138,14 +136,12 @@ const downloadProductFile = asyncHandler(async (req, res) => {
     }
   }
 
-  // Generate signed URL (60 second expiry)
-  const storagePath = product.fileUrl.replace(`${BUCKET}/`, '');
-  const { data, error } = await supabase.storage
-    .from(BUCKET)
-    .createSignedUrl(storagePath, 60);
+  // Generate a download link (Supabase signed URL or local marker)
+  const storagePath = product.fileKey.replace(`${BUCKET}/`, '');
+  const { data, error } = await storage.getSignedUrl(storagePath, 60);
 
   if (error) {
-    log.error({ error }, 'Failed to generate signed URL');
+    log.error({ error }, 'Failed to generate download link');
     throw new Error('Failed to generate download link');
   }
 
@@ -157,6 +153,12 @@ const downloadProductFile = asyncHandler(async (req, res) => {
 
   log.info({ productId, userId, isSeller }, 'File downloaded');
 
+  // Local mode: stream the file directly (ownership already verified above)
+  if (data.signedUrl.startsWith('local://')) {
+    return storage.downloadStream(storagePath, res);
+  }
+
+  // Cloud mode: redirect to the signed Supabase URL
   res.redirect(data.signedUrl);
 });
 
@@ -169,7 +171,7 @@ const getFileInfo = asyncHandler(async (req, res) => {
 
   const product = await prisma.product.findUnique({
     where: { id: productId },
-    select: { id: true, fileUrl: true, sellerId: true, title: true },
+    select: { id: true, fileKey: true, sellerId: true, title: true },
   });
 
   if (!product) throw new NotFoundError('Product not found');
@@ -182,18 +184,18 @@ const getFileInfo = asyncHandler(async (req, res) => {
       });
 
   const hasAccess = isSeller || !!order;
-  const hasFile = !!product.fileUrl;
+  const hasFile = !!product.fileKey;
 
   let fileSize = null;
   let fileName = null;
 
   if (hasFile) {
-    const storagePath = product.fileUrl.replace(`${BUCKET}/`, '');
+    const storagePath = product.fileKey.replace(`${BUCKET}/`, '');
     fileName = path.basename(storagePath);
 
     const parts = storagePath.split('/');
     const folder = parts.slice(0, -1).join('/');
-    const { data: files } = await supabase.storage.from(BUCKET).list(folder);
+    const { data: files } = await storage.list(folder);
     if (files) {
       const f = files.find(f => f.name === parts[parts.length - 1]);
       if (f) fileSize = f.metadata?.size || null;

@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { serializeArray, deserializeArray, arrayHas } = require('../utils/dbCompat');
 const { getLogger } = require('../utils/logger');
 const asyncHandler = require('../utils/asyncHandler');
 const {
@@ -13,6 +14,11 @@ const {
 } = require('../services/notificationService');
 
 const log = getLogger('jobs');
+
+// ── Helper: normalize a job object for API responses (DB-agnostic) ──
+const deserializeJob = (job) => job
+  ? { ...job, skillsRequired: deserializeArray(job.skillsRequired) }
+  : job;
 
 // ────────────────────────────────────────────────
 // GET ALL JOBS
@@ -38,7 +44,7 @@ const getJobs = asyncHandler(async (req, res) => {
       { description: { contains: search, mode: 'insensitive' } },
     ];
   }
-  if (skill) where.skillsRequired = { has: skill.toLowerCase() };
+  if (skill) where.skillsRequired = arrayHas('skillsRequired', skill.toLowerCase()).skillsRequired;
   if (minBudget) where.budgetMin = { gte: parseFloat(minBudget) };
   if (maxBudget) where.budgetMax = { lte: parseFloat(maxBudget) };
 
@@ -59,7 +65,7 @@ const getJobs = asyncHandler(async (req, res) => {
   ]);
 
   res.json({
-    jobs,
+    jobs: jobs.map(deserializeJob),
     pagination: {
       total,
       page: parseInt(page),
@@ -97,7 +103,7 @@ const getJob = asyncHandler(async (req, res) => {
     throw new NotFoundError('Job not found.');
   }
 
-  res.json({ job });
+  res.json({ job: deserializeJob(job) });
 });
 
 // ────────────────────────────────────────────────
@@ -137,9 +143,11 @@ const createJob = asyncHandler(async (req, res) => {
       description: description.trim(),
       budgetMin: parseFloat(budgetMin),
       budgetMax: parseFloat(budgetMax),
-      skillsRequired: Array.isArray(skillsRequired)
-        ? skillsRequired.map(s => s.toLowerCase().trim())
-        : [],
+      skillsRequired: serializeArray(
+        Array.isArray(skillsRequired)
+          ? skillsRequired.map(s => s.toLowerCase().trim())
+          : []
+      ),
       deadline: deadline ? new Date(deadline) : null,
     },
     include: {
@@ -153,7 +161,7 @@ const createJob = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     message: 'Job posted successfully!',
-    job,
+    job: deserializeJob(job),
   });
 });
 
@@ -240,7 +248,7 @@ const getMyJobs = asyncHandler(async (req, res) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  res.json({ jobs });
+  res.json({ jobs: jobs.map(deserializeJob) });
 });
 
 // ────────────────────────────────────────────────
@@ -264,7 +272,12 @@ const getMyProposals = asyncHandler(async (req, res) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  res.json({ proposals });
+  res.json({
+    proposals: proposals.map(p => ({
+      ...p,
+      job: p.job ? deserializeJob(p.job) : p.job,
+    })),
+  });
 });
 
 // ────────────────────────────────────────────────
@@ -432,7 +445,7 @@ const closeJob = asyncHandler(async (req, res) => {
 
   log.info({ jobId: id, clientId }, 'Job closed');
 
-  res.json({ message: 'Job closed successfully.', job: updated });
+  res.json({ message: 'Job closed successfully.', job: deserializeJob(updated) });
 });
 
 module.exports = {

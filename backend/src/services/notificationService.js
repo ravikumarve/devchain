@@ -3,13 +3,14 @@
  * Called by controllers after state-changing operations.
  */
 const prisma = require('../config/database');
+const { serializeJson } = require('../utils/dbCompat');
 
 /**
  * Create a notification for a user.
  */
 async function createNotification({ userId, type, title, message, data }) {
   return prisma.notification.create({
-    data: { userId, type, title, message, data: data || {} },
+    data: { userId, type, title, message, data: serializeJson(data || {}) },
   });
 }
 

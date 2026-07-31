@@ -63,6 +63,15 @@ const templates = {
 
 // ── Send email ──
 async function sendEmail(to, subject, html) {
+  const provider = (process.env.EMAIL_PROVIDER || 'smtp').trim().toLowerCase();
+
+  // Local mode: log instead of sending via SMTP
+  if (provider === 'console') {
+    const preview = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
+    log.info({ to, subject, preview }, 'Email (console provider)');
+    return { success: true, messageId: 'console-local' };
+  }
+
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
     log.warn('SMTP not configured — email not sent');
     return { success: false, error: 'SMTP not configured' };
