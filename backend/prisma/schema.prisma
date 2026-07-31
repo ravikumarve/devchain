@@ -48,6 +48,7 @@ model Product {
   fileKey     String?
   previewUrl  String?
   isActive    Boolean  @default(true)
+  downloadsCount Int    @default(0)
   sellerId    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

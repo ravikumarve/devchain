@@ -58,7 +58,7 @@ const mockOwnershipRecord = {
       id: mockProduct.id,
       title: mockProduct.title,
       category: mockProduct.category,
-      amountPaid: mockProduct.price,
+      amount: mockProduct.price,
       seller: { id: otherUserId, username: 'seller', avatarUrl: null },
     },
     createdAt: new Date().toISOString(),
@@ -141,7 +141,7 @@ describe('POST /api/v1/ownership/purchase', () => {
         create: jest.fn().mockResolvedValue({
           id: 'order-123',
           productId: mockProduct.id,
-          amountPaid: mockProduct.price,
+          amount: mockProduct.price,
           status: 'completed',
           createdAt: new Date().toISOString(),
         }),
@@ -247,7 +247,7 @@ describe('GET /api/v1/ownership/my-purchases', () => {
       {
         id: 'order-1',
         productId: mockProduct.id,
-        amountPaid: mockProduct.price,
+        amount: mockProduct.price,
         ownershipHash: 'abc123',
         createdAt: new Date().toISOString(),
         product: {
@@ -290,7 +290,7 @@ describe('GET /api/v1/ownership/my-sales', () => {
     prisma.order.findMany.mockResolvedValue([
       {
         id: 'order-1',
-        amountPaid: 2999,
+        amount: 2999,
         ownershipHash: 'abc123',
         createdAt: new Date().toISOString(),
         product: { id: mockProduct.id, title: mockProduct.title, category: mockProduct.category },
@@ -298,7 +298,7 @@ describe('GET /api/v1/ownership/my-sales', () => {
       },
       {
         id: 'order-2',
-        amountPaid: 1500,
+        amount: 1500,
         ownershipHash: 'def456',
         createdAt: new Date().toISOString(),
         product: { id: 'prod-2', title: 'Another Template', category: 'ui-kits' },

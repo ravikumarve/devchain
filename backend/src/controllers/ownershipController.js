@@ -65,9 +65,8 @@ const purchaseProduct = asyncHandler(async (req, res) => {
       data: {
         buyerId,
         productId,
-        amountPaid: product.price,
-        paymentMethod: 'simulated',
-        ownershipHash,
+        amount: product.price,
+        stripeSessionId: `sim_${crypto.randomBytes(12).toString('hex')}`,
         status: 'completed',
       },
     });
@@ -97,7 +96,7 @@ const purchaseProduct = asyncHandler(async (req, res) => {
     order: {
       id: result.order.id,
       productId,
-      amountPaid: result.order.amountPaid,
+      amountPaid: result.order.amount,
       status: result.order.status,
       purchasedAt: result.order.createdAt,
     },
@@ -197,7 +196,7 @@ const verifyCertificate = asyncHandler(async (req, res) => {
         id: record.order.product.id,
         title: record.order.product.title,
         category: record.order.product.category,
-        price: record.order.amountPaid,
+        price: record.order.amount,
         seller: record.order.product.seller,
       },
       purchasedAt: record.order.createdAt,
@@ -233,7 +232,7 @@ const getMyPurchases = asyncHandler(async (req, res) => {
         category: order.product.category,
         seller: order.product.seller,
       },
-      amountPaid: order.amountPaid,
+      amountPaid: order.amount,
       purchasedAt: order.createdAt,
       certificate: {
         ownershipHash: order.ownershipHash,
@@ -259,7 +258,7 @@ const getMySales = asyncHandler(async (req, res) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.amountPaid || 0), 0);
+  const totalRevenue = orders.reduce((sum, o) => sum + (o.amount || 0), 0);
 
   res.json({
     totalSales: orders.length,
@@ -268,7 +267,7 @@ const getMySales = asyncHandler(async (req, res) => {
       id: order.id,
       product: order.product,
       buyer: order.buyer,
-      amountPaid: order.amountPaid,
+      amountPaid: order.amount,
       ownershipHash: order.ownershipHash,
       soldAt: order.createdAt,
     })),

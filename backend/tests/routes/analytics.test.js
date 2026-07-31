@@ -49,7 +49,7 @@ const mockProduct = {
 const mockOrder = {
   id: 'order-1',
   productId: mockProduct.id,
-  amountPaid: 2999,
+  amount: 2999,
   status: 'completed',
   createdAt: new Date().toISOString(),
   product: { id: mockProduct.id, title: mockProduct.title },
@@ -93,11 +93,11 @@ describe('GET /api/v1/analytics/seller', () => {
     prisma.order.findMany.mockImplementation(async (args) => {
       if (args?.where?.createdAt?.gte && !args?.where?.createdAt?.lte) {
         // This month — include product details
-        return [mockOrder, { ...mockOrder, id: 'order-2', amountPaid: 1500 }];
+        return [mockOrder, { ...mockOrder, id: 'order-2', amount: 1500 }];
       }
       if (args?.where?.createdAt?.lte) {
         // Last month — no product details
-        return [{ id: 'order-3', amountPaid: 5000 }];
+        return [{ id: 'order-3', amount: 5000 }];
       }
       return [];
     });
@@ -105,8 +105,8 @@ describe('GET /api/v1/analytics/seller', () => {
     prisma.product.findMany.mockResolvedValue([mockProduct]);
 
     prisma.user.findMany.mockResolvedValue([
-      { id: mockUser.id, products: [{ orders: [{ amountPaid: 2999 }, { amountPaid: 1500 }] }] },
-      { id: 'seller-2', products: [{ orders: [{ amountPaid: 1000 }] }] },
+      { id: mockUser.id, products: [{ orders: [{ amount: 2999 }, { amount: 1500 }] }] },
+      { id: 'seller-2', products: [{ orders: [{ amount: 1000 }] }] },
     ]);
   });
 

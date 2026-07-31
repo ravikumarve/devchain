@@ -53,8 +53,8 @@ const getSellerAnalytics = asyncHandler(async (req, res) => {
   ]);
 
   // ── Revenue calculations ──
-  const totalRevenueThisMonth = ordersThisMonth.reduce((sum, o) => sum + (o.amountPaid || 0), 0);
-  const totalRevenueLastMonth = ordersLastMonth.reduce((sum, o) => sum + (o.amountPaid || 0), 0);
+  const totalRevenueThisMonth = ordersThisMonth.reduce((sum, o) => sum + (o.amount || 0), 0);
+  const totalRevenueLastMonth = ordersLastMonth.reduce((sum, o) => sum + (o.amount || 0), 0);
   const revenueChange = totalRevenueThisMonth - totalRevenueLastMonth;
   const revenueChangePercent = totalRevenueLastMonth > 0
     ? ((revenueChange / totalRevenueLastMonth) * 100)
@@ -101,7 +101,7 @@ const getSellerAnalytics = asyncHandler(async (req, res) => {
       salesCount: p._count.orders,
       revenue: ordersThisMonth
         .filter(o => o.product.id === p.id)
-        .reduce((sum, o) => sum + (o.amountPaid || 0), 0),
+        .reduce((sum, o) => sum + (o.amount || 0), 0),
       daysSinceCreated,
       daysSinceLastSale,
       status,
@@ -293,7 +293,7 @@ async function calculateRanking(sellerId, sellerRevenue) {
 
     const sellerRevenues = allSellers.map(s => ({
       id: s.id,
-      revenue: s.products.reduce((sum, p) => sum + p.orders.reduce((os, o) => os + (o.amountPaid || 0), 0), 0),
+      revenue: s.products.reduce((sum, p) => sum + p.orders.reduce((os, o) => os + (o.amount || 0), 0), 0),
     }));
 
     sellerRevenues.sort((a, b) => b.revenue - a.revenue);
