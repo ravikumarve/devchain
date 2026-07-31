@@ -1222,7 +1222,14 @@ textarea::placeholder {
   font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.4rem;
+}
+
+.dash-section-sub {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  margin-bottom: 0.5rem;
 }
 
 .dash-section-title .dash-link {
@@ -1307,6 +1314,32 @@ textarea::placeholder {
 .status-dot.accepted { color: var(--success-green); }
 .status-dot.rejected { color: var(--danger-red); }
 .status-dot.closed { color: var(--text-faint); }
+
+/* Product performance statuses (analytics) */
+.status-dot.hot { color: var(--success-green); }
+.status-dot.stale { color: var(--text-faint); }
+.status-dot.new { color: var(--accent-blue); }
+.status-dot.active { color: var(--accent-blue); }
+
+/* Mini bar (top products / categories) */
+.mini-bar { margin-bottom: 1.1rem; }
+.mini-bar .mb-head { display: flex; justify-content: space-between; margin-bottom: 0.4rem; }
+.mini-bar .mb-lbl { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+.mini-bar .mb-val { font-size: 0.8rem; font-weight: 700; font-family: var(--font-mono); color: var(--accent-blue); }
+.mini-bar .mb-track { height: 6px; background: var(--bg-panel); border-radius: 3px; overflow: hidden; }
+.mini-bar .mb-fill { height: 100%; background: linear-gradient(90deg, var(--accent-blue), rgba(59,130,246,0.45)); border-radius: 3px; }
+
+/* 7-day bar chart */
+.bar-chart { display: flex; align-items: flex-end; gap: 0.6rem; height: 130px; }
+.bar-chart .bc-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0.4rem; height: 100%; }
+.bar-chart .bc-val { font-size: 0.65rem; font-weight: 700; font-family: var(--font-mono); color: var(--accent-blue); }
+.bar-chart .bc-val.empty { color: transparent; }
+.bar-chart .bc-bar { width: 100%; background: linear-gradient(180deg, #60a5fa, var(--accent-blue)); border-radius: 4px 4px 0 0; box-shadow: 0 0 12px rgba(59,130,246,0.35); min-height: 4px; }
+.bar-chart .bc-bar.empty { background: var(--bg-panel); box-shadow: none; }
+.bar-chart .bc-lbl { font-size: 0.65rem; color: var(--text-faint); font-family: var(--font-mono); }
+
+/* Review stars */
+.stars { color: var(--warning-amber); letter-spacing: 1px; }
 
 .msg-list { display: flex; flex-direction: column; gap: 1.25rem; }
 
