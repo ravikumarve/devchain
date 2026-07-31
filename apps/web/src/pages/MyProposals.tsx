@@ -23,14 +23,24 @@ interface ProposalData {
 
 export default function MyProposals() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuthStore();
   const [proposals, setProposals] = useState<ProposalData[]>([]);
   const [escrows, setEscrows] = useState<Record<string, { status: string; amount: number }>>({});
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) { navigate('/login'); return; }
+    // Defer past App's sync loadUser() so hard-navigations don't false-redirect
+    const t = setTimeout(() => {
+      if (!isLoading && !isAuthenticated) {
+        navigate('/login');
+      }
+    }, 0);
+    return () => clearTimeout(t);
+  }, [isLoading, isAuthenticated, navigate]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
     Promise.all([
       jobsAPI.myProposals(),
       escrowAPI.getMy().catch(() => ({ data: { escrows: [] } })),
@@ -45,7 +55,7 @@ export default function MyProposals() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated]);
 
   const handleRequestRelease = async (proposalId: string) => {
     setActionLoading(proposalId);
@@ -66,30 +76,25 @@ export default function MyProposals() {
     }
   };
 
-  const statusBadge = (status: string) => {
-    const colors: Record<string, string> = {
-      pending: '#f59e0b33; color: #f59e0b',
-      accepted: '#10b98133; color: #10b981',
-      rejected: '#ef444433; color: #ef4444',
-    };
-    const c = colors[status] || '#6b728033; color: #6b7280';
-    return <span style={{ background: c.split(';')[0], color: c.split(';')[1], padding: '4px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{status.charAt(0).toUpperCase() + status.slice(1)}</span>;
-  };
+  const statusDot = (status: string) => (
+    <span className={`status-dot ${status}`}>
+      {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
+    </span>
+  );
 
   if (loading) return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>Loading proposals...</div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>Loading proposals...</div>
   );
 
   return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
-      <div className="container" style={{ padding: '48px 2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
-          <div>
-            <div style={{ color: 'var(--text-faint)', fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 6 }}>Freelancer</div>
-            <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.04em' }}>My Proposals</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 6 }}>{proposals.length} proposal{proposals.length !== 1 ? 's' : ''} submitted</p>
+    <div className="workspace">
+      <div className="container">
+        <div className="page-header">
+          <div className="page-title">
+            <h1>My Proposals</h1>
+            <p>{proposals.length} proposal{proposals.length !== 1 ? 's' : ''} submitted</p>
           </div>
-          <button onClick={() => navigate('/jobs')} className="btn-primary" style={{ padding: '10px 22px', fontSize: 14 }}>Browse Jobs →</button>
+          <button onClick={() => navigate('/jobs')} className="btn btn-outline" style={{ padding: '10px 22px', fontSize: 14 }}>Browse Jobs →</button>
         </div>
 
         {proposals.length === 0 ? (
@@ -108,7 +113,7 @@ export default function MyProposals() {
                 <div style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 20, flexWrap: 'wrap' }}>
                   <div style={{ flex: 1, minWidth: 200 }}>
                     <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
-                      {statusBadge(p.status)}
+                      {statusDot(p.status)}
                       <span style={{ color: 'var(--text-faint)', fontSize: 12, fontFamily: 'var(--font-mono)' }}>{p.job.status === 'open' ? '🟢 Open' : '🔴 ' + p.job.status}</span>
                     </div>
                     <h3
@@ -126,7 +131,7 @@ export default function MyProposals() {
                   </div>
                   <div style={{ textAlign: 'right', minWidth: 140 }}>
                     <div style={{ color: 'var(--text-faint)', fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 8 }}>Your Bid</div>
-                    <div style={{ fontSize: 24, fontWeight: 900, background: 'linear-gradient(135deg, #10b981, #059669)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--success-green)', fontFamily: 'var(--font-mono)' }}>
                       ${p.proposedRate}
                     </div>
                     {p.deliveryDays && (

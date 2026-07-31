@@ -19,14 +19,14 @@ export default function PurchaseSuccess() {
   }, [navigate, searchParams]);
 
   return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="card" style={{ padding: 48, textAlign: 'center', maxWidth: 500, width: '100%', margin: '0 20px' }}>
+    <div className="workspace" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '70vh' }}>
+      <div style={{ textAlign: 'center', maxWidth: 500, width: '100%', margin: '0 20px' }}>
         <div style={{ fontSize: 64, marginBottom: 24 }}>🎉</div>
-        <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--text-main)', marginBottom: 16, letterSpacing: '-0.03em' }}>Purchase Successful!</h1>
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-main)', marginBottom: 16, letterSpacing: '-0.02em' }}>Purchase Successful!</h1>
         <p style={{ color: 'var(--text-muted)', fontSize: 14, lineHeight: 1.6, marginBottom: 32, fontFamily: 'var(--font-mono)' }}>
-          Thank you for your purchase! Your order has been confirmed and the digital product is now available in your account. You will be redirected to the marketplace in <strong style={{ color: 'var(--eth-purple)' }}>{countdown}</strong> seconds.
+          Thank you for your purchase! Your order has been confirmed and the digital product is now available in your account. You will be redirected to the marketplace in <strong style={{ color: 'var(--text-main)' }}>{countdown}</strong> seconds.
         </p>
-        <button className="btn-primary" onClick={() => navigate('/marketplace')} style={{ width: '100%', padding: '14px', fontSize: 15 }}>
+        <button className="btn btn-primary" onClick={() => navigate('/marketplace')} style={{ width: '100%', padding: '14px', fontSize: 15 }}>
           Go to Marketplace
         </button>
       </div>

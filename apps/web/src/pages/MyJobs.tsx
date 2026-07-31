@@ -35,7 +35,7 @@ interface JobItem {
 
 export default function MyJobs() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuthStore();
   const [jobs, setJobs] = useState<JobItem[]>([]);
   const [escrows, setEscrows] = useState<Record<string, { status: string; amount: number }>>({});
   const [loading, setLoading] = useState(true);
@@ -43,7 +43,17 @@ export default function MyJobs() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) { navigate('/login'); return; }
+    // Defer past App's sync loadUser() so hard-navigations don't false-redirect
+    const t = setTimeout(() => {
+      if (!isLoading && !isAuthenticated) {
+        navigate('/login');
+      }
+    }, 0);
+    return () => clearTimeout(t);
+  }, [isLoading, isAuthenticated, navigate]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
     Promise.all([
       jobsAPI.myJobs(),
       escrowAPI.getMy().catch(() => ({ data: { escrows: [] } })),
@@ -58,7 +68,7 @@ export default function MyJobs() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated]);
 
   const handleAccept = async (proposalId: string) => {
     setActionLoading(proposalId);

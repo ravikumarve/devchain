@@ -2,17 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productsAPI } from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { Button } from '../../@/components/ui/button';
-import { Input } from '../../@/components/ui/input';
-import { Label } from '../../@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../@/components/ui/select';
-import { Textarea } from '../../@/components/ui/textarea';
 
 const CATEGORIES = [
   { value: 'templates', label: 'Templates' },
@@ -89,52 +78,43 @@ export default function CreateProduct() {
 
   if (success) {
     return (
-      <div
-        style={{
-          paddingTop: 64,
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+      <div className="workspace" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '70vh' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 64, marginBottom: 24 }}>🎉</div>
-          <h2 style={{ fontSize: 28, fontWeight: 900, color: '#fff', marginBottom: 12 }}>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-main)', marginBottom: 12, letterSpacing: '-0.02em' }}>
             Product Listed!
           </h2>
-          <p style={{ color: '#9898b0' }}>Redirecting to your product page...</p>
+          <p style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>
+            Redirecting to your product page...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ paddingTop: 64, minHeight: '100vh' }}>
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px' }}>
-        <Button
-          variant="ghost"
+    <div className="workspace">
+      <div className="container" style={{ maxWidth: 720 }}>
+        <button
+          className="btn btn-outline"
           onClick={() => navigate('/marketplace')}
-          style={{ marginBottom: 32, padding: 0 }}
+          style={{ marginBottom: '2rem', padding: '8px 18px', fontSize: 13 }}
         >
           ← Back to Marketplace
-        </Button>
+        </button>
 
-        <div style={{ marginBottom: 40 }}>
-          <h1 style={{ fontSize: 36, fontWeight: 900, color: '#fff', marginBottom: 8 }}>
-            List a Product
-          </h1>
-          <p style={{ color: '#9898b0', fontSize: 16 }}>
-            Sell your code, templates, or tools on DevChain and get blockchain ownership
-            certificates.
-          </p>
+        <div className="page-header" style={{ marginBottom: '3rem' }}>
+          <div className="page-title">
+            <h1>List a Product</h1>
+            <p>Sell your code, templates, or tools on DevChain and get blockchain ownership certificates.</p>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          {/* Title */}
-          <div style={styles.field}>
-            <Label htmlFor="title">Product Title *</Label>
-            <Input
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: 720 }}>
+          <div className="form-group" style={{ maxWidth: 'none' }}>
+            <label className="form-label" htmlFor="title">Product Title *</label>
+            <input
+              className="form-control"
               id="title"
               placeholder="e.g. React Dashboard Template with Dark Mode"
               value={form.title}
@@ -142,24 +122,23 @@ export default function CreateProduct() {
             />
           </div>
 
-          {/* Description */}
-          <div style={styles.field}>
-            <Label htmlFor="description">Description *</Label>
-            <Textarea
+          <div className="form-group" style={{ maxWidth: 'none' }}>
+            <label className="form-label" htmlFor="description">Description *</label>
+            <textarea
+              className="form-control"
               id="description"
               placeholder="Describe what's included, key features, and why developers should buy it..."
               value={form.description}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 set('description', e.target.value)
               }
-              style={{ height: 140 }}
+              style={{ height: 140, resize: 'vertical' }}
             />
           </div>
 
-          {/* Price + Category */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <div style={styles.field}>
-              <Label htmlFor="price">Price (USD) *</Label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div className="form-group" style={{ maxWidth: 'none' }}>
+              <label className="form-label" htmlFor="price">Price (USD) *</label>
               <div style={{ position: 'relative' }}>
                 <span
                   style={{
@@ -167,14 +146,15 @@ export default function CreateProduct() {
                     left: 16,
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    color: '#3b82f6',
-                    fontWeight: 800,
-                    fontSize: 18,
+                    color: 'var(--text-muted)',
+                    fontWeight: 600,
+                    fontSize: 16,
                   }}
                 >
                   $
                 </span>
-                <Input
+                <input
+                  className="form-control"
                   id="price"
                   type="number"
                   min="1"
@@ -188,29 +168,27 @@ export default function CreateProduct() {
                 />
               </div>
             </div>
-            <div style={styles.field}>
-              <Label htmlFor="category">Category *</Label>
-              <Select value={form.category} onValueChange={(v: string) => set('category', v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>
-                      {c.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="form-group" style={{ maxWidth: 'none' }}>
+              <label className="form-label" htmlFor="category">Category *</label>
+              <select
+                className="form-control"
+                id="category"
+                value={form.category}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => set('category', e.target.value)}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </select>
             </div>
           </div>
 
-          {/* Preview URL */}
-          <div style={styles.field}>
-            <Label htmlFor="previewUrl">
-              Preview URL <span style={{ color: '#55556a', fontWeight: 400 }}>(optional)</span>
-            </Label>
-            <Input
+          <div className="form-group" style={{ maxWidth: 'none' }}>
+            <label className="form-label" htmlFor="previewUrl">
+              Preview URL <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}>(optional)</span>
+            </label>
+            <input
+              className="form-control"
               id="previewUrl"
               placeholder="https://github.com/you/repo or live demo link"
               value={form.previewUrl}
@@ -220,13 +198,13 @@ export default function CreateProduct() {
             />
           </div>
 
-          {/* Tags */}
-          <div style={styles.field}>
-            <Label htmlFor="tags">
-              Tags <span style={{ color: '#55556a', fontWeight: 400 }}>(up to 8)</span>
-            </Label>
+          <div className="form-group" style={{ maxWidth: 'none' }}>
+            <label className="form-label" htmlFor="tags">
+              Tags <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}>(up to 8)</span>
+            </label>
             <div style={{ display: 'flex', gap: 8 }}>
-              <Input
+              <input
+                className="form-control"
                 id="tags"
                 placeholder="e.g. react, typescript, dashboard"
                 value={tagInput}
@@ -235,26 +213,17 @@ export default function CreateProduct() {
                   e.key === 'Enter' && (e.preventDefault(), addTag())
                 }
               />
-              <Button onClick={addTag} variant="outline">
+              <button onClick={addTag} className="btn btn-outline" style={{ padding: '0 20px', fontSize: 13 }}>
                 Add
-              </Button>
+              </button>
             </div>
             {form.tags.length > 0 && (
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
                 {form.tags.map((t) => (
                   <span
                     key={t}
-                    style={{
-                      background: '#12121a',
-                      border: '1px solid #2a2a3e',
-                      padding: '4px 12px',
-                      borderRadius: 6,
-                      color: '#9898b0',
-                      fontSize: 13,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                    }}
+                    className="status-dot"
+                    style={{ gap: 6, fontSize: 13, color: 'var(--text-muted)' }}
                   >
                     #{t}
                     <button
@@ -262,7 +231,7 @@ export default function CreateProduct() {
                       style={{
                         background: 'none',
                         border: 'none',
-                        color: '#55556a',
+                        color: 'var(--text-faint)',
                         cursor: 'pointer',
                         fontSize: 14,
                         padding: 0,
@@ -277,50 +246,29 @@ export default function CreateProduct() {
             )}
           </div>
 
-          {/* Blockchain info box */}
-          <div
-            style={{
-              background: '#0d0a1a',
-              border: '1px solid #3b82f633',
-              borderRadius: 14,
-              padding: 20,
-              display: 'flex',
-              gap: 16,
-              alignItems: 'flex-start',
-            }}
-          >
+          <div style={{ border: '1px solid var(--border-faint)', borderRadius: 6, padding: '1.25rem 1.5rem', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
             <span style={{ fontSize: 28 }}>🔐</span>
             <div>
-              <div style={{ color: '#60a5fa', fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
+              <div style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: 15, marginBottom: 4 }}>
                 Blockchain Ownership on Every Sale
               </div>
-              <div style={{ color: '#55556a', fontSize: 13, lineHeight: 1.7 }}>
+              <div style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.7 }}>
                 Every buyer receives a unique SHA-256 certificate permanently linked to their
                 account. Your product is protected and verifiable forever on DevChain.
               </div>
             </div>
           </div>
 
-          {/* Submit */}
-          <Button
+          <button
             onClick={handleSubmit}
             disabled={loading}
-            style={{
-              width: '100%',
-              padding: '18px',
-              borderRadius: 14,
-              fontSize: 17,
-              fontWeight: 800,
-            }}
+            className="btn btn-primary"
+            style={{ padding: '18px', fontSize: 17, fontWeight: 700 }}
           >
             {loading ? 'Listing...' : '🚀 List Product on DevChain'}
-          </Button>
+          </button>
         </div>
       </div>
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  field: { display: 'flex', flexDirection: 'column', gap: 8 },
-};

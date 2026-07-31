@@ -47,7 +47,7 @@ function PurchaseModal({
         }}>
           <div>
             <div style={{
-              color: 'var(--eth-purple)', fontSize: 11, fontWeight: 700,
+              color: 'var(--text-muted)', fontSize: 11, fontWeight: 700,
               letterSpacing: 2, marginBottom: 6, textTransform: 'uppercase',
               fontFamily: 'var(--font-mono)',
             }}>
@@ -76,13 +76,13 @@ function PurchaseModal({
               {i < steps.length - 1 && (
                 <div style={{
                   position: 'absolute', top: 14, left: '50%', width: '100%', height: 2,
-                  background: i < step ? 'var(--eth-purple)' : 'var(--border-dim)',
+                  background: i < step ? 'var(--accent-blue)' : 'var(--border-dim)',
                 }} />
               )}
               <div style={{
                 width: 28, height: 28, borderRadius: '50%', zIndex: 1,
-                background: i < step ? 'var(--eth-purple)' : 'var(--bg-panel)',
-                border: `2px solid ${i <= step ? 'var(--eth-purple)' : 'var(--border-dim)'}`,
+                background: i < step ? 'var(--accent-blue)' : 'var(--bg-panel)',
+                border: `2px solid ${i <= step ? 'var(--accent-blue)' : 'var(--border-dim)'}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 11, fontWeight: 700, color: '#fff',
               }}>
@@ -122,7 +122,7 @@ function PurchaseModal({
                   }}>
                     <span style={{ color: 'var(--text-faint)', fontSize: 13 }}>{k}</span>
                     <span style={{
-                      color: k === 'Price' ? 'var(--eth-purple)' : 'var(--text-main)',
+                      color: k === 'Price' ? 'var(--accent-blue)' : 'var(--text-main)',
                       fontSize: 13, fontWeight: 700,
                     }}>
                       {v}
@@ -141,7 +141,7 @@ function PurchaseModal({
             <div>
               <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 20 }}>
                 Confirm purchase of <strong style={{ color: 'var(--text-main)' }}>{product.title}</strong> for{' '}
-                <strong style={{ color: 'var(--eth-purple)' }}>${product.price?.toFixed(2)}</strong>.
+                <strong style={{ color: 'var(--accent-blue)' }}>${product.price?.toFixed(2)}</strong>.
               </p>
               <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={() => setStep(0)} className="btn-outline"
@@ -253,7 +253,7 @@ export default function ProductDetail() {
 
   if (loading) return (
     <div style={{
-      paddingTop: 72, minHeight: '100vh', background: 'transparent',
+      minHeight: '100vh', background: 'transparent',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13,
     }}>
@@ -263,15 +263,15 @@ export default function ProductDetail() {
   if (!product) return null;
 
   const isOwner = product.seller?.id === user?.id;
-  const color = catColors[product.category] || 'var(--eth-purple)';
+  const color = catColors[product.category] || 'var(--accent-blue)';
 
   return (
     <>
-      <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
-        <div className="container" style={{ padding: '48px 2rem' }}>
+      <div className="workspace">
+        <div className="container">
           <button onClick={() => navigate('/marketplace')}
-            className="btn-outline"
-            style={{ padding: '8px 18px', fontSize: 13, marginBottom: 32 }}>
+            className="btn btn-outline"
+            style={{ padding: '8px 18px', fontSize: 13, marginBottom: '2rem' }}>
             ← Back to Marketplace
           </button>
 
@@ -298,9 +298,9 @@ export default function ProductDetail() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                   <div style={{
                     width: 36, height: 36, borderRadius: 10,
-                    background: 'var(--eth-purple)', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center',
-                    fontSize: 14, fontWeight: 800, color: '#fff',
+                    background: 'var(--bg-surface)', border: '1px solid var(--border-dim)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 14, fontWeight: 800, color: 'var(--text-main)',
                   }}>
                     {product.seller?.username?.[0]?.toUpperCase()}
                   </div>
@@ -331,7 +331,7 @@ export default function ProductDetail() {
                 {['about', 'tech', 'reviews'].map((t) => (
                   <button key={t} onClick={() => setActiveTab(t)} style={{
                     padding: '8px 20px', borderRadius: 8, border: 'none',
-                    background: activeTab === t ? 'var(--eth-purple)' : 'transparent',
+                    background: activeTab === t ? 'var(--accent-blue)' : 'transparent',
                     color: activeTab === t ? '#fff' : 'var(--text-muted)',
                     fontWeight: 600, fontSize: 14, cursor: 'pointer',
                     fontFamily: 'var(--font-mono)', textTransform: 'capitalize',
@@ -474,9 +474,9 @@ export default function ProductDetail() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                               <div style={{
                                 width: 28, height: 28, borderRadius: 8,
-                                background: 'var(--eth-purple)', display: 'flex',
+                                background: 'var(--bg-panel)', display: 'flex',
                                 alignItems: 'center', justifyContent: 'center',
-                                fontSize: 12, fontWeight: 800, color: '#fff',
+                                fontSize: 12, fontWeight: 800, color: 'var(--text-main)',
                               }}>
                                 {rev.reviewer?.username?.[0]?.toUpperCase()}
                               </div>
@@ -526,9 +526,8 @@ export default function ProductDetail() {
                     Price
                   </div>
                   <div style={{
-                    fontSize: 42, fontWeight: 900,
-                    background: 'linear-gradient(135deg, #60a5fa, var(--eth-purple))',
-                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                    fontSize: 42, fontWeight: 700,
+                    color: 'var(--text-main)',
                     marginBottom: 4,
                   }}>
                     ${product.price?.toFixed(2)}
@@ -537,12 +536,12 @@ export default function ProductDetail() {
 
                 <div style={{
                   padding: '14px 24px', borderBottom: '1px solid var(--border-dim)',
-                  background: 'var(--eth-purple-dim)',
+                  background: 'transparent',
                   display: 'flex', alignItems: 'center', gap: 10,
                 }}>
                   <span style={{ fontSize: 18 }}>🔐</span>
                   <div>
-                    <div style={{ color: 'var(--eth-purple)', fontSize: 12, fontWeight: 700 }}>
+                    <div style={{ color: 'var(--accent-blue)', fontSize: 12, fontWeight: 700 }}>
                       SHA-256 Ownership Certificate
                     </div>
                     <div style={{ color: 'var(--text-faint)', fontSize: 11 }}>
@@ -555,15 +554,17 @@ export default function ProductDetail() {
                   {isOwner ? (
                     <div style={{
                       textAlign: 'center', padding: '16px',
-                      background: 'var(--eth-purple-dim)', borderRadius: 12,
-                      color: 'var(--eth-purple)', fontWeight: 700, fontSize: 15,
+                      background: 'transparent', borderRadius: 12,
+                      border: '1px solid var(--border-dim)',
+                      color: 'var(--text-main)', fontWeight: 700, fontSize: 15,
                     }}>
                       ✅ You own this product
                     </div>
                   ) : purchased ? (
                     <div style={{
                       textAlign: 'center', padding: '16px',
-                      background: 'rgba(16, 185, 129, 0.1)', borderRadius: 12,
+                      background: 'transparent', borderRadius: 12,
+                      border: '1px solid rgba(16, 185, 129, 0.3)',
                       color: 'var(--success-green)', fontWeight: 700, fontSize: 15,
                     }}>
                       🎉 Purchased!
@@ -597,9 +598,9 @@ export default function ProductDetail() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{
                       width: 44, height: 44, borderRadius: 12,
-                      background: 'var(--eth-purple)', display: 'flex',
-                      alignItems: 'center', justifyContent: 'center',
-                      fontSize: 16, fontWeight: 800, color: '#fff',
+                      background: 'var(--bg-surface)', border: '1px solid var(--border-dim)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 16, fontWeight: 800, color: 'var(--text-main)',
                     }}>
                       {product.seller?.username?.[0]?.toUpperCase()}
                     </div>

@@ -37,16 +37,16 @@ export default function JobDetail() {
     } finally { setSubmitting(false); }
   };
 
-  if (loading) return <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>Loading...</div>;
+  if (loading) return <div style={{ minHeight: '100vh', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>Loading...</div>;
   if (!job) return null;
 
   const isOwner = job.client?.id === user?.id;
 
   return (
     <>
-      <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
-        <div className="container" style={{ padding: '48px 2rem' }}>
-          <button onClick={() => navigate('/jobs')} className="btn-outline" style={{ padding: '8px 18px', fontSize: 13, marginBottom: 32 }}>
+      <div className="workspace">
+        <div className="container">
+          <button onClick={() => navigate('/jobs')} className="btn btn-outline" style={{ padding: '8px 18px', fontSize: 13, marginBottom: '2rem' }}>
             ← Back to Jobs
           </button>
 
@@ -58,8 +58,8 @@ export default function JobDetail() {
                   <span style={{ background: '#10b98122', color: '#10b981', padding: '4px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
                     {job.category || 'Development'}
                   </span>
-                  <span style={{ color: 'var(--text-faint)', fontSize: 12, fontFamily: 'var(--font-mono)' }}>
-                    {job.status}
+                  <span className={`status-dot ${job.status}`} style={{ fontSize: 12 }}>
+                    {job.status.replace('_', ' ')}
                   </span>
                   <span style={{ color: 'var(--text-faint)', fontSize: 12, fontFamily: 'var(--font-mono)' }}>
                     · 📋 {job.proposalCount || 0} proposals
@@ -67,7 +67,7 @@ export default function JobDetail() {
                 </div>
                 <h1 style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-main)', letterSpacing: '-0.04em', marginBottom: 12, lineHeight: 1.2 }}>{job.title}</h1>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--eth-purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: '#fff' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: 'var(--text-main)' }}>
                     {job.client?.username?.[0]?.toUpperCase()}
                   </div>
                   <span style={{ color: 'var(--text-muted)', fontSize: 14, fontFamily: 'var(--font-mono)' }}>@{job.client?.username}</span>
@@ -98,7 +98,7 @@ export default function JobDetail() {
               <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                 <div style={{ padding: '24px', borderBottom: '1px solid var(--border-dim)' }}>
                   <div style={{ color: 'var(--text-faint)', fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 8 }}>Budget</div>
-                  <div style={{ fontSize: 32, fontWeight: 900, background: 'linear-gradient(135deg, #10b981, #059669)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--success-green)', fontFamily: 'var(--font-mono)' }}>
                     ${job.budgetMin}–${job.budgetMax}
                   </div>
                   <div style={{ color: 'var(--text-faint)', fontSize: 12, fontFamily: 'var(--font-mono)', marginTop: 4 }}>
@@ -108,11 +108,11 @@ export default function JobDetail() {
 
                 <div style={{ padding: '20px 24px' }}>
                   {isOwner ? (
-                    <div style={{ textAlign: 'center', padding: '14px', background: 'var(--eth-purple-dim)', borderRadius: 12, color: 'var(--eth-purple)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: 13 }}>
+                    <div style={{ textAlign: 'center', padding: '14px', background: 'transparent', borderRadius: 12, border: '1px solid var(--border-dim)', color: 'var(--text-main)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: 13 }}>
                       ✅ Your Job Post
                     </div>
                   ) : submitted ? (
-                    <div style={{ textAlign: 'center', padding: '14px', background: '#10b98122', borderRadius: 12, color: '#10b981', fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: 13 }}>
+                    <div style={{ textAlign: 'center', padding: '14px', background: 'transparent', borderRadius: 12, border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: 13 }}>
                       ✅ Proposal Submitted!
                     </div>
                   ) : !isAuthenticated ? (
@@ -145,7 +145,7 @@ export default function JobDetail() {
                 <div style={{ padding: '20px 24px', borderTop: '1px solid var(--border-dim)' }}>
                   <div style={{ color: 'var(--text-faint)', fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 12 }}>Client</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--eth-purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: '#fff' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: 'var(--text-main)' }}>
                       {job.client?.username?.[0]?.toUpperCase()}
                     </div>
                     <div>

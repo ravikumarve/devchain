@@ -35,99 +35,96 @@ export default function Sell() {
   };
 
   if (success) return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="workspace" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '70vh' }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: 64, marginBottom: 24 }}>🎉</div>
-        <h2 style={{ fontSize: 28, fontWeight: 900, color: 'var(--text-main)', marginBottom: 12 }}>Product Listed!</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-main)', marginBottom: 12, letterSpacing: '-0.02em' }}>Product Listed!</h2>
         <p style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>Redirecting to your product page...</p>
       </div>
     </div>
   );
 
   return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
-      <div className="container" style={{ padding: '48px 2rem' }}>
-        <button onClick={() => navigate('/marketplace')} className="btn-outline" style={{ marginBottom: 32, padding: '8px 18px', fontSize: 13 }}>
+    <div className="workspace">
+      <div className="container" style={{ maxWidth: 720 }}>
+        <button onClick={() => navigate('/marketplace')} className="btn btn-outline" style={{ marginBottom: '2rem', padding: '8px 18px', fontSize: 13 }}>
           ← Back to Marketplace
         </button>
 
-        <div className="card" style={{ padding: 32, maxWidth: 720 }}>
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ color: 'var(--eth-purple)', fontSize: 12, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 8, fontFamily: 'var(--font-mono)' }}>
-              Sell
-            </div>
-            <h1 style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-main)', letterSpacing: '-0.04em', marginBottom: 8 }}>List a Product</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Sell your code, templates, or tools on DevChain and get blockchain ownership certificates.</p>
+        <div className="page-header" style={{ marginBottom: '3rem' }}>
+          <div className="page-title">
+            <h1>List a Product</h1>
+            <p>Sell your code, templates, or tools on DevChain and get blockchain ownership certificates.</p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: 720 }}>
+          <div className="form-group" style={{ maxWidth: 'none' }}>
+            <label className="form-label" htmlFor="title">Product Title *</label>
+            <input className="form-control" id="title" placeholder="e.g. React Dashboard Template with Dark Mode" value={form.title} onChange={e => set('title', e.target.value)} />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <div style={fld}>
-              <label style={lbl}>Product Title *</label>
-              <input style={inp} placeholder="e.g. React Dashboard Template with Dark Mode" value={form.title} onChange={e => set('title', e.target.value)} />
-            </div>
-
-            <div style={fld}>
-              <label style={lbl}>Description *</label>
-              <textarea style={{ ...inp, height: 140, resize: 'vertical' }} placeholder="Describe what's included, key features, and why developers should buy it..." value={form.description} onChange={e => set('description', e.target.value)} />
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <div style={fld}>
-                <label style={lbl}>Price (USD) *</label>
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--eth-purple)', fontWeight: 800, fontSize: 18 }}>$</span>
-                  <input style={{ ...inp, paddingLeft: 32 }} type="number" min="1" step="0.01" placeholder="29.99" value={form.price} onChange={e => set('price', e.target.value)} />
-                </div>
-              </div>
-              <div style={fld}>
-                <label style={lbl}>Category *</label>
-                <select style={{ ...inp, cursor: 'pointer' }} value={form.category} onChange={e => set('category', e.target.value)}>
-                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <div style={fld}>
-              <label style={lbl}>Preview URL <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}>(optional)</span></label>
-              <input style={inp} placeholder="https://github.com/you/repo or live demo link" value={form.previewUrl} onChange={e => set('previewUrl', e.target.value)} />
-            </div>
-
-            <div style={fld}>
-              <label style={lbl}>Tags <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}>(up to 8)</span></label>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <input style={{ ...inp, flex: 1 }} placeholder="e.g. react, typescript, dashboard" value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTag())} />
-                <button onClick={addTag} className="btn-outline" style={{ padding: '10px 20px', fontSize: 13 }}>Add</button>
-              </div>
-              {form.tags.length > 0 && (
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-                  {form.tags.map(t => (
-                    <span key={t} style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-dim)', padding: '4px 12px', borderRadius: 6, color: 'var(--text-faint)', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      #{t}
-                      <button onClick={() => { set('tags', form.tags.filter(x => x !== t)); }} style={{ background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: 14, padding: 0, lineHeight: 1 }}>×</button>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div style={{ background: 'transparent', border: '1px solid var(--eth-purple-dim)', borderRadius: 14, padding: 20, display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-              <span style={{ fontSize: 28 }}>🔐</span>
-              <div>
-                <div style={{ color: 'var(--eth-purple)', fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Blockchain Ownership on Every Sale</div>
-                <div style={{ color: 'var(--text-faint)', fontSize: 13, lineHeight: 1.7 }}>Every buyer receives a unique SHA-256 certificate permanently linked to their account. Your product is protected and verifiable forever on DevChain.</div>
-              </div>
-            </div>
-
-            <button onClick={handleSubmit} disabled={loading} style={{ width: '100%', padding: '18px', borderRadius: 14, background: loading ? 'var(--eth-purple-dim)' : 'linear-gradient(135deg, var(--eth-purple), #60a5fa)', border: 'none', color: '#fff', fontSize: 17, fontWeight: 800, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '0 4px 24px rgba(59,130,246,0.35)', opacity: loading ? 0.6 : 1 }}>
-              {loading ? 'Listing...' : '🚀 List Product on DevChain'}
-            </button>
+          <div className="form-group" style={{ maxWidth: 'none' }}>
+            <label className="form-label" htmlFor="description">Description *</label>
+            <textarea className="form-control" id="description" style={{ height: 140, resize: 'vertical' }} placeholder="Describe what's included, key features, and why developers should buy it..." value={form.description} onChange={e => set('description', e.target.value)} />
           </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div className="form-group" style={{ maxWidth: 'none' }}>
+              <label className="form-label" htmlFor="price">Price (USD) *</label>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontWeight: 600, fontSize: 16 }}>$</span>
+                <input className="form-control" id="price" type="number" min="1" step="0.01" placeholder="29.99" value={form.price} onChange={e => set('price', e.target.value)} style={{ paddingLeft: 32 }} />
+              </div>
+            </div>
+            <div className="form-group" style={{ maxWidth: 'none' }}>
+              <label className="form-label" htmlFor="category">Category *</label>
+              <select className="form-control" id="category" value={form.category} onChange={e => set('category', e.target.value)}>
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="form-group" style={{ maxWidth: 'none' }}>
+            <label className="form-label" htmlFor="previewUrl">
+              Preview URL <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}>(optional)</span>
+            </label>
+            <input className="form-control" id="previewUrl" placeholder="https://github.com/you/repo or live demo link" value={form.previewUrl} onChange={e => set('previewUrl', e.target.value)} />
+          </div>
+
+          <div className="form-group" style={{ maxWidth: 'none' }}>
+            <label className="form-label" htmlFor="tags">
+              Tags <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}>(up to 8)</span>
+            </label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input className="form-control" id="tags" placeholder="e.g. react, typescript, dashboard" value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTag())} />
+              <button onClick={addTag} className="btn btn-outline" style={{ padding: '0 20px', fontSize: 13 }}>Add</button>
+            </div>
+            {form.tags.length > 0 && (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+                {form.tags.map(t => (
+                  <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-muted)' }}>
+                    #{t}
+                    <button onClick={() => { set('tags', form.tags.filter(x => x !== t)); }} style={{ background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: 14, padding: 0, lineHeight: 1 }}>×</button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ border: '1px solid var(--border-faint)', borderRadius: 6, padding: '1.25rem 1.5rem', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+            <span style={{ fontSize: 28 }}>🔐</span>
+            <div>
+              <div style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Blockchain Ownership on Every Sale</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.7 }}>Every buyer receives a unique SHA-256 certificate permanently linked to their account. Your product is protected and verifiable forever on DevChain.</div>
+            </div>
+          </div>
+
+          <button onClick={handleSubmit} disabled={loading} className="btn btn-primary" style={{ padding: '18px', fontSize: 17, fontWeight: 700 }}>
+            {loading ? 'Listing...' : '🚀 List Product on DevChain'}
+          </button>
         </div>
       </div>
     </div>
   );
 }
-
-const fld: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 8 };
-const lbl: React.CSSProperties = { fontSize: 14, fontWeight: 700, color: 'var(--text-main)', letterSpacing: 0.3 };
-const inp: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 10, padding: '12px 16px', color: 'var(--text-main)', fontSize: 15, fontFamily: 'var(--font-display)', outline: 'none', width: '100%', boxSizing: 'border-box' };
