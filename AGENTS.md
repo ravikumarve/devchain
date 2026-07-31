@@ -20,6 +20,26 @@ devchain/
 > subdirectories. This is required due to npm workspaces.
 
 ---
+## Visual verification (mandatory — do not skip)
+After any change to layout, styling, component structure, or data
+rendering in the web frontend:
+
+1. Open the running dev server URL with agent-browser
+2. Capture a full-page screenshot: `agent-browser screenshot --full`
+3. If checking interactive elements (buttons, forms, nav), use
+   `agent-browser screenshot --annotate` to get numbered element
+   references alongside the image
+4. If a reference mockup HTML exists in the repo, open it too and
+   compare directly — spacing, alignment, colors, missing elements
+5. Check the browser console for errors: `agent-browser console`
+6. If anything doesn't match or an error is present, fix it and
+   repeat steps 1-5 before reporting the task as done
+
+Never report a UI change as complete without having actually seen
+it render via a full-page screenshot. A code change that "should"
+look right is not verified until confirmed visually.
+
+---
 
 ### [2026-06-19 15:10] - Chat Auto-Create Bug Fixed
 - **State**: Success
@@ -529,6 +549,19 @@ cd apps/web && npx shadcn@latest add <component-name>
 ---
 
 ## 💾 Session Memory Ledger
+
+### [2026-07-31 12:40] - MarketFoundry → DevChain Rebrand + Auth Pages + Mockup Set Complete
+- **State**: Success — 4 mockup HTMLs ready, pending commit/push
+- **MCP Data Used**: agent-browser DOM verification (login→dashboard→sign-out flow), direct file edits, grep for stale references
+- **Agents Deployed**: Orchestrator (direct execution)
+- **Architectural Decision**:
+  - Restored original **DevChain** brand across all mockups (was temporarily "MarketFoundry"). Renamed files: `devchain_landing.html`, `devchain_dashboard.html`, `devchain_login.html`, `devchain_register.html`
+  - **Auth wired in**: landing nav + footer → `devchain_login.html`; dashboard "Sign Out" → `devchain_login.html`; login ↔ register cross-links; demo credentials (demo-seller/client/buyer@devchain.dev / Demo1234) with one-click fill
+  - Register page validates: min 8 chars + 1 letter + 1 number, password match, then redirects to dashboard
+  - Dashboard overview now has **Recent Product Sales** full-width section below the 2-col grid (Active Contracts | Recent Messages) — moved out of grid to fix right-column padding shift
+  - Gumroad CTAs point to `https://devchain.gumroad.com` — **UNVERIFIED URL, confirm before launch**
+  - Backup `marketfoundry_dashboard (copy).html` left on disk, NOT committed
+- **Next Turn Directive**: Commit + push mockup set, then START IMPLEMENTING the Midnight Monolith design into the core app — extract design tokens to `apps/web/src/index.css` (bg-void #000, bg-surface #0a0a0a, bg-panel #111, accent-blue #3b82f6, Manrope + JetBrains Mono), then rebuild dashboard pages (Overview, Products, Jobs, Messages, Analytics, Profile) in React with the `const styles` + shadcn/ui pattern
 
 ### [2026-07-31 11:15] - Local Mode (SQLite) Fully Verified + Committed
 - **State**: Success — `62eaf9e` committed, working tree clean

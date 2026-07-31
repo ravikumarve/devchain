@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | DevChain</title>
+    <meta name="description" content="Create your DevChain seller account and start selling digital products in minutes.">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --bg-void: #000000;
+            --bg-surface: #0a0a0a;
+            --bg-panel: #111111;
+            --border-faint: #1f1f1f;
+            --border-solid: #333333;
+            --accent-blue: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.2);
+            --success-green: #10b981;
+            --danger-red: #ef4444;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --text-faint: #555555;
+            --font-sans: 'Manrope', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-void);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .ambient-mesh {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 0; pointer-events: none;
+            background-image:
+                radial-gradient(ellipse 60% 50% at 20% -10%, rgba(59, 130, 246, 0.10), transparent),
+                radial-gradient(ellipse 50% 40% at 90% 10%, rgba(59, 130, 246, 0.06), transparent);
+        }
+
+        .auth-wrap {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 440px;
+            padding: 2rem 1.5rem;
+        }
+
+        .auth-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-faint);
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+        }
+
+        .logo-row {
+            display: flex; align-items: center; gap: 0.75rem;
+            margin-bottom: 2rem; justify-content: center;
+        }
+        .logo-mark {
+            width: 34px; height: 34px;
+            border: 1px solid var(--accent-blue);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent-blue);
+            font-size: 1.1rem;
+            background: var(--accent-glow);
+        }
+        .logo-word { font-weight: 700; letter-spacing: -0.02em; font-size: 1.15rem; }
+
+        h1 { font-size: 1.5rem; font-weight: 700; text-align: center; letter-spacing: -0.02em; }
+        .sub { color: var(--text-muted); font-size: 0.9rem; text-align: center; margin-top: 0.5rem; line-height: 1.6; }
+
+        .form-group { margin-top: 1.25rem; }
+        .form-label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .form-control {
+            width: 100%;
+            background: var(--bg-void);
+            border: 1px solid var(--border-solid);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            padding: 0.75rem 1rem;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .form-control:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .form-control::placeholder { color: var(--text-faint); }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            font-family: var(--font-sans); font-weight: 600; font-size: 0.95rem;
+            padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer;
+            border: 1px solid transparent; text-decoration: none; transition: opacity 0.15s ease;
+        }
+        .btn-primary { background: var(--accent-blue); color: #fff; width: 100%; margin-top: 1.75rem; }
+        .btn-primary:hover { opacity: 0.85; }
+
+        .terms {
+            margin-top: 1rem; font-size: 0.75rem; color: var(--text-faint);
+            text-align: center; line-height: 1.6;
+        }
+        .terms a { color: var(--text-muted); }
+
+        .err-msg {
+            display: none; color: var(--danger-red); font-size: 0.85rem;
+            margin-top: 1rem; text-align: center;
+        }
+        .ok-msg {
+            display: none; color: var(--success-green); font-size: 0.85rem;
+            margin-top: 1rem; text-align: center;
+        }
+        .pass-hint { font-size: 0.75rem; color: var(--text-faint); margin-top: 0.35rem; }
+
+        .auth-foot { text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted); }
+        .auth-foot a { color: var(--accent-blue); text-decoration: none; font-weight: 500; }
+        .auth-foot a:hover { text-decoration: underline; }
+
+        .back-home { display: flex; justify-content: center; margin-top: 1.25rem; font-size: 0.8rem; }
+        .back-home a { color: var(--text-faint); text-decoration: none; }
+        .back-home a:hover { color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="ambient-mesh"></div>
+
+    <div class="auth-wrap">
+        <div class="auth-card">
+            <div class="logo-row">
+                <div class="logo-mark"><i class="ph-bold ph-lightning"></i></div>
+                <span class="logo-word">DevChain</span>
+            </div>
+
+            <h1>Create your account</h1>
+            <p class="sub">Sell digital products, take escrowed client work, and track everything in one dashboard.</p>
+
+            <form id="registerForm" onsubmit="return handleRegister(event)">
+                <div class="form-group">
+                    <label class="form-label" for="name">Full Name</label>
+                    <input type="text" id="name" class="form-control" placeholder="Ada Developer" autocomplete="name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" id="email" class="form-control" placeholder="you@example.com" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Min 8 chars, 1 letter + 1 number" autocomplete="new-password" required>
+                    <div class="pass-hint">Min 8 characters, at least 1 letter and 1 number.</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password2">Confirm Password</label>
+                    <input type="password" id="password2" class="form-control" placeholder="••••••••" autocomplete="new-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Account <i class="ph-bold ph-arrow-right"></i></button>
+                <div class="err-msg" id="errMsg"></div>
+                <div class="ok-msg" id="okMsg">Account created! Redirecting to your dashboard…</div>
+                <p class="terms">By creating an account you agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+            </form>
+
+            <p class="auth-foot">Already have an account? <a href="devchain_login.html">Sign in</a></p>
+        </div>
+
+        <div class="back-home"><a href="devchain_landing.html">← Back to landing</a></div>
+    </div>
+
+    <script>
+        function handleRegister(e) {
+            e.preventDefault();
+            const errMsg = document.getElementById('errMsg');
+            const okMsg = document.getElementById('okMsg');
+            errMsg.style.display = 'none';
+            okMsg.style.display = 'none';
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value;
+            const pass2 = document.getElementById('password2').value;
+
+            if (!name || !email || !pass) {
+                errMsg.textContent = 'Please fill in all fields.';
+                errMsg.style.display = 'block';
+                return false;
+            }
+            if (pass.length < 8 || !/[a-zA-Z]/.test(pass) || !/[0-9]/.test(pass)) {
+                errMsg.textContent = 'Password must be 8+ chars with at least 1 letter and 1 number.';
+                errMsg.style.display = 'block';
+                return false;
+            }
+            if (pass !== pass2) {
+                errMsg.textContent = 'Passwords do not match.';
+                errMsg.style.display = 'block';
+                return false;
+            }
+
+            // Mock register — create account and enter the dashboard
+            okMsg.style.display = 'block';
+            setTimeout(function () { window.location.href = 'devchain_dashboard.html'; }, 900);
+            return false;
+        }
+    </script>
+</body>
+</html>

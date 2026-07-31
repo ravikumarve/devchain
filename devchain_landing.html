@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevChain | Two-Sided Marketplace Boilerplate — Escrow, Chat, 187 Tests</title>
+    <meta name="description" content="The only Gumroad + Fiverr marketplace boilerplate NOT locked to Next.js. Escrow payments, in-app chat, seller analytics, Expo mobile app, and 187 passing tests. Docker-free local setup. Deploy free on Supabase + Vercel + Render.">
+    <meta name="keywords" content="marketplace boilerplate, escrow boilerplate, two-sided marketplace, gumroad clone, fiverr clone, express react boilerplate, no next.js">
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="DevChain — Marketplace Boilerplate with Escrow, Chat & Mobile App">
+    <meta property="og:description" content="The marketplace boilerplate you actually own. Escrow, chat, seller analytics, and 187 tests — on your laptop in 5 minutes, in production by the weekend.">
+    <meta property="og:url" content="https://github.com/ravikumarve/devchain">
+    <meta property="og:image" content="https://github.com/ravikumarve/devchain/raw/main/docs/screenshots/og-cover.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DevChain — Marketplace Boilerplate with Escrow, Chat & Mobile App">
+    <meta name="twitter:description" content="No Docker. No Next.js lock-in. Escrow + chat + analytics + 187 tests. Run it locally in 5 minutes.">
+    <!-- Sleek Typography: Manrope for headings, JetBrains Mono for code/data -->
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            /* Midnight Monolith Palette */
+            --bg-void: #000000;
+            --bg-surface: #0a0a0a;
+            --bg-panel: #111111;
+
+            --border-faint: #1f1f1f;
+            --border-solid: #333333;
+
+            /* Strategic Accents */
+            --accent-blue: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.2);
+            --success-green: #10b981;
+            --warning-amber: #f59e0b;
+            --danger-red: #ef4444;
+
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --text-faint: #555555;
+
+            --font-sans: 'Manrope', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg-void);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- AMBIENT BACKGROUND --- */
+        .ambient-mesh {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 0; pointer-events: none;
+            background-image:
+                radial-gradient(circle at 15% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 100%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+        }
+
+        /* --- LAYOUT --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; position: relative; z-index: 10; }
+        section { padding: 8rem 0; border-bottom: 1px solid var(--border-faint); }
+        .no-border { border-bottom: none; }
+
+        /* Typography */
+        h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+        .mono { font-family: var(--font-mono); }
+
+        /* --- NAVIGATION --- */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.5rem 0; border-bottom: 1px solid var(--border-faint);
+            position: relative; z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.25rem; font-weight: 800; color: var(--text-main);
+            text-decoration: none; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px;
+        }
+        .logo i { color: var(--accent-blue); font-size: 1.5rem; }
+
+        .nav-links { display: flex; gap: 2.5rem; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text-main); }
+
+        .nav-toggle {
+            display: none; background: none; border: 1px solid var(--border-solid); color: var(--text-main);
+            padding: 8px 12px; border-radius: 4px; font-size: 1.2rem; cursor: pointer; line-height: 1;
+        }
+        .nav-toggle:hover { border-color: var(--text-muted); }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 0.75rem 1.5rem; font-size: 0.85rem; font-weight: 600;
+            border-radius: 4px; text-decoration: none; transition: all 0.2s ease; cursor: pointer;
+            border: 1px solid transparent; font-family: var(--font-sans);
+        }
+        .btn-primary { background: var(--text-main); color: var(--bg-void); }
+        .btn-primary:hover { background: #e5e5e5; }
+        .btn-outline { background: transparent; color: var(--text-main); border-color: var(--border-solid); }
+        .btn-outline:hover { background: var(--bg-surface); border-color: var(--text-muted); }
+        .btn-accent { background: var(--accent-blue); color: #fff; }
+        .btn-accent:hover { background: #2f6fe0; }
+
+        /* --- HERO SECTION --- */
+        .hero { min-height: 80vh; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; padding-top: 0; border: none; }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 4px 12px; background: transparent;
+            border: 1px solid var(--border-solid); color: var(--text-muted);
+            font-size: 0.75rem; font-family: var(--font-mono); margin-bottom: 2rem; border-radius: 100px;
+        }
+        .hero-badge .ping { width: 6px; height: 6px; background: var(--success-green); border-radius: 50%; box-shadow: 0 0 10px var(--success-green); }
+
+        .hero h1 { font-size: clamp(3rem, 5vw, 4.5rem); margin-bottom: 1.5rem; max-width: 600px; color: var(--text-main); }
+        .hero p { font-size: 1.15rem; color: var(--text-muted); max-width: 500px; line-height: 1.6; margin-bottom: 3rem; font-weight: 400; }
+
+        /* CLI Mockup */
+        .cli-mockup {
+            width: 100%; background: var(--bg-surface); border: 1px solid var(--border-solid);
+            border-radius: 8px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .cli-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-faint); background: var(--bg-void);
+        }
+        .cli-header span:last-child { color: var(--accent-blue); font-size: 0.7rem; text-transform: uppercase; }
+        .cli-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; line-height: 1.6;}
+
+        .c-cmd { color: var(--text-main); font-weight: 600;}
+        .c-arg { color: var(--accent-blue); }
+        .c-ok { color: var(--success-green); }
+        .c-sys { color: var(--text-faint); }
+
+        /* --- THE ENGINE (BENTO MATRIX) --- */
+        .section-header { margin-bottom: 4rem; }
+        .section-header h2 { font-size: 3rem; margin-bottom: 1rem; }
+        .section-header p { font-size: 1.1rem; color: var(--text-muted); max-width: 600px; line-height: 1.6;}
+
+        .bento-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1px; background: var(--border-faint); border: 1px solid var(--border-faint); border-radius: 8px; overflow: hidden;}
+
+        .bento-card {
+            background: var(--bg-void); padding: 3.5rem; position: relative;
+            transition: background 0.3s ease; display: flex; flex-direction: column;
+        }
+        .bento-card:hover { background: var(--bg-surface); }
+
+        .col-8 { grid-column: span 8; }
+        .col-4 { grid-column: span 4; }
+        .col-6 { grid-column: span 6; }
+
+        .bc-tag { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-faint); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1px;}
+        .bc-tag i { color: var(--accent-blue); font-size: 1rem; }
+
+        .bento-card h3 { font-size: 1.75rem; margin-bottom: 1rem; color: var(--text-main); }
+        .bento-card p { font-size: 1rem; color: var(--text-muted); line-height: 1.7; font-weight: 400; flex: 1;}
+
+        /* --- STACK SECTION --- */
+        .stack-section { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
+
+        .stack-list { list-style: none; display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--border-faint);}
+        .stack-list li { display: flex; justify-content: space-between; font-size: 0.95rem; color: var(--text-muted); align-items: center; border-bottom: 1px solid var(--border-faint); padding: 1.5rem 0;}
+        .stack-list li span:last-child { color: var(--text-main); font-family: var(--font-mono); font-size: 0.75rem; background: var(--bg-surface); padding: 4px 8px; border: 1px solid var(--border-solid); border-radius: 4px;}
+
+        /* --- MAKER STRIP (social proof, no fake quotes) --- */
+        .maker-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
+        .maker-strip .mono-stat { font-size: 2.5rem; color: var(--text-main); font-weight: 700; display: block; margin-bottom: 6px; }
+        .maker-strip .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+        .stat-grid .stat { border-top: 1px solid var(--border-solid); padding-top: 1rem; }
+        .stat-grid .stat span { display: block; }
+        .stat-grid .stat .s-val { font-family: var(--font-mono); font-size: 1.5rem; color: var(--text-main); margin-bottom: 4px; }
+        .stat-grid .stat .s-lbl { font-size: 0.8rem; color: var(--text-faint); }
+
+        /* --- DEMO SECTION --- */
+        .demo-box { border: 1px solid var(--border-solid); border-radius: 8px; padding: 3rem; background: var(--bg-surface); }
+        .demo-cred { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 2rem 0; }
+        .cred { border: 1px solid var(--border-faint); border-radius: 6px; padding: 1.25rem; background: var(--bg-void); }
+        .cred .c-role { font-size: 0.7rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; color: var(--accent-blue); margin-bottom: 8px; }
+        .cred .c-mail { font-size: 0.85rem; color: var(--text-main); margin-bottom: 4px; }
+        .cred .c-pass { font-size: 0.8rem; color: var(--text-faint); font-family: var(--font-mono); }
+
+        /* --- PRICING --- */
+        .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 900px; margin: 0 auto; }
+        .price-card { border: 1px solid var(--border-solid); border-radius: 8px; padding: 3rem; background: var(--bg-void); display: flex; flex-direction: column; position: relative; transition: border-color 0.2s; }
+        .price-card:hover { border-color: var(--text-muted); }
+        .price-card.featured { border-color: var(--accent-blue); box-shadow: 0 0 40px var(--accent-glow); }
+        .price-card .p-tier { font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-faint); margin-bottom: 1rem; }
+        .price-card .p-price { font-size: 3rem; font-weight: 700; letter-spacing: -0.03em; }
+        .price-card .p-price .p-per { font-size: 1rem; color: var(--text-faint); font-weight: 400; letter-spacing: 0; }
+        .price-card .p-desc { color: var(--text-muted); font-size: 0.9rem; margin: 1rem 0 2rem; line-height: 1.6; }
+        .price-card ul { list-style: none; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2.5rem; flex: 1; }
+        .price-card ul li { display: flex; gap: 10px; font-size: 0.9rem; color: var(--text-muted); align-items: flex-start; }
+        .price-card ul li i { color: var(--success-green); font-size: 1.1rem; flex-shrink: 0; }
+        .price-card .btn { width: 100%; }
+        .price-note { text-align: center; color: var(--text-faint); font-size: 0.8rem; margin-top: 2rem; font-family: var(--font-mono); }
+
+        /* --- COMPARISON TABLE --- */
+        .compare-wrap { overflow-x: auto; border: 1px solid var(--border-solid); border-radius: 8px; }
+        .compare-table { width: 100%; border-collapse: collapse; min-width: 720px; }
+        .compare-table th, .compare-table td { padding: 1.25rem 1.5rem; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--border-faint); }
+        .compare-table thead th { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-faint); border-bottom: 1px solid var(--border-solid); }
+        .compare-table td:first-child { color: var(--text-muted); }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .compare-table .cell-mf { color: var(--text-main); font-weight: 600; }
+        .compare-table .cell-yes { color: var(--success-green); }
+        .compare-table .cell-no { color: var(--text-faint); }
+        .compare-table .cell-warn { color: var(--warning-amber); }
+        .compare-table .cell-price { font-family: var(--font-mono); color: var(--text-main); }
+        .compare-table .tag-mf { display: inline-block; background: var(--accent-blue); color: #fff; font-size: 0.65rem; font-family: var(--font-mono); padding: 2px 8px; border-radius: 100px; margin-left: 8px; vertical-align: middle; }
+
+        /* --- FAQ --- */
+        .faq-list { max-width: 760px; margin: 0 auto; border-top: 1px solid var(--border-faint); }
+        details.faq-item { border-bottom: 1px solid var(--border-faint); }
+        details.faq-item summary {
+            padding: 1.75rem 0; cursor: pointer; font-size: 1.05rem; font-weight: 600; color: var(--text-main);
+            display: flex; justify-content: space-between; align-items: center; list-style: none; transition: color 0.2s;
+        }
+        details.faq-item summary::-webkit-details-marker { display: none; }
+        details.faq-item summary::after { content: '+'; font-family: var(--font-mono); font-size: 1.25rem; color: var(--text-faint); transition: transform 0.2s; }
+        details.faq-item[open] summary::after { transform: rotate(45deg); }
+        details.faq-item summary:hover { color: var(--text-muted); }
+        .faq-a { padding: 0 0 1.75rem; color: var(--text-muted); font-size: 0.95rem; line-height: 1.8; max-width: 620px; }
+
+        /* --- FOOTER --- */
+        footer { padding: 4rem 0 2rem; display: flex; justify-content: space-between; align-items: flex-start; }
+        .f-brand p { color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem; max-width: 320px; line-height: 1.6; }
+
+        .f-links { display: flex; gap: 4rem; }
+        .f-col h5 { font-family: var(--font-sans); font-size: 0.8rem; color: var(--text-main); margin-bottom: 1.5rem; }
+        .f-col ul { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
+        .f-col a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        .f-col a:hover { color: var(--accent-blue); }
+
+        .f-bottom { margin-top: 5rem; padding-top: 2rem; border-top: 1px solid var(--border-faint); display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-faint); text-transform: uppercase;}
+
+        /* Responsiveness */
+        @media (max-width: 1024px) {
+            .hero, .stack-section, .maker-strip { grid-template-columns: 1fr; gap: 4rem; }
+            .col-8, .col-4, .col-6 { grid-column: span 12; }
+            footer { flex-direction: column; gap: 4rem; }
+            .demo-cred { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            nav { flex-wrap: wrap; gap: 1rem; }
+            .nav-toggle { display: inline-flex; }
+            .nav-links {
+                display: none; flex-direction: column; width: 100%; gap: 1rem;
+                padding: 1.5rem 0; border-top: 1px solid var(--border-faint); order: 3;
+            }
+            .nav-links.open { display: flex; }
+            .nav-cta { order: 2; }
+            .hero h1 { font-size: 2.8rem; }
+            .bento-card { padding: 2.5rem 1.5rem; }
+            .pricing-grid { grid-template-columns: 1fr; }
+            .stat-grid { grid-template-columns: 1fr; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-mesh"></div>
+
+    <div class="container">
+        <!-- NAVIGATION -->
+        <nav>
+            <a href="#" class="logo">
+                <i class="ph-fill ph-rocket"></i> DevChain
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="#features">Architecture</a>
+                <a href="#stack">Tech Stack</a>
+                <a href="#demo">Live Demo</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#faq">FAQ</a>
+                <a href="https://github.com/ravikumarve/devchain">Documentation</a>
+            </div>
+            <div class="nav-cta" style="display: flex; gap: 1rem; align-items: center;">
+                <a href="devchain_login.html" class="btn btn-ghost" style="background: transparent; border: 1px solid var(--border-solid); color: var(--text-main);">Sign In</a>
+                <a href="devchain_dashboard.html" class="btn btn-outline">Live Dashboard</a>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+            </div>
+        </nav>
+
+        <!-- HERO SECTION -->
+        <section class="hero no-border">
+            <div>
+                <div class="hero-badge">
+                    <div class="ping"></div> 187 Automated Tests Passing
+                </div>
+                <h1>The marketplace boilerplate <br>you actually own.</h1>
+                <p>Sell digital products, run a job board with escrow, and let buyers & sellers chat — all in your own code. Ship your platform this weekend without vendor lock-in.</p>
+                <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
+                    <a href="devchain_dashboard.html" class="btn btn-primary">Explore Dashboard</a>
+                    <a href="https://github.com/ravikumarve/devchain" class="btn btn-outline"><i class="ph-bold ph-github-logo"></i> View Source</a>
+                    <a href="#pricing" class="btn btn-accent"><i class="ph-bold ph-shopping-cart"></i> Get the Boilerplate</a>
+                </div>
+            </div>
+
+            <!-- Terminal Mockup -->
+            <div class="cli-mockup">
+                <div class="cli-header">
+                    <span>Terminal ~ /devchain</span>
+                    <span>Local Mode Active</span>
+                </div>
+                <div class="cli-body">
+                    <div>$ <span class="c-cmd">npm run setup:local</span></div>
+                    <div class="c-sys">[Info] Migrating SQLite database...</div>
+                    <div class="c-sys">[Info] Seeding 8 products, 6 jobs...</div>
+                    <br>
+                    <div>$ <span class="c-cmd">npm run dev --prefix backend</span></div>
+                    <div><span class="c-ok">✔</span> Backend API live on localhost:10000</div>
+                    <br>
+                    <div>$ <span class="c-cmd">npm run dev --prefix apps/web</span></div>
+                    <div><span class="c-ok">✔</span> React 19 Web App live on localhost:5173</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES BENTO -->
+        <section id="features">
+            <div class="section-header">
+                <h2>Production Ready.</h2>
+                <p>DevChain ships with the hard parts of a two-sided marketplace already solved. Swap the DB mode to push to production instantly.</p>
+            </div>
+
+            <div class="bento-grid">
+                <!-- Escrow -->
+                <div class="bento-card col-8">
+                    <span class="bc-tag"><i class="ph-fill ph-shield-check"></i> Escrow Engine</span>
+                    <h3>Secure Job Contracts</h3>
+                    <p>Post jobs, accept proposals, and lock funds securely in Stripe. The platform holds the money until the freelancer delivers the work, preventing disputes and building trust automatically.</p>
+                </div>
+
+                <!-- Digital Products -->
+                <div class="bento-card col-4">
+                    <span class="bc-tag"><i class="ph-fill ph-shopping-bag"></i> Commerce</span>
+                    <h3>Digital Products</h3>
+                    <p>Sell templates, tools, and courses. Includes instant file delivery, verified reviews, and SHA-256 ownership certificates.</p>
+                </div>
+
+                <!-- Dual Mode -->
+                <div class="bento-card col-6">
+                    <span class="bc-tag"><i class="ph-fill ph-database"></i> Architecture</span>
+                    <h3>Dual-Mode Database</h3>
+                    <p>Run locally with SQLite and local file storage for rapid offline dev. Flip a script to instantly use PostgreSQL (Supabase) and signed URLs for production.</p>
+                </div>
+
+                <!-- Chat -->
+                <div class="bento-card col-6">
+                    <span class="bc-tag"><i class="ph-fill ph-chats"></i> Communication</span>
+                    <h3>Real-Time Chat</h3>
+                    <p>Integrated buyer/seller messaging. Includes optimistic UI updates, error recovery, unread badges, and non-blocking in-app notifications.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- STACK / ARCHITECTURE -->
+        <section id="stack" class="stack-section no-border">
+            <div>
+                <h2>Engineered for <br>scale.</h2>
+                <p style="color: var(--text-muted); font-size: 1.15rem; line-height: 1.8; margin-bottom: 2rem; font-weight: 400;">We stripped away the ephemeral hype stack. DevChain relies on standard, deeply-tested JavaScript and TypeScript patterns.</p>
+                <div style="display: flex; gap: 2rem; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-faint);">
+                    <div><span style="color: var(--text-main); font-size: 1.5rem; display: block; margin-bottom: 4px;">187</span> Automated Tests</div>
+                    <div><span style="color: var(--text-main); font-size: 1.5rem; display: block; margin-bottom: 4px;">14</span> Mobile Screens</div>
+                </div>
+            </div>
+
+            <div>
+                <ul class="stack-list">
+                    <li>Frontend Client <span>React 19 + TypeScript</span></li>
+                    <li>Backend API <span>Node.js + Express</span></li>
+                    <li>Database ORM <span>Prisma (SQLite/Postgres)</span></li>
+                    <li>Payments & Escrow <span>Stripe (test-mode ready)</span></li>
+                    <li>Mobile App <span>React Native (Expo)</span></li>
+                    <li>Local Dev Mode <span>No Docker — Node only</span></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- MAKER STRIP (real production proof — no fake testimonials) -->
+        <section class="maker-strip no-border">
+            <div>
+                <h2>Built in production.<br>Fixed in production.</h2>
+                <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.8; margin-top: 1.5rem; font-weight: 400;">DevChain ran live as a real marketplace before it was packaged. Every feature you buy survived real users, real money, and a real production outage that went back into the code.</p>
+            </div>
+            <div class="stat-grid">
+                <div class="stat">
+                    <span class="s-val">8</span>
+                    <span class="s-lbl">Products sold on the live demo</span>
+                </div>
+                <div class="stat">
+                    <span class="s-val">6</span>
+                    <span class="s-lbl">Active jobs with escrow</span>
+                </div>
+                <div class="stat">
+                    <span class="s-val">1</span>
+                    <span class="s-lbl">Production crash — fixed & shipped back</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- LIVE DEMO -->
+        <section id="demo" class="no-border">
+            <div class="demo-box">
+                <div class="section-header" style="margin-bottom: 2rem;">
+                    <h2>Try it before you buy it.</h2>
+                    <p>Open the live dashboard and log in with any demo account. Chat, escrow, and analytics are fully working.</p>
+                </div>
+                <div class="demo-cred">
+                    <div class="cred">
+                        <div class="c-role">Seller</div>
+                        <div class="c-mail">demo-seller@devchain.dev</div>
+                        <div class="c-pass">Demo1234</div>
+                    </div>
+                    <div class="cred">
+                        <div class="c-role">Client</div>
+                        <div class="c-mail">demo-client@devchain.dev</div>
+                        <div class="c-pass">Demo1234</div>
+                    </div>
+                    <div class="cred">
+                        <div class="c-role">Buyer</div>
+                        <div class="c-mail">demo-buyer@devchain.dev</div>
+                        <div class="c-pass">Demo1234</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="devchain_dashboard.html" class="btn btn-primary"><i class="ph-bold ph-arrow-right"></i> Open Live Dashboard</a>
+                    <a href="https://github.com/ravikumarve/devchain" class="btn btn-outline">Read the README</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRICING -->
+        <section id="pricing">
+            <div class="section-header">
+                <h2>One-time. Yours forever.</h2>
+                <p>No subscriptions. No per-project licensing. Use it on unlimited projects.</p>
+            </div>
+
+            <div class="pricing-grid">
+                <!-- Starter -->
+                <div class="price-card">
+                    <span class="p-tier">Starter</span>
+                    <div class="p-price">$149 <span class="p-per">one-time</span></div>
+                    <p class="p-desc">The full two-sided marketplace. Everything you need to launch your own platform.</p>
+                    <ul>
+                        <li><i class="ph-bold ph-check"></i> Web app + backend source code</li>
+                        <li><i class="ph-bold ph-check"></i> Escrow payments with Stripe webhooks</li>
+                        <li><i class="ph-bold ph-check"></i> In-app chat with auto-conversations</li>
+                        <li><i class="ph-bold ph-check"></i> Seller analytics dashboard</li>
+                        <li><i class="ph-bold ph-check"></i> SHA-256 ownership verification</li>
+                        <li><i class="ph-bold ph-check"></i> SQLite local mode + demo data</li>
+                        <li><i class="ph-bold ph-check"></i> 187 automated tests</li>
+                        <li><i class="ph-bold ph-check"></i> Deployment guide (Supabase + Vercel + Render)</li>
+                        <li><i class="ph-bold ph-check"></i> Lifetime updates</li>
+                    </ul>
+                    <a href="https://devchain.gumroad.com" class="btn btn-primary">Buy Starter — $149</a>
+                </div>
+
+                <!-- Pro -->
+                <div class="price-card featured">
+                    <span class="p-tier" style="color: var(--accent-blue);">Pro — Most Popular</span>
+                    <div class="p-price">$249 <span class="p-per">one-time</span></div>
+                    <p class="p-desc">Everything in Starter, plus the Expo mobile app and extended support.</p>
+                    <ul>
+                        <li><i class="ph-bold ph-check"></i> Everything in Starter</li>
+                        <li><i class="ph-bold ph-check"></i> <strong style="color: var(--text-main);">Expo mobile app</strong> — marketplace, chat, analytics, jobs</li>
+                        <li><i class="ph-bold ph-check"></i> Extended deployment + mobile build guide</li>
+                        <li><i class="ph-bold ph-check"></i> Priority email support</li>
+                        <li><i class="ph-bold ph-check"></i> 30-day money-back guarantee</li>
+                    </ul>
+                    <a href="https://devchain.gumroad.com" class="btn btn-accent">Buy Pro — $249</a>
+                </div>
+            </div>
+            <p class="price-note">FOUNDING OFFER: first 20 buyers get the Pro tier for $97 — then it goes up to $249.</p>
+        </section>
+
+        <!-- COMPARISON -->
+        <section id="compare" class="no-border">
+            <div class="section-header">
+                <h2>Why not just use <span style="color: var(--text-muted);">ShipFast?</span></h2>
+                <p>Because a marketplace is not a landing page. Compare what you actually get.</p>
+            </div>
+
+            <div class="compare-wrap">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>DevChain <span class="tag-mf">YOU</span></th>
+                            <th>ShipFast Marketplace</th>
+                            <th>MakerKit Marketplace</th>
+                            <th>Fiverr Clone Scripts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Price</td>
+                            <td class="cell-price cell-mf">$149 1×</td>
+                            <td class="cell-price">$349 1×</td>
+                            <td class="cell-price">$299<span class="cell-no">/yr</span></td>
+                            <td class="cell-price">$499–3,000 1×</td>
+                        </tr>
+                        <tr>
+                            <td>Stack</td>
+                            <td class="cell-mf">Express + React + Expo</td>
+                            <td class="cell-no">Next.js</td>
+                            <td class="cell-no">Next.js</td>
+                            <td class="cell-warn">PHP / CodeIgniter</td>
+                        </tr>
+                        <tr>
+                            <td>Escrow payments</td>
+                            <td class="cell-yes cell-mf">✅ Built</td>
+                            <td class="cell-no">❌ Not included</td>
+                            <td class="cell-warn">⚠️ Manual only</td>
+                            <td class="cell-warn">⚠️ Varies</td>
+                        </tr>
+                        <tr>
+                            <td>In-app chat</td>
+                            <td class="cell-yes cell-mf">✅ Built</td>
+                            <td class="cell-no">❌</td>
+                            <td class="cell-no">❌</td>
+                            <td class="cell-warn">⚠️ Varies</td>
+                        </tr>
+                        <tr>
+                            <td>Seller analytics</td>
+                            <td class="cell-yes cell-mf">✅ Built</td>
+                            <td class="cell-no">❌</td>
+                            <td class="cell-no">❌</td>
+                            <td class="cell-no">❌</td>
+                        </tr>
+                        <tr>
+                            <td>Mobile app</td>
+                            <td class="cell-yes cell-mf">✅ Pro tier</td>
+                            <td class="cell-no">❌</td>
+                            <td class="cell-no">❌</td>
+                            <td class="cell-warn">Extra $</td>
+                        </tr>
+                        <tr>
+                            <td>Test suite</td>
+                            <td class="cell-yes cell-mf">✅ 187 tests</td>
+                            <td class="cell-no">❌</td>
+                            <td class="cell-no">❌</td>
+                            <td class="cell-no">❌</td>
+                        </tr>
+                        <tr>
+                            <td>Docker-free local dev</td>
+                            <td class="cell-yes cell-mf">✅ SQLite</td>
+                            <td class="cell-no">❌</td>
+                            <td class="cell-no">❌</td>
+                            <td class="cell-warn">⚠️</td>
+                        </tr>
+                        <tr>
+                            <td>Source ownership</td>
+                            <td class="cell-yes cell-mf">✅ Yours</td>
+                            <td class="cell-yes">✅</td>
+                            <td class="cell-warn">⚠️ Subscription</td>
+                            <td class="cell-yes">✅</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq" class="no-border">
+            <div class="section-header">
+                <h2>Questions, answered.</h2>
+                <p>The objections, handled before you ask.</p>
+            </div>
+
+            <div class="faq-list">
+                <details class="faq-item">
+                    <summary>Do I need Docker?</summary>
+                    <div class="faq-a">No. Local mode uses SQLite + local file storage. Node.js 20+ is the only requirement — the entire stack boots on any laptop.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>Can I really run this in 5 minutes?</summary>
+                    <div class="faq-a">Yes. <span class="mono">npm run setup:local</span> installs dependencies, creates the database, seeds demo data, and prints the two commands to start backend + web. Then open http://localhost:5173.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>What about payments? Do I need a Stripe account?</summary>
+                    <div class="faq-a">Stripe test mode works out of the box — you can walk the full escrow flow with test cards. Live mode needs free Stripe keys, configured in <span class="mono">.env</span>.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>How do I deploy to production?</summary>
+                    <div class="faq-a">The included deployment guide walks you through Supabase (database + storage), Vercel (frontend), and Render (backend) — all free tiers. This exact pipeline has been tested end-to-end.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>Can I use this for client work?</summary>
+                    <div class="faq-a">Yes. Unlimited projects, one-time license. (You may not resell or redistribute the source as a competing boilerplate.)</div>
+                </details>
+                <details class="faq-item">
+                    <summary>The code is Express, not Next.js — why?</summary>
+                    <div class="faq-a">The API/mobile/web separation is the architecture real products use. Your mobile app reuses the same API, and you're not locked into a single framework's ecosystem. If you're building on Next.js, this isn't for you.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>What if I get stuck?</summary>
+                    <div class="faq-a">Email support is included (Pro gets priority). The repo ships with AGENTS.md so AI coding tools can help you navigate and extend it.</div>
+                </details>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer>
+            <div class="f-brand">
+                <a href="#" class="logo"><i class="ph-fill ph-rocket"></i> DevChain</a>
+                <p>The two-sided marketplace boilerplate you actually own. Build, ship, and scale without vendor lock-in.</p>
+            </div>
+
+            <div class="f-links">
+                <div class="f-col">
+                    <h5>Product</h5>
+                    <ul>
+                        <li><a href="devchain_login.html">Sign In</a></li>
+                        <li><a href="devchain_dashboard.html">Web Dashboard</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="f-col">
+                    <h5>Resources</h5>
+                    <ul>
+                        <li><a href="https://github.com/ravikumarve/devchain">GitHub Repo</a></li>
+                        <li><a href="https://github.com/ravikumarve/devchain">Documentation</a></li>
+                        <li><a href="https://devchain.gumroad.com">Buy on Gumroad</a></li>
+                    </ul>
+                </div>
+            </div>
+        </footer>
+
+        <div class="f-bottom">
+            <div>© 2026 DEVCHAIN. ONE-TIME LICENSE, UNLIMITED PROJECTS.</div>
+            <div>STATUS: <span style="color: var(--success-green);">ALL SYSTEMS NOMINAL</span></div>
+        </div>
+    </div>
+
+    <!-- Mobile nav toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('navToggle');
+            const links = document.getElementById('navLinks');
+            if (toggle && links) {
+                toggle.addEventListener('click', () => {
+                    const open = links.classList.toggle('open');
+                    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                });
+                // Close the menu after clicking a link (mobile)
+                links.querySelectorAll('a').forEach(a => {
+                    a.addEventListener('click', () => {
+                        links.classList.remove('open');
+                        toggle.setAttribute('aria-expanded', 'false');
+                    });
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
