@@ -1,7 +1,7 @@
 <p align="center">
-  <h1 align="center">DevChain 🚀</h1>
+  <h1 align="center">MarketFoundry 🚀</h1>
   <p align="center">
-    <strong>Gumroad + Fiverr + GitHub Marketplace</strong> — Sell digital products, offer services, hire talent, all secured by SHA-256 cryptographic ownership verification
+    <strong>Two-sided marketplace boilerplate</strong> — sell digital products, run a job board with escrow, and let buyers & sellers chat — all in your own code. No Next.js lock-in. No Docker.
   </p>
 </p>
 
@@ -22,12 +22,13 @@
   <img src="https://img.shields.io/badge/node.js-20+-339933?logo=node.js&logoColor=white" alt="Node.js" />
   <img src="https://img.shields.io/badge/react-19-61DAFB?logo=react&logoColor=white" alt="React 19" />
   <img src="https://img.shields.io/badge/React%20Native-Expo-000020?logo=expo&logoColor=white" alt="React Native Expo" />
-  <img src="https://img.shields.io/badge/SHA--256-Ownership-8B5CF6?logo=cryptography&logoColor=white" alt="SHA-256 Ownership" />
+  <img src="https://img.shields.io/badge/no%20docker-local%20first-22C55E" alt="No Docker" />
   <img src="https://img.shields.io/badge/tests-187%20passing-22C55E" alt="187 tests passing" />
-  <img src="https://img.shields.io/badge/CI-Passing-22C55E?logo=githubactions" alt="CI Passing" />
 </p>
 
-DevChain is a next-generation developer marketplace where you can **sell digital products**, **offer freelance services**, **hire developers**, and **manage projects** — all secured by SHA-256 cryptographic ownership verification.
+MarketFoundry (formerly DevChain) is a production-ready **Gumroad + Fiverr + GitHub Marketplace** hybrid. It ships with the hard parts of a two-sided marketplace already solved — **escrow payments, in-app chat, seller analytics, ownership verification, and an Expo mobile app** — backed by **187 automated tests**.
+
+Run it on your laptop in 5 minutes with **SQLite + local file storage (no Docker, no Supabase account)**, then flip a switch and deploy to **Supabase + Vercel + Render** on free tiers.
 
 ---
 
@@ -35,7 +36,7 @@ DevChain is a next-generation developer marketplace where you can **sell digital
 
 ### 🛍️ Product Marketplace
 - Sell digital products (templates, tools, courses, scripts, design assets)
-- Instant file delivery via Supabase Storage (signed URLs)
+- Instant file delivery via storage adapter (local disk in dev, signed URLs in production)
 - SHA-256 ownership certificates for every purchase
 - Reviews & ratings system with verified-purchase enforcement
 
@@ -80,23 +81,74 @@ DevChain is a next-generation developer marketplace where you can **sell digital
 
 ---
 
+## 🔄 Two Modes, One Codebase
+
+MarketFoundry runs identically in two modes — you pick with a single command:
+
+| | 🖥️ **Local mode** (default) | ☁️ **Cloud mode** |
+|---|---|---|
+| **Database** | SQLite (`backend/prisma/dev.db`) | PostgreSQL via Supabase |
+| **Storage** | Local disk (`backend/uploads/`) | Supabase Storage (signed URLs) |
+| **Auth** | Built-in JWT + bcrypt | Supabase Auth (same API shape) |
+| **Setup** | `npm run setup:local` — Node only | `.env` + Supabase/Stripe keys |
+| **Cost** | $0, no accounts | Free tiers |
+| **Use it for** | Development, demos, tutorials | Production launch |
+
+The backend detects the mode from `DATABASE_URL` (`file:` → local) and swaps in the right storage and auth providers through a tiny compatibility layer (`backend/src/utils/dbCompat.js`). All 187 tests run in cloud mode and the full flow is verified in local mode.
+
+---
+
 ## 🚀 Quick Start
 
+### ⚡ Option A — Local mode (5 minutes, no Docker, no accounts)
+
+Requires only **Node.js 20+**. Uses SQLite + local disk storage + JWT/bcrypt auth.
+
 ```bash
-# 1. Install dependencies (from monorepo root)
+# 1. One command: install deps, create local DB, seed demo data
+npm run setup:local
+
+# 2. Start backend (:10000) and web app (:5173) — two terminals
+npm run dev --prefix backend
+npm run dev --prefix apps/web
+
+# 3. Open http://localhost:5173 and log in
+#    demo-seller@devchain.dev / Demo1234
+#    demo-client@devchain.dev / Demo1234
+#    demo-buyer@devchain.dev  / Demo1234
+```
+
+Demo data includes 8 products, 6 jobs, and 3 user roles — chat, escrow, and analytics all work against it.
+
+### ☁️ Option B — Cloud mode (Supabase + Stripe)
+
+```bash
+# 1. Install dependencies
 npm ci
 
 # 2. Configure environment
 cp backend/.env.example backend/.env
-# Edit backend/.env with your Supabase credentials, JWT secrets, etc.
+cp apps/web/.env.example apps/web/.env
+# Add SUPABASE_URL, SUPABASE_SERVICE_KEY, JWT secrets, STRIPE keys
 
-# 3. Start backend + web app
-npm start                # Backend on :10000
-cd apps/web && npm run dev  # Web on :5173
+# 3. Switch Prisma to PostgreSQL + push schema
+node scripts/db-mode.js postgres
+npx prisma db push --schema=backend/prisma/schema.prisma
 
-# 4. (Optional) Start mobile app
-cd apps/mobile && npm run start  # Expo dev server
+# 4. Seed + start
+npm run seed:demo
+npm run start --prefix backend  # Backend on :10000
+cd apps/web && npm run dev      # Web on :5173
 ```
+
+### Switching modes anytime
+
+```bash
+node scripts/db-mode.js sqlite     # → local mode (SQLite)
+node scripts/db-mode.js postgres   # → cloud mode (PostgreSQL)
+```
+
+The mode switch only regenerates the Prisma client — no code changes needed. See the [docs](docs/) folder for API, testing, and contribution guides.
 
 ---
 
@@ -118,13 +170,19 @@ devchain/                          (npm workspaces monorepo)
 │           ├── services/api.ts    # Mobile API client
 │           └── store/authStore.ts # Zustand with AsyncStorage persistence
 ├── backend/                       # Node.js + Express + Prisma
+│   ├── prisma/
+│   │   ├── schema.prisma          # PostgreSQL schema (cloud mode)
+│   │   └── schema.sqlite.prisma   # SQLite variant (local mode)
 │   └── src/
 │       ├── controllers/           # 11 controllers (auth, products, jobs, escrow, chat, etc.)
 │       ├── routes/                # 11 route files with Joi validation
 │       ├── middleware/            # auth, errorHandler, cors, validate, rateLimit
-│       ├── services/              # emailService, notificationService
-│       ├── utils/                 # errors, logger, asyncHandler
-│       └── config/                # env validation, database, supabase
+│       ├── services/              # storageService (local|supabase), localAuthProvider, emailService
+│       ├── utils/                 # dbCompat, errors, logger, asyncHandler
+│       └── config/                # env validation, database, supabase (guarded)
+├── scripts/
+│   ├── setup.js                   # One-command local setup (npm run setup:local)
+│   └── db-mode.js                 # Prisma schema switcher (sqlite|postgres)
 ├── .github/workflows/
 │   └── ci.yml                     # Lint → TypeCheck → Audit → Test → Deploy
 └── docs/                          # Documentation
@@ -132,18 +190,17 @@ devchain/                          (npm workspaces monorepo)
 
 ### Tech Stack
 
-| Layer          | Technology                           | Purpose                             |
-| -------------- | ------------------------------------ | ----------------------------------- |
-| **Web**        | React 19 + TypeScript + Vite         | Modern web SPA                      |
-| **Mobile**     | React Native 0.83 + Expo SDK 55      | Cross-platform mobile app           |
-| **Backend**    | Node.js 20 + Express + CommonJS      | RESTful API with Joi validation     |
-| **Database**   | PostgreSQL (Supabase) + Prisma ORM   | Type-safe queries + migrations      |
-| **Storage**    | Supabase Storage                      | Signed URL file access              |
-| **Auth**       | JWT (access + refresh) + bcrypt      | Stateless auth with silent refresh  |
-| **Payments**   | Stripe (simulated for development)   | Escrow + product checkout           |
-| **Realtime**   | Supabase Realtime                     | Live chat (configured, ready)       |
-| **Deploy**     | Vercel (web + API) + Supabase (DB)   | Serverless functions at edge        |
-| **CI/CD**      | GitHub Actions                        | Test gate → auto-deploy on main     |
+| Layer          | Local mode                    | Cloud mode (production)         |
+| -------------- | ----------------------------- | ------------------------------- |
+| **Web**        | React 19 + TypeScript + Vite  | Same                            |
+| **Mobile**     | React Native 0.83 + Expo 55   | Same                            |
+| **Backend**    | Node.js 20 + Express + Prisma | Same                            |
+| **Database**   | SQLite (`dev.db`)             | PostgreSQL (Supabase) + Prisma  |
+| **Storage**    | Local disk (`backend/uploads`)| Supabase Storage (signed URLs)  |
+| **Auth**       | JWT + bcrypt (built-in)       | Supabase Auth (same JWT shape)  |
+| **Payments**   | Stripe test mode              | Stripe (escrow + checkout)      |
+| **Tests**      | Jest — 187 passing            | Same                            |
+| **Deploy**     | — (local dev)                 | Vercel + Render + Supabase (free tiers) |
 
 ---
 
@@ -369,15 +426,19 @@ On push to `main`:
 
 ```bash
 # Monorepo root
+npm run setup:local         # One-command local setup (deps + DB + seed)
+npm run db:sqlite           # Switch Prisma to SQLite (local)
+npm run db:postgres         # Switch Prisma to PostgreSQL (cloud)
+npm run seed:demo           # Seed demo users/products/jobs
 npm test                    # Run all backend tests
 npm run lint                # Run ESLint across workspace
 npm run typecheck           # TypeScript type check all workspaces
 
 # Backend
 cd backend
-npm run dev                 # Nodemon auto-reload
+npm run dev                 # Start API on :10000 (nodemon)
 npx prisma studio           # Prisma admin UI
-npx prisma migrate dev      # Create new migration
+npx prisma migrate dev      # Create new migration (cloud mode)
 
 # Web App
 cd apps/web
@@ -409,10 +470,12 @@ npm run web                 # Run in browser
 
 MIT License — see [LICENSE](LICENSE) for details.
 
+Looking for the commercial boilerplate (one-time license, unlimited projects)? See the [MarketFoundry listing](docs/gumroad-listing.md) — includes the Expo mobile app, extended deployment guide, and priority support.
+
 ---
 
 <p align="center">
-  <strong>DevChain</strong> — Where code meets commerce, secured by SHA-256.
+  <strong>MarketFoundry</strong> — the marketplace you own. Escrow, chat, analytics, and 187 tests — on your laptop in 5 minutes, in production by the weekend.
   <br>
   <sub>Built with ❤️ by developers, for developers</sub>
 </p>
