@@ -23,11 +23,11 @@ import Overview from './pages/Overview';
 
 function AppContent() {
   const location = useLocation();
-  const isLanding = location.pathname === '/';
+  const hideNav = location.pathname === '/' || location.pathname === '/login' || location.pathname === '/register';
 
   return (
     <>
-      {!isLanding && <Navbar />}
+      {!hideNav && <Navbar />}
       <main className="app-main">
         <Routes>
         <Route path="/" element={<Landing />} />
