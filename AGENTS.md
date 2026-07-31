@@ -550,6 +550,21 @@ cd apps/web && npx shadcn@latest add <component-name>
 
 ## 💾 Session Memory Ledger
 
+### [2026-07-31 18:05] - All Legacy Pages Rebuilt into Midnight Monolith (Commit 9)
+- **State**: Success — committed (`b637ccc`) + pushed to main
+- **MCP Data Used**: agent-browser DOM verification (create-product/post-job/product/:id/job/:id/sell/purchase-cancel/my-proposals/my-jobs), direct file reads/writes, bash for build + jest regression
+- **Agents Deployed**: Orchestrator (direct execution)
+- **Architectural Decision**: Rebuilt all 8 remaining legacy pages into the `.workspace` borderless aesthetic:
+  - **CreateProduct / Sell / PostJob**: workspace shell + page-header + `.form-control`/`.form-label`/`.form-group` pattern; removed shadcn `../../@/components` imports (they were pointing at a dead path); tags/skills chips as inline-flex; info boxes border-faint; white `btn btn-primary` CTAs.
+  - **ProductDetail**: workspace shell, borderless sidebar card (price, SHA-256 cert strip, owner/purchased states, seller + Message Seller), tabs, reviews, purchase modal; FileManager untouched.
+  - **JobDetail**: workspace shell, `status-dot` + status mapping, budget sidebar, proposal modal.
+  - **MyProposals**: workspace shell + page-header + status-dot badges; escrow actions preserved.
+  - **PurchaseSuccess/PurchaseCancel**: workspace-centered minimal pages.
+  - **Auth race fix**: MyProposals + MyJobs now use deferred `setTimeout(0)` redirect (matching Overview/Profile pattern) so hard-navigations don't false-redirect to /login. Verified: `/my-proposals` and `/my-jobs` both load on full-page navigation now.
+- **Mesh sweep (user-requested)**: `grep -rni mesh` over `apps/web/src/`, built `dist/assets/*.css|js`, and mockup HTML = **0 references**. Login/Register/App body = `rgb(0,0,0)`, no `.bg-mesh*`, no mesh backgroundImage. Only intentional element remaining: the fixed `radial-gradient` glow div on Login/Register (a design accent, not a mesh).
+- **Verification**: clean build tsc+vite ✓ | 187/187 tests ✓ (pre-commit hook) | browser DOM all 8 pages render workspace shell, meshCount 0, body black | screenshots `screenshots/workspace-create-product.png`, `workspace-post-job.png`, `workspace-product-detail.png`, `workspace-job-detail.png`, `workspace-my-proposals.png`
+- **Next Turn Directive**: All 18 web pages now Midnight Monolith-consistent. Next high-value: Gumroad launch prep (verify `devchain.gumroad.com` URL — still UNVERIFIED, write LICENSE, finalize README), or run `npm run setup:local` on clean clone to validate 5-min setup claim, or mobile parity pass.
+
 ### [2026-07-31 17:20] - Midnight Monolith Workspace Rebuild (Commit 8)
 - **State**: Success — committed (`584e79a`) + pushed to main
 - **MCP Data Used**: agent-browser DOM verification (5 workspace views + login redirect flow), direct file reads/writes, bash for build + jest regression
