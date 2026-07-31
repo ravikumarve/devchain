@@ -187,15 +187,16 @@ export default function Overview() {
   const hasData = kpis.sales > 0 || contracts.length > 0 || messages.length > 0 || sales.length > 0;
 
   return (
-    <div className="dash-page">
-      <div className="dash-header">
-        <div className="dash-title">
+    <div className="workspace">
+      <div className="container">
+      <div className="page-header">
+        <div className="page-title">
           <h1>Overview</h1>
           <p>Track your digital sales, active job escrows, and proposals.</p>
         </div>
-        <div className="dash-actions">
-          <Link to="/post-job" className="btn btn-outline" style={{ padding: '0.6rem 1.4rem', fontSize: '0.8rem' }}>Post Job</Link>
-          <Link to="/create-product" className="btn btn-primary" style={{ padding: '0.6rem 1.4rem', fontSize: '0.8rem' }}>New Product</Link>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <Link to="/post-job" className="btn btn-outline">Post Job</Link>
+          <Link to="/create-product" className="btn btn-primary">New Product</Link>
         </div>
       </div>
 
@@ -208,7 +209,7 @@ export default function Overview() {
         </div>
         <div className="kpi-item">
           <span className="kpi-lbl">Escrowed Funds</span>
-          <span className="kpi-val" style={{ color: 'var(--success-green)' }}>${kpis.escrowed.toFixed(2)}</span>
+          <span className="kpi-val">${kpis.escrowed.toFixed(2)}</span>
           <span className="kpi-sub">Locked in {contracts.length} active jobs</span>
         </div>
         <div className="kpi-item">
@@ -232,17 +233,18 @@ export default function Overview() {
         />
       ) : (
         <>
-          <div className="dash-grid">
+          <div className="two-col">
             {/* Active Contracts */}
-            <div className="dash-section">
-              <div className="dash-section-title">
+            <div className="data-section">
+              <div className="section-title">
                 Active Contracts
-                <Link to="/my-jobs" className="dash-link">View All ↗</Link>
+                <Link to="/my-jobs">View All ↗</Link>
               </div>
               {contracts.length === 0 ? (
                 <p style={{ color: 'var(--text-faint)', fontSize: '0.88rem' }}>No active contracts yet.</p>
               ) : (
-                <table className="dash-table">
+                <div className="table-wrap">
+                <table className="data-table">
                   <thead>
                     <tr>
                       <th>Project</th>
@@ -263,26 +265,27 @@ export default function Overview() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               )}
             </div>
 
             {/* Recent Messages */}
-            <div className="dash-section">
-              <div className="dash-section-title">
+            <div className="data-section">
+              <div className="section-title">
                 Recent Messages
-                <Link to="/chat" className="dash-link">Inbox ↗</Link>
+                <Link to="/chat">Inbox ↗</Link>
               </div>
               {messages.length === 0 ? (
                 <p style={{ color: 'var(--text-faint)', fontSize: '0.88rem' }}>No conversations yet.</p>
               ) : (
-                <div className="msg-list">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1rem' }}>
                   {messages.map((m) => (
-                    <div key={m.id} className="msg-item" onClick={() => navigate('/chat')}>
-                      <div className="m-header">
-                        <span className="m-name">{m.name}</span>
-                        <span className="m-time">{m.time}</span>
+                    <div key={m.id} style={{ cursor: 'pointer' }} onClick={() => navigate('/chat')}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <span style={{ fontWeight: 500, fontSize: '0.95rem' }}>{m.name}</span>
+                        <span className="item-secondary">{m.time}</span>
                       </div>
-                      <div className="m-text">{m.content}</div>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{m.content}</div>
                     </div>
                   ))}
                 </div>
@@ -291,15 +294,16 @@ export default function Overview() {
           </div>
 
           {/* Recent Product Sales (full width) */}
-          <div className="dash-section" style={{ marginTop: '2.5rem' }}>
-            <div className="dash-section-title">
+          <div className="data-section" style={{ marginTop: '2.5rem' }}>
+            <div className="section-title">
               Recent Product Sales
-              <Link to="/analytics" className="dash-link">Analytics ↗</Link>
+              <Link to="/analytics">Analytics ↗</Link>
             </div>
             {sales.length === 0 ? (
               <p style={{ color: 'var(--text-faint)', fontSize: '0.88rem' }}>No sales yet. Share your product links to get started.</p>
             ) : (
-              <table className="dash-table">
+              <div className="table-wrap">
+              <table className="data-table">
                 <thead>
                   <tr>
                     <th>Digital Product</th>
@@ -314,7 +318,7 @@ export default function Overview() {
                         <span className="item-primary">{s.productTitle}</span>
                         <span className="item-secondary">${s.amountPaid.toFixed(2)}</span>
                       </td>
-                      <td className="item-secondary" style={{ fontFamily: 'var(--font-sans)' }}>{s.buyerName}</td>
+                      <td className="item-secondary" style={{ fontFamily: 'var(--font-display)' }}>{s.buyerName}</td>
                       <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-faint)' }}>
                         {timeAgo(s.createdAt)}
                       </td>
@@ -322,10 +326,12 @@ export default function Overview() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </div>
         </>
       )}
+      </div>
     </div>
   );
 }

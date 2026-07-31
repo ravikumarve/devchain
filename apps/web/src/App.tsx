@@ -29,14 +29,8 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="bg-mesh">
-        <div className="bg-mesh-glow" />
-        <div className="bg-mesh-glow-bottom" />
-        <div className="bg-mesh-grid" />
-        <div className="bg-mesh-dots" />
-      </div>
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <Navbar />
+      <Navbar />
+      <main className="app-main">
         <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/dashboard" element={<Overview />} />
@@ -57,7 +51,7 @@ function App() {
         <Route path="/purchase-cancel" element={<PurchaseCancel />} />
         <Route path="/chat" element={<Chat />} />
       </Routes>
-      </div>
+      </main>
     </BrowserRouter>
   );
 }

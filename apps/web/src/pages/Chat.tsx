@@ -172,72 +172,55 @@ export default function Chat() {
   if (!isAuthenticated) return null;
 
   return (
-    <div style={{ paddingTop: 72, height: '100vh', display: 'flex', flexDirection: 'column', background: 'transparent' }}>
-      <div style={{ flex: 1, display: 'flex', maxWidth: 1200, width: '100%', margin: '0 auto', padding: '16px', gap: 16, overflow: 'hidden' }}>
+    <div className="workspace" style={{ padding: '3rem 0 0' }}>
+      <div className="container">
+      <div className="page-header" style={{ marginBottom: '1.5rem' }}>
+        <div className="page-title">
+          <h1>Messages</h1>
+          <p>Real-time chat with buyers and freelancers.</p>
+        </div>
+        <button className="btn btn-primary">New Message</button>
+      </div>
+
+      <div className="msg-layout" style={{ height: 'calc(100vh - 240px)' }}>
 
         {/* Left panel — conversation list */}
-        <div style={{ width: 320, minWidth: 280, background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border-dim)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-dim)' }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>Messages</h2>
+        <div className="msg-list">
+          <div style={{ padding: '0 0 0.75rem' }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>Inbox</h2>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            {loadingConv ? (
-              <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>Loading...</div>
-            ) : conversations.length === 0 ? (
-              <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-                No conversations yet. Start by sending a message from a job or product.
-              </div>
-            ) : (
-              conversations.map((c) => (
-                <div
-                  key={c.id}
-                  onClick={() => setSelectedConv(c)}
-                  style={{
-                    padding: '14px 20px',
-                    cursor: 'pointer',
-                    background: selectedConv?.id === c.id ? 'var(--bg-panel)' : 'transparent',
-                    borderBottom: '1px solid var(--border-dim)',
-                    transition: 'background 0.15s',
-                  }}
-                  onMouseEnter={(e) => { if (selectedConv?.id !== c.id) e.currentTarget.style.background = 'var(--bg-panel)'; }}
-                  onMouseLeave={(e) => { if (selectedConv?.id !== c.id) e.currentTarget.style.background = 'transparent'; }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{
-                      width: 36, height: 36, borderRadius: '50%',
-                      background: 'linear-gradient(135deg, var(--eth-purple), #60a5fa)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 14, fontWeight: 700, color: '#fff', flexShrink: 0,
-                    }}>
-                      {c.otherUser.username[0].toUpperCase()}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-main)' }}>
-                          @{c.otherUser.username}
-                        </span>
-                        {c.lastMessage && (
-                          <span style={{ fontSize: 11, color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>
-                            {formatTime(c.lastMessage.createdAt)}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {c.lastMessage
-                          ? (c.lastMessage.senderId === user?.id ? 'You: ' : '') +
-                            c.lastMessage.content.substring(0, 60)
-                          : 'No messages yet'}
-                      </div>
-                    </div>
-                  </div>
+          {loadingConv ? (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>Loading...</div>
+          ) : conversations.length === 0 ? (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+              No conversations yet. Start by sending a message from a job or product.
+            </div>
+          ) : (
+            conversations.map((c) => (
+              <div
+                key={c.id}
+                onClick={() => setSelectedConv(c)}
+                className={`msg-item${selectedConv?.id === c.id ? ' active-chat' : ''}`}
+              >
+                <div className="m-header">
+                  <span className="m-name">@{c.otherUser.username}</span>
+                  {c.lastMessage && (
+                    <span className="m-time">{formatTime(c.lastMessage.createdAt)}</span>
+                  )}
                 </div>
-              ))
-            )}
-          </div>
+                <div className="m-snippet">
+                  {c.lastMessage
+                    ? (c.lastMessage.senderId === user?.id ? 'You: ' : '') +
+                      c.lastMessage.content.substring(0, 60)
+                    : 'No messages yet'}
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Right panel — message thread */}
-        <div style={{ flex: 1, background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border-dim)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="chat-window">
           {!selectedConv ? (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 14 }}>
               Select a conversation to start chatting
@@ -245,22 +228,15 @@ export default function Chat() {
           ) : (
             <>
               {/* Header */}
-              <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border-dim)', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, var(--eth-purple), #60a5fa)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 13, fontWeight: 700, color: '#fff',
-                }}>
-                  {selectedConv.otherUser.username[0].toUpperCase()}
+              <div className="chat-header">
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>@{selectedConv.otherUser.username}</h3>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--success-green)' }}>● Online</span>
                 </div>
-                <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-main)' }}>
-                  @{selectedConv.otherUser.username}
-                </span>
               </div>
 
               {/* Messages */}
-              <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className="chat-history">
                 {loadingMsgs ? (
                   <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 40, fontSize: 13 }}>Loading messages...</div>
                 ) : messages.length === 0 ? (
@@ -271,21 +247,9 @@ export default function Chat() {
                   messages.map((msg) => {
                     const isOwn = msg.senderId === user?.id;
                     return (
-                      <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: isOwn ? 'flex-end' : 'flex-start', maxWidth: '75%', alignSelf: isOwn ? 'flex-end' : 'flex-start' }}>
-                        <div style={{
-                          padding: '8px 14px',
-                          borderRadius: 16,
-                          background: isOwn ? 'var(--eth-purple)' : 'var(--bg-panel)',
-                          color: isOwn ? '#fff' : 'var(--text-main)',
-                          fontSize: 14,
-                          lineHeight: 1.4,
-                          wordBreak: 'break-word',
-                          borderBottomRightRadius: isOwn ? 4 : 16,
-                          borderBottomLeftRadius: isOwn ? 16 : 4,
-                        }}>
-                          {msg.content}
-                        </div>
-                        <div style={{ fontSize: 10, color: 'var(--text-faint)', marginTop: 2, fontFamily: 'var(--font-mono)' }}>
+                      <div key={msg.id} className={`bubble ${isOwn ? 'bubble-me' : 'bubble-them'}`}>
+                        {msg.content}
+                        <div style={{ fontSize: 10, color: 'var(--text-faint)', marginTop: 4, fontFamily: 'var(--font-mono)' }}>
                           {msg.sender.username} · {formatTime(msg.createdAt)}
                         </div>
                       </div>
@@ -296,49 +260,37 @@ export default function Chat() {
               </div>
 
               {/* Input */}
-              <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border-dim)' }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-                  <textarea
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Type a message..."
-                    rows={1}
-                    style={{
-                      flex: 1,
-                      background: 'var(--bg-panel)',
-                      border: '1px solid var(--border-dim)',
-                      borderRadius: 10,
-                      padding: '10px 14px',
-                      color: 'var(--text-main)',
-                      fontSize: 14,
-                      fontFamily: 'var(--font-display)',
-                      resize: 'none',
-                      outline: 'none',
-                      minHeight: 42,
-                      maxHeight: 120,
-                    }}
-                  />
-                  <button
-                    onClick={handleSend}
-                    disabled={!input.trim() || sending}
-                    style={{
-                      padding: '10px 20px',
-                      borderRadius: 10,
-                      border: 'none',
-                      background: input.trim() && !sending ? 'var(--eth-purple)' : 'var(--border-dim)',
-                      color: input.trim() && !sending ? '#fff' : 'var(--text-faint)',
-                      fontWeight: 600,
-                      fontSize: 14,
-                      cursor: input.trim() && !sending ? 'pointer' : 'not-allowed',
-                      transition: 'all 0.15s',
-                      fontFamily: 'var(--font-display)',
-                      height: 42,
-                    }}
-                  >
-                    Send
-                  </button>
-                </div>
+              <div className="chat-input">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type a message..."
+                  rows={1}
+                  style={{
+                    flex: 1,
+                    background: 'transparent',
+                    border: '1px solid var(--border-solid)',
+                    borderRadius: 6,
+                    padding: '0.75rem 1rem',
+                    color: 'var(--text-main)',
+                    fontSize: 14,
+                    fontFamily: 'var(--font-display)',
+                    resize: 'none',
+                    outline: 'none',
+                    minHeight: 42,
+                    maxHeight: 120,
+                    boxSizing: 'border-box',
+                  }}
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={!input.trim() || sending}
+                  className="btn btn-primary"
+                  style={{ padding: '0.75rem 1.5rem', height: 'auto', opacity: input.trim() && !sending ? 1 : 0.5, cursor: input.trim() && !sending ? 'pointer' : 'not-allowed' }}
+                >
+                  Send
+                </button>
               </div>
             </>
           )}
@@ -351,6 +303,7 @@ export default function Chat() {
           <button onClick={() => setError('')} style={{ marginLeft: 12, background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>✕</button>
         </div>
       )}
+      </div>
     </div>
   );
 }

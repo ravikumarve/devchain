@@ -190,17 +190,18 @@ export default function Analytics() {
   const isCompletelyEmpty = summary.totalProducts === 0 && summary.totalSales === 0;
 
   return (
-    <div className="dash-page">
-      <div className="dash-header">
-        <div className="dash-title">
+    <div className="workspace">
+      <div className="container">
+      <div className="page-header">
+        <div className="page-title">
           <h1>Analytics</h1>
           <p>@{user?.username} · All-time performance across products, sales, and reviews.</p>
         </div>
-        <div className="dash-actions">
-          <button className="btn btn-outline" style={{ padding: '0.6rem 1.4rem', fontSize: '0.8rem' }} onClick={() => navigate('/profile')}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <button className="btn btn-outline" onClick={() => navigate('/profile')}>
             Profile
           </button>
-          <button className="btn btn-primary" style={{ padding: '0.6rem 1.4rem', fontSize: '0.8rem' }} onClick={() => navigate('/create-product')}>
+          <button className="btn btn-primary" onClick={() => navigate('/create-product')}>
             New Product
           </button>
         </div>
@@ -224,7 +225,7 @@ export default function Analytics() {
             </div>
             <div className="kpi-item">
               <span className="kpi-lbl">Total Sales</span>
-              <span className="kpi-val" style={{ color: 'var(--success-green)' }}>{summary.totalSales}</span>
+              <span className="kpi-val">{summary.totalSales}</span>
               <span className="kpi-sub">Orders completed</span>
             </div>
             <div className="kpi-item">
@@ -234,36 +235,35 @@ export default function Analytics() {
             </div>
             <div className="kpi-item">
               <span className="kpi-lbl">Avg Order Value</span>
-              <span className="kpi-val" style={{ color: 'var(--warning-amber)' }}>${summary.avgOrderValue.toLocaleString()}</span>
+              <span className="kpi-val">${summary.avgOrderValue.toLocaleString()}</span>
               <span className="kpi-sub">Per transaction</span>
             </div>
           </div>
 
           {/* Revenue last 7 days + Top products */}
-          <div className="dash-grid">
-            <div className="dash-section">
-              <div className="dash-section-title">Revenue — Last 7 Days</div>
-              <p className="dash-section-sub">Daily earnings breakdown</p>
-              <div className="bar-chart" style={{ marginTop: '1.5rem' }}>
+          <div className="two-col">
+            <div className="data-section">
+              <div className="section-title">Revenue — Last 7 Days</div>
+              <div className="chart-wrap" style={{ marginBottom: 0 }}>
+              <div className="bar-chart" style={{ height: 220 }}>
                 {last7.map((day) => {
                   const val = salesByDay[day] || 0;
                   const h = maxDay > 0 ? Math.round((val / maxDay) * 100) : 0;
                   const label = new Date(day + 'T12:00:00').toLocaleDateString('en', { weekday: 'short' });
                   return (
-                    <div key={day} className="bc-col">
-                      <div className={`bc-val${val > 0 ? '' : ' empty'}`}>${val.toFixed(0)}</div>
-                      <div className={`bc-bar${val > 0 ? '' : ' empty'}`} style={{ height: `${Math.max(h, val > 0 ? 6 : 4)}%` }} />
-                      <div className="bc-lbl">{label}</div>
+                    <div key={day} className="bar-col">
+                      <div className="bar" style={{ height: `${Math.max(h, val > 0 ? 6 : 3)}%` }} />
+                      <span className="bar-lbl">{label}</span>
                     </div>
                   );
                 })}
               </div>
+              </div>
             </div>
 
-            <div className="dash-section">
-              <div className="dash-section-title">Top Products</div>
-              <p className="dash-section-sub">Revenue by product</p>
-              <div style={{ marginTop: '1.5rem' }}>
+            <div className="data-section">
+              <div className="section-title">Top Products</div>
+              <div style={{ marginTop: '1rem' }}>
                 {productsByRevenue.length === 0 ? (
                   <p style={{ color: 'var(--text-faint)', fontSize: '0.88rem' }}>No sales yet.</p>
                 ) : (
@@ -276,11 +276,10 @@ export default function Analytics() {
           </div>
 
           {/* Category + Product performance */}
-          <div className="dash-grid" style={{ marginTop: '2.5rem' }}>
-            <div className="dash-section">
-              <div className="dash-section-title">Revenue by Category</div>
-              <p className="dash-section-sub">Sales distribution</p>
-              <div style={{ marginTop: '1.5rem' }}>
+          <div className="two-col" style={{ marginTop: '2.5rem' }}>
+            <div className="data-section">
+              <div className="section-title">Revenue by Category</div>
+              <div style={{ marginTop: '1rem' }}>
                 {categoriesSorted.length === 0 ? (
                   <p style={{ color: 'var(--text-faint)', fontSize: '0.88rem' }}>No sales across categories yet.</p>
                 ) : (
@@ -291,13 +290,13 @@ export default function Analytics() {
               </div>
             </div>
 
-            <div className="dash-section">
-              <div className="dash-section-title">Product Performance</div>
-              <p className="dash-section-sub">Your listed products</p>
+            <div className="data-section">
+              <div className="section-title">Product Performance</div>
               {products.length === 0 ? (
                 <p style={{ color: 'var(--text-faint)', fontSize: '0.88rem', marginTop: '1rem' }}>No products listed.</p>
               ) : (
-                <table className="dash-table" style={{ marginTop: '1rem' }}>
+                <div className="table-wrap">
+                <table className="data-table">
                   <thead>
                     <tr>
                       <th>Product</th>
@@ -320,18 +319,19 @@ export default function Analytics() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               )}
             </div>
           </div>
 
           {/* Recent sales */}
-          <div className="dash-section" style={{ marginTop: '2.5rem' }}>
-            <div className="dash-section-title">Recent Sales</div>
-            <p className="dash-section-sub">Latest transactions</p>
+          <div className="data-section" style={{ marginTop: '2.5rem' }}>
+            <div className="section-title">Recent Sales</div>
             {sales.length === 0 ? (
               <p style={{ color: 'var(--text-faint)', fontSize: '0.88rem', marginTop: '0.6rem' }}>No sales yet. Your first transaction will appear here.</p>
             ) : (
-              <table className="dash-table" style={{ marginTop: '1rem' }}>
+              <div className="table-wrap">
+              <table className="data-table">
                 <thead>
                   <tr>
                     <th>Buyer</th>
@@ -343,7 +343,7 @@ export default function Analytics() {
                 <tbody>
                   {sales.slice(0, 8).map((s) => (
                     <tr key={s.id}>
-                      <td className="item-secondary" style={{ fontFamily: 'var(--font-sans)' }}>@{s.buyer?.username || 'Buyer'}</td>
+                      <td className="item-secondary" style={{ fontFamily: 'var(--font-display)' }}>@{s.buyer?.username || 'Buyer'}</td>
                       <td>
                         <span className="item-primary">{s.product?.title?.slice(0, 32) || 'Untitled product'}</span>
                         <span className="item-secondary">Ownership issued</span>
@@ -356,13 +356,13 @@ export default function Analytics() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </div>
 
           {/* Reviews */}
-          <div className="dash-section" style={{ marginTop: '2.5rem' }}>
-            <div className="dash-section-title">Reviews &amp; Ratings</div>
-            <p className="dash-section-sub">Buyer feedback on your products</p>
+          <div className="data-section" style={{ marginTop: '2.5rem' }}>
+            <div className="section-title">Reviews &amp; Ratings</div>
 
             {ratingInfo.totalReviews === 0 && reviews.length === 0 ? (
               <p style={{ color: 'var(--text-faint)', fontSize: '0.88rem', marginTop: '0.6rem' }}>No reviews yet. Reviews from buyers will appear here.</p>
@@ -418,6 +418,7 @@ export default function Analytics() {
           </div>
         </>
       )}
+      </div>
     </div>
   );
 }

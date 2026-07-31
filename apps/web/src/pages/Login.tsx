@@ -20,7 +20,7 @@ export default function Login() {
     setError('');
     try {
       await login(email, password);
-      navigate('/marketplace');
+      navigate('/dashboard');
     } catch (err: unknown) {
       setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Login failed. Please try again.');
     }

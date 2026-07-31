@@ -118,17 +118,18 @@ export default function Profile() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="dash-page">
-      <div className="dash-header">
-        <div className="dash-title">
+    <div className="workspace">
+      <div className="container">
+      <div className="page-header">
+        <div className="page-title">
           <h1>Profile</h1>
           <p>Your purchases, sales, products, and job listings.</p>
         </div>
-        <div className="dash-actions">
-          <button className="btn btn-outline" style={{ padding: '0.6rem 1.4rem', fontSize: '0.8rem' }} onClick={handleLogout}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <button className="btn btn-outline" onClick={handleLogout}>
             Logout
           </button>
-          <button className="btn btn-primary" style={{ padding: '0.6rem 1.4rem', fontSize: '0.8rem' }} onClick={() => { setBio(user?.bio || ''); setEditOpen(true); }}>
+          <button className="btn btn-primary" onClick={() => { setBio(user?.bio || ''); setEditOpen(true); }}>
             Edit Profile
           </button>
         </div>
@@ -244,6 +245,7 @@ export default function Profile() {
         ) : (
           <JobsList jobs={jobs} navigate={navigate} />
         )}
+      </div>
       </div>
     </div>
   );

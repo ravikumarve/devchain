@@ -150,20 +150,22 @@ export default function MyJobs() {
   };
 
   if (loading) return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>Loading jobs...</div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>Loading jobs...</div>
   );
 
   return (
-    <div style={{ paddingTop: 72, minHeight: '100vh', background: 'transparent' }}>
-      <div className="container" style={{ padding: '48px 2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
-          <div>
-            <div style={{ color: 'var(--text-faint)', fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 6 }}>Client</div>
-            <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.04em' }}>My Posted Jobs</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 6 }}>{jobs.length} job{jobs.length !== 1 ? 's' : ''} posted</p>
-          </div>
-          <button onClick={() => navigate('/post-job')} className="btn-primary" style={{ padding: '10px 22px', fontSize: 14 }}>+ Post a Job</button>
+    <div className="workspace">
+      <div className="container">
+      <div className="page-header">
+        <div className="page-title">
+          <h1>Active Jobs</h1>
+          <p>Manage freelance contracts and funded milestones.</p>
         </div>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <button className="btn btn-outline" onClick={() => navigate('/jobs')}>Find Jobs</button>
+          <button className="btn btn-primary" onClick={() => navigate('/post-job')}>Post Job</button>
+        </div>
+      </div>
 
         {jobs.length === 0 ? (
           <div className="card" style={{ padding: '48px 2rem', textAlign: 'center' }}>
