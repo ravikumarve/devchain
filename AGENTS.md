@@ -550,6 +550,17 @@ cd apps/web && npx shadcn@latest add <component-name>
 
 ## 💾 Session Memory Ledger
 
+### [2026-07-31 19:10] - Marketplace + Jobs Rebuilt into Midnight Monolith (Commit 11)
+- **State**: Success — committed (`26ca901`) + pushed to main
+- **MCP Data Used**: agent-browser DOM verification (marketplace/jobs/login/register), direct file reads/writes, bash for build + eslint + jest regression
+- **Agents Deployed**: Orchestrator (direct execution)
+- **Architectural Decision**: Last two legacy pages rebuilt; all 18 web pages now Midnight Monolith-consistent:
+  - **Marketplace.tsx**: stripped `.dash-*` cards, `catColors` hex map, emoji sort labels, gradient headers. Now `.workspace` shell: `.page-header` + auth-only "List Product" CTA, `.form-control` search, mono uppercase sort select + Price panel + GRID/LIST toggle (black-on-white active), neutral mono category pills (white bg when active, 1px `--border-solid`), bento grid (1px hairline gap on `--border-faint`, `bg-void` tiles hover `--bg-surface`) with mono category/price/seller/sales/tags + SHA-256 cert badge in list rows.
+  - **Jobs.tsx**: `.workspace` shell, `.page-header` with "Jobs" + auth-only `Post Job` button, `.form-control` search, mono skill filter pills (white active), borderless job rows (bottom hairline) with `status-dot` badges, mono budget column, skills chips `#tag` style, EmptyState fallback.
+  - **App.tsx**: `hideNav` now `['/', '/login', '/register']` — Navbar gone from auth pages to match `devchain_login.html`/`devchain_register.html` mockups (no top nav, centered card only).
+- **Verification**: clean build tsc+vite ✓ | eslint clean ✓ | 187/187 tests ✓ (pre-commit hook) | browser DOM: /marketplace page-header + 8 product rows, dashClasses 0, emoji 0, body rgb(0,0,0); /jobs 6 job rows, no old card classes; /login + /register top-nav absent, h1 "Welcome back"/"Create account" | screenshot `screenshots/marketplace-workspace.png`
+- **Next Turn Directive**: Gumroad launch prep (verify `devchain.gumroad.com` URL — STILL UNVERIFIED, write LICENSE, finalize README), or run `npm run setup:local` on clean clone to validate 5-min setup claim, or mobile parity pass.
+
 ### [2026-07-31 18:45] - Landing Page Nav + Ambient Mesh Fix (Commit 10)
 - **State**: Success — committed (`396ea1d`) + pushed to main
 - **MCP Data Used**: agent-browser DOM verification (mockup vs app: nav links, CTA row, ambient pixels), direct file reads/writes, bash for build + eslint + jest regression, PIL pixel sampling of screenshots
