@@ -550,14 +550,24 @@ cd apps/web && npx shadcn@latest add <component-name>
 
 ## 💾 Session Memory Ledger
 
-### [2026-07-31 16:10] - Landing Rebuilt as Boilerplate Pitch (Commit 7)
-- **State**: Success — committed (`5dd9afd`) + pushed
-- **MCP Data Used**: agent-browser DOM verification (all 9 sections, anchor nav, console), direct file reads/writes
+### [2026-07-31 17:20] - Midnight Monolith Workspace Rebuild (Commit 8)
+- **State**: Success — committed (`584e79a`) + pushed to main
+- **MCP Data Used**: agent-browser DOM verification (5 workspace views + login redirect flow), direct file reads/writes, bash for build + jest regression
 - **Agents Deployed**: Orchestrator (direct execution)
-- **Architectural Decision**: Rebuilt `Landing.tsx` (912→~380 lines) against `devchain_landing.html` — page now sells the **boilerplate** (hero "The marketplace boilerplate you actually own" + CLI mockup, features bento 8/4/6/6, stack section, maker strip, demo creds, pricing Starter $149/Pro $249, ShipFast comparison, FAQ, one-time-license footer). App itself = live demo. Added ~700 lines scoped `.landing-page` CSS (white primary / blue accent / ghost outline buttons, bento, stack, pricing, compare, faq, footer). Updated `index.html` title/meta/OG to boilerplate pitch.
-- **Migrate-and-Delete**: Removed 6 Landing-only orphan components (Footer, CtaBand, BentoGrid, ApiReference, BlockchainSphere, CryptoTerminal) in the same commit.
-- **Verification**: Build tsc+vite ✓ | 187/187 tests ✓ | DOM: h1/badge/4 bento/6 stack/3 stats/2 price/9 compare rows/7 faq all render | 0 console errors | anchor `#pricing` scroll works | white primary rgb(255,255,255) + blue accent rgb(59,130,246) | black body bg | CLI mockup visible | screenshot `screenshots/landing-new.png`
-- **Next Turn Directive**: Continue rebuilding remaining legacy-layout pages into Midnight Monolith: **CreateProduct, MyJobs, Jobs, Chat** (highest value), then ProductDetail/JobDetail, Sell/PostJob, PurchaseSuccess/Cancel. Or Gumroad launch prep (verify `devchain.gumroad.com` URL — still UNVERIFIED, LICENSE, README).
+- **Architectural Decision**: Rebuilt all workspace/auth pages to borderless Midnight Monolith aesthetic per `devchain_dashboard.html`:
+  - **Navbar**: top-nav with ◆DevChain brand + `Local: SQLite` badge-mono + avatar initials; `NavLink` active underline. Always Marketplace+Jobs; authed adds Overview (`/dashboard`), Products (`/profile`), Active Jobs (`/my-jobs`), Messages (`/chat`), Analytics (`/analytics`).
+  - **App.tsx**: removed mesh (`.bg-mesh*` deleted from index.css) — body now rgb(0,0,0).
+  - **index.css**: ~700 lines appended `.workspace` block (page-header, borderless kpi-row, transparent data-table + status-dot hot/stale/new/active, two-col, msg-layout, chat bubbles, form-control, bar-chart, profile-grid, responsive).
+  - **Overview**: borderless KPI row ($3,900.00 / $0.00 / 2 / —), Active Contracts + Recent Messages two-col, Recent Product Sales full-width table (uses `salesData.sales` not `.orders`).
+  - **Analytics**: borderless KPIs, 7-day bar chart, Top Products, Revenue by Category, Product Performance + Recent Sales, Reviews & Ratings.
+  - **Profile**: workspace shell + page-header; 4 tabs preserved (My Products shows 8 rows w/ status-dot).
+  - **Chat**: msg-layout port — inbox list + empty state + "Select a conversation…" placeholder; send/auto-create logic untouched.
+  - **MyJobs**: workspace shell + page-header "Active Jobs" + empty state.
+  - **Login/Register**: redirect → `/dashboard` (matches devchain_login mockup which goes to dashboard).
+- **Verification**: clean build tsc+vite ✓ (1903 modules) | 187/187 tests ✓ (pre-commit hook) | browser DOM: Overview/Products/Active Jobs/Messages/Analytics all render, active nav states correct, meshCount 0, body black, 0 console errors, login→/dashboard flow ✓ | screenshots in `screenshots/workspace-*.png` + `login-redirect-dashboard.png`
+- **Next Turn Directive**: Rebuild remaining legacy pages into `.dash-*` where needed (Marketplace is already Commit 6-redesigned; **CreateProduct, Sell, PostJob, ProductDetail, JobDetail, MyProposals, PurchaseSuccess/Cancel** still legacy but token-compatible — Marketplace/CreateProduct/MyJobs highest value), or Gumroad launch prep (verify `devchain.gumroad.com` URL — still UNVERIFIED, write LICENSE, finalize README), or run `npm run setup:local` on clean clone to validate 5-min setup claim.
+
+### [2026-07-31 16:10] - Landing Rebuilt as Boilerplate Pitch (Commit 7)
 
 ### [2026-07-31 14:30] - Midnight Monolith Commits 2-5 + Purchase Pipeline Fix
 - **State**: Success — 5 commits pushed (`cba8478`, `d1e3431`, `fe1ee8c`, `98f0313`, `671d5b3`)
