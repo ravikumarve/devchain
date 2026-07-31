@@ -149,7 +149,7 @@ export default function EmptyState({
                   alignItems: 'center', marginBottom: 12,
                 }}>
                   <span style={{
-                    background: 'rgba(98,126,234,0.12)',
+                    background: 'rgba(59,130,246,0.12)',
                     color: 'var(--eth-purple)',
                     padding: '4px 10px', borderRadius: 6,
                     fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-mono)',

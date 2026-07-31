@@ -91,7 +91,7 @@ export default function Analytics() {
   const recentSales = [...sales].slice(0, 5);
 
   const catColors: Record<string, string> = {
-    'react-components': '#7C3AED', 'node-packages': '#059669', 'python-scripts': '#2563EB',
+    'react-components': '#3b82f6', 'node-packages': '#059669', 'python-scripts': '#2563EB',
     blockchain: '#F59E0B', other: '#6B7280',
   };
 
@@ -157,7 +157,7 @@ export default function Analytics() {
                 return (
                   <div key={day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, height: '100%', justifyContent: 'flex-end' }}>
                     <div style={{ fontSize: 10, color: val > 0 ? 'var(--eth-purple)' : 'transparent', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>${val.toFixed(0)}</div>
-                    <div style={{ width: '100%', height: `${Math.max(h, val > 0 ? 8 : 4)}%`, background: val > 0 ? 'linear-gradient(180deg, #9F67FF, var(--eth-purple))' : 'var(--bg-panel)', borderRadius: '4px 4px 0 0', minHeight: 4, transition: 'height 0.8s ease', boxShadow: val > 0 ? '0 0 10px rgba(98,126,234,0.4)' : 'none' }} />
+                    <div style={{ width: '100%', height: `${Math.max(h, val > 0 ? 8 : 4)}%`, background: val > 0 ? 'linear-gradient(180deg, #60a5fa, var(--eth-purple))' : 'var(--bg-panel)', borderRadius: '4px 4px 0 0', minHeight: 4, transition: 'height 0.8s ease', boxShadow: val > 0 ? '0 0 10px rgba(59,130,246,0.4)' : 'none' }} />
                     <div style={{ fontSize: 10, color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>{label}</div>
                   </div>
                 );
@@ -254,7 +254,7 @@ export default function Analytics() {
               {recentSales.map((s, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', background: 'transparent', borderRadius: 12, border: '1px solid var(--border-dim)', flexWrap: 'wrap', gap: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, var(--eth-purple), #9F67FF)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, var(--eth-purple), #60a5fa)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
                       {s.buyer?.username?.[0]?.toUpperCase()}
                     </div>
                     <div>

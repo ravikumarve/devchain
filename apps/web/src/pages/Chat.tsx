@@ -205,7 +205,7 @@ export default function Chat() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{
                       width: 36, height: 36, borderRadius: '50%',
-                      background: 'linear-gradient(135deg, var(--eth-purple), #9F67FF)',
+                      background: 'linear-gradient(135deg, var(--eth-purple), #60a5fa)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 14, fontWeight: 700, color: '#fff', flexShrink: 0,
                     }}>
@@ -248,7 +248,7 @@ export default function Chat() {
               <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border-dim)', display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{
                   width: 32, height: 32, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, var(--eth-purple), #9F67FF)',
+                  background: 'linear-gradient(135deg, var(--eth-purple), #60a5fa)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 13, fontWeight: 700, color: '#fff',
                 }}>

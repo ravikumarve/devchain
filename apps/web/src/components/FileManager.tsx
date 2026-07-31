@@ -99,14 +99,14 @@ export default function FileManager({ productId, isSeller }: { productId: string
             onDragOver={e => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleUpload(f); }}
-            style={{ border: `2px dashed ${dragOver ? '#7C3AED' : '#2a2a3e'}`, borderRadius: 12, padding: '28px 20px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s', background: dragOver ? '#1a0a2e' : 'transparent' }}
+            style={{ border: `2px dashed ${dragOver ? '#3b82f6' : '#2a2a3e'}`, borderRadius: 12, padding: '28px 20px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s', background: dragOver ? '#1a0a2e' : 'transparent' }}
           >
             {uploading ? (
               <div>
                 <div style={{ fontSize: 28, marginBottom: 8 }}>⬆️</div>
-                <div style={{ color: '#7C3AED', fontWeight: 700, marginBottom: 10 }}>Uploading... {uploadProgress}%</div>
+                <div style={{ color: '#3b82f6', fontWeight: 700, marginBottom: 10 }}>Uploading... {uploadProgress}%</div>
                 <div style={{ height: 6, background: '#1e1e2e', borderRadius: 3, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${uploadProgress}%`, background: 'linear-gradient(90deg, #7C3AED, #9F67FF)', borderRadius: 3, transition: 'width 0.3s' }} />
+                  <div style={{ height: '100%', width: `${uploadProgress}%`, background: 'linear-gradient(90deg, #3b82f6, #60a5fa)', borderRadius: 3, transition: 'width 0.3s' }} />
                 </div>
               </div>
             ) : (
@@ -133,7 +133,7 @@ export default function FileManager({ productId, isSeller }: { productId: string
               📭 The seller hasn't uploaded files yet. Check back soon.
             </div>
           ) : (
-            <div style={{ background: '#07070d', border: '1px solid #7C3AED33', borderRadius: 12, padding: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ background: '#07070d', border: '1px solid #3b82f633', borderRadius: 12, padding: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span style={{ fontSize: 28 }}>📦</span>
                 <div>
@@ -141,7 +141,7 @@ export default function FileManager({ productId, isSeller }: { productId: string
                   <div style={{ color: '#55556a', fontSize: 12 }}>{info.fileSize ? formatSize(info.fileSize) : ''} · Ready to download</div>
                 </div>
               </div>
-              <button onClick={handleDownload} style={{ padding: '12px 24px', borderRadius: 10, background: 'linear-gradient(135deg, #7C3AED, #9F67FF)', border: 'none', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 14, fontFamily: 'Inter, sans-serif', boxShadow: '0 4px 16px rgba(124,58,237,0.3)' }}>
+              <button onClick={handleDownload} style={{ padding: '12px 24px', borderRadius: 10, background: 'linear-gradient(135deg, #3b82f6, #60a5fa)', border: 'none', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 14, fontFamily: 'Inter, sans-serif', boxShadow: '0 4px 16px rgba(124,58,237,0.3)' }}>
                 ⬇️ Download File
               </button>
             </div>

@@ -114,7 +114,7 @@ export default function PostJob() {
               </div>
             </div>
 
-            <button onClick={handleSubmit} disabled={loading} style={{ width: '100%', padding: '18px', borderRadius: 14, background: loading ? 'var(--eth-purple-dim)' : 'linear-gradient(135deg, var(--eth-purple), #9F67FF)', border: 'none', color: '#fff', fontSize: 17, fontWeight: 800, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '0 4px 24px rgba(98,126,234,0.35)', opacity: loading ? 0.6 : 1 }}>
+            <button onClick={handleSubmit} disabled={loading} style={{ width: '100%', padding: '18px', borderRadius: 14, background: loading ? 'var(--eth-purple-dim)' : 'linear-gradient(135deg, var(--eth-purple), #60a5fa)', border: 'none', color: '#fff', fontSize: 17, fontWeight: 800, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '0 4px 24px rgba(59,130,246,0.35)', opacity: loading ? 0.6 : 1 }}>
               {loading ? 'Posting...' : '💼 Post Job on DevChain'}
             </button>
           </div>

@@ -47,7 +47,7 @@ export default function Profile() {
         {/* Profile Header */}
         <div className="card" style={{ padding: 32, display: 'flex', alignItems: 'center', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
           <div style={{ position: 'relative' }}>
-            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--eth-purple), #9F67FF)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 800, color: '#fff' }}>
+            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--eth-purple), #60a5fa)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 800, color: '#fff' }}>
               {user?.username?.[0]?.toUpperCase()}
             </div>
             <div style={{ position: 'absolute', bottom: 4, right: 4, width: 14, height: 14, borderRadius: '50%', background: '#10b981', border: '2px solid var(--bg-surface)' }} />
@@ -154,7 +154,7 @@ function PurchasesList({ purchases }: { purchases: PurchaseData[] }) {
           {p.certificate?.ownershipHash && (
             <div style={{ marginTop: 16, background: 'transparent', border: '1px solid var(--eth-purple-dim)', borderRadius: 10, padding: 14 }}>
               <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--eth-purple)', letterSpacing: 2, marginBottom: 8, fontFamily: 'var(--font-mono)' }}>🔐 SHA-256 CERTIFICATE</div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#9F67FF', wordBreak: 'break-all', lineHeight: 1.6 }}>{p.certificate.ownershipHash}</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#60a5fa', wordBreak: 'break-all', lineHeight: 1.6 }}>{p.certificate.ownershipHash}</div>
               <div style={{ marginTop: 8 }}>
                 <a href={`https://devchain.onrender.com${p.certificate.verifyUrl}`} target="_blank" rel="noreferrer" style={{ color: 'var(--eth-purple)', fontSize: 12, fontFamily: 'var(--font-mono)' }}>
                   Verify on-chain →

@@ -167,7 +167,7 @@ export default function CreateProduct() {
                     left: 16,
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    color: '#7C3AED',
+                    color: '#3b82f6',
                     fontWeight: 800,
                     fontSize: 18,
                   }}
@@ -281,7 +281,7 @@ export default function CreateProduct() {
           <div
             style={{
               background: '#0d0a1a',
-              border: '1px solid #7C3AED33',
+              border: '1px solid #3b82f633',
               borderRadius: 14,
               padding: 20,
               display: 'flex',
@@ -291,7 +291,7 @@ export default function CreateProduct() {
           >
             <span style={{ fontSize: 28 }}>🔐</span>
             <div>
-              <div style={{ color: '#a78bfa', fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
+              <div style={{ color: '#60a5fa', fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
                 Blockchain Ownership on Every Sale
               </div>
               <div style={{ color: '#55556a', fontSize: 13, lineHeight: 1.7 }}>

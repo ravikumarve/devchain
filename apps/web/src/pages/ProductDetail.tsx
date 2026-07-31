@@ -182,9 +182,9 @@ function PurchaseModal({
 }
 
 const catColors: Record<string, string> = {
-  'react-components': '#7C3AED', 'node-packages': '#059669',
+  'react-components': '#3b82f6', 'node-packages': '#059669',
   'python-scripts': '#2563EB', 'mobile-templates': '#DC2626',
-  'ui-kits': '#D97706', apis: '#0891B2', tools: '#7C3AED',
+  'ui-kits': '#D97706', apis: '#0891B2', tools: '#3b82f6',
   blockchain: '#F59E0B', other: '#6B7280',
 };
 
@@ -527,7 +527,7 @@ export default function ProductDetail() {
                   </div>
                   <div style={{
                     fontSize: 42, fontWeight: 900,
-                    background: 'linear-gradient(135deg, #a78bfa, var(--eth-purple))',
+                    background: 'linear-gradient(135deg, #60a5fa, var(--eth-purple))',
                     WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                     marginBottom: 4,
                   }}>
