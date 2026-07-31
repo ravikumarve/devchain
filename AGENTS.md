@@ -530,6 +530,19 @@ cd apps/web && npx shadcn@latest add <component-name>
 
 ## 💾 Session Memory Ledger
 
+### [2026-07-31 11:15] - Local Mode (SQLite) Fully Verified + Committed
+- **State**: Success — `62eaf9e` committed, working tree clean
+- **MCP Data Used**: direct file reads/writes, bash for server boot + curl smoke tests, npm test regression
+- **Agents Deployed**: Orchestrator (direct execution)
+- **Architectural Decision**:
+  - Local mode (SQLite + local disk + JWT/bcrypt auth) now fully verified end-to-end on port 10000: health (local), register/login, products (tags deserialize), jobs (skillsRequired + search), analytics aggregation, chat (conversation+message), proposal submit→accept (escrow created), notifications (JSON data round-trip), upload/download via local disk streaming
+  - Fixed 4 real bugs: db-mode.js schema path (needs `backend/prisma/` prefix), `Notification.data Json?`→`String?` on SQLite (serializeJson/deserializeJson in dbCompat), **pre-existing cloud bug**: uploadController used `fileUrl` but schema field is `fileKey` (uploads would crash in production too — masked by prisma mocks), storage.upload arg order is `(buffer, path, contentType)`
+  - Health check now reports `supabaseAuth: local (bcrypt + JWT)` when Supabase creds absent
+  - Correct local DATABASE_URL is `file:./dev.db` (Prisma resolves relative to schema dir → backend/prisma/dev.db). Do NOT use `file:./prisma/dev.db` (creates nested dir)
+  - Cloud regression: 187/187 tests, 14 suites green
+- **Key Gotcha**: `pkill -f "backend/src/index.js"` matches the bash shell's own command line and kills the shell — use `fuser -k 10000/tcp` instead
+- **Next Turn Directive**: Run `npm run setup:local` on a clean clone to validate the 5-minute setup claim; switch back to cloud (`node scripts/db-mode.js postgres`) + verify Render/Supabase deploy; then MarketFoundry branding polish + Gumroad launch
+
 ### [2026-06-18 15:00] - Empty State Redesign (Marketplace, Jobs, Analytics)
 - **State**: Success
 - **MCP Data Used**: Direct file reads of 3 pages + 1 CSS file, write for 1 new component + 4 edits
