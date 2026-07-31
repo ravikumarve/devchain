@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuthStore } from './store/authStore';
 import Navbar from './components/Navbar';
@@ -21,15 +21,13 @@ import PurchaseCancel from './pages/PurchaseCancel';
 import Chat from './pages/Chat';
 import Overview from './pages/Overview';
 
-function App() {
-  const { loadUser } = useAuthStore();
-  useEffect(() => {
-    loadUser();
-  }, [loadUser]);
+function AppContent() {
+  const location = useLocation();
+  const isLanding = location.pathname === '/';
 
   return (
-    <BrowserRouter>
-      <Navbar />
+    <>
+      {!isLanding && <Navbar />}
       <main className="app-main">
         <Routes>
         <Route path="/" element={<Landing />} />
@@ -52,6 +50,19 @@ function App() {
         <Route path="/chat" element={<Chat />} />
       </Routes>
       </main>
+    </>
+  );
+}
+
+function App() {
+  const { loadUser } = useAuthStore();
+  useEffect(() => {
+    loadUser();
+  }, [loadUser]);
+
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   );
 }

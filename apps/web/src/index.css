@@ -1886,6 +1886,54 @@ textarea::placeholder {
 }
 .landing-page .f-ok { color: var(--success-green); }
 
+/* ─── Landing Ambient Mesh (matches devchain_landing.html) ─── */
+.landing-page .ambient-mesh {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 0; pointer-events: none;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(59, 130, 246, 0.08) 0%, rgba(0, 0, 0, 0) 40%),
+    radial-gradient(circle at 85% 100%, rgba(16, 185, 129, 0.05) 0%, rgba(0, 0, 0, 0) 40%);
+}
+
+/* ─── Landing Nav (matches devchain_landing.html) ─── */
+.landing-page .landing-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.5rem 0; border-bottom: 1px solid var(--border-faint);
+  position: relative; z-index: 100;
+}
+.landing-page .landing-nav .logo {
+  font-size: 1.25rem; font-weight: 800; color: var(--text-main);
+  text-decoration: none; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px;
+}
+.landing-page .landing-nav .logo .brand-icon { color: var(--accent-blue); font-size: 1.1rem; }
+.landing-page .landing-nav .nav-links { display: flex; gap: 2.5rem; }
+.landing-page .landing-nav .nav-links a {
+  color: var(--text-muted); text-decoration: none; font-size: 0.85rem;
+  font-weight: 500; transition: color 0.2s;
+}
+.landing-page .landing-nav .nav-links a:hover { color: var(--text-main); }
+.landing-page .landing-nav .nav-cta { display: flex; gap: 1rem; align-items: center; }
+.landing-page .landing-nav .nav-toggle {
+  display: none; background: none; border: 1px solid var(--border-solid); color: var(--text-main);
+  padding: 8px 12px; border-radius: 4px; font-size: 1.2rem; cursor: pointer; line-height: 1;
+}
+.landing-page .landing-nav .nav-toggle:hover { border-color: var(--text-muted); }
+.landing-page .landing-nav .btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 0.75rem 1.5rem; font-size: 0.85rem; font-weight: 600;
+  border-radius: 4px; text-decoration: none; transition: all 0.2s ease; cursor: pointer;
+  background: transparent; border: 1px solid var(--border-solid); color: var(--text-main);
+  font-family: var(--font-display);
+}
+.landing-page .landing-nav .btn-ghost:hover { border-color: var(--text-muted); }
+
+/* Force hero CTAs onto a single row (mockup intent) */
+.landing-page .hero-ctas {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: nowrap;
+}
+
 @media (max-width: 1024px) {
   .landing-page .hero,
   .landing-page .stack-section,
@@ -1897,6 +1945,14 @@ textarea::placeholder {
   .landing-page .demo-cred { grid-template-columns: 1fr; }
 }
 @media (max-width: 768px) {
+  .landing-page .landing-nav { flex-wrap: wrap; gap: 1rem; }
+  .landing-page .landing-nav .nav-toggle { display: inline-flex; }
+  .landing-page .landing-nav .nav-links {
+    display: none; flex-direction: column; width: 100%; gap: 1rem;
+    padding: 1.5rem 0; border-top: 1px solid var(--border-faint); order: 3;
+  }
+  .landing-page .landing-nav .nav-links.open { display: flex; }
+  .landing-page .landing-nav .nav-cta { order: 2; }
   .landing-page .hero h1 { font-size: 2.8rem; }
   .landing-page .bento-card { padding: 2.5rem 1.5rem; }
   .landing-page .pricing-grid { grid-template-columns: 1fr; }

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const FEATURES = [
@@ -102,8 +103,39 @@ function cellClass(idx: number, value: string): string {
 }
 
 export default function Landing() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
     <div className="landing-page">
+      <div className="ambient-mesh" />
+
+      {/* ─── LANDING NAV ─── */}
+      <nav className="landing-nav">
+        <Link to="/" className="logo">
+          <span className="brand-icon">◆</span> DevChain
+        </Link>
+        <div className={`nav-links ${mobileOpen ? 'open' : ''}`} id="navLinks">
+          <a href="#features">Architecture</a>
+          <a href="#stack">Tech Stack</a>
+          <a href="#demo">Live Demo</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#faq">FAQ</a>
+          <a href="https://github.com/ravikumarve/devchain">Documentation</a>
+        </div>
+        <div className="nav-cta">
+          <Link to="/login" className="btn-ghost">Sign In</Link>
+          <Link to="/dashboard" className="btn-outline">Live Dashboard</Link>
+          <button
+            className="nav-toggle"
+            aria-label="Toggle navigation"
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            ☰
+          </button>
+        </div>
+      </nav>
+
       {/* ─── HERO ─── */}
       <section className="hero no-border">
         <div>
