@@ -133,6 +133,10 @@ export const escrowAPI = {
   releasePayment: (proposalId: string) => api.post(`/escrow/${proposalId}/release`),
 };
 
+export const analyticsAPI = {
+  getSeller: () => api.get('/analytics/seller'),
+};
+
 export const notificationsAPI = {
   getMy: () => api.get('/notifications'),
   markRead: (id: string) => api.patch(`/notifications/${id}/read`),

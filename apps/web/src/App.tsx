@@ -19,6 +19,7 @@ import CreateProduct from './pages/CreateProduct';
 import PurchaseSuccess from './pages/PurchaseSuccess';
 import PurchaseCancel from './pages/PurchaseCancel';
 import Chat from './pages/Chat';
+import Overview from './pages/Overview';
 
 function App() {
   const { loadUser } = useAuthStore();
@@ -38,6 +39,7 @@ function App() {
         <Navbar />
         <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/dashboard" element={<Overview />} />
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/login" element={<Login />} />

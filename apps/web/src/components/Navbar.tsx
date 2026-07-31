@@ -27,6 +27,7 @@ export default function Navbar() {
         <div className="nav-links">
           <Link to="/marketplace">Marketplace</Link>
           <Link to="/jobs">Jobs</Link>
+          {isAuthenticated && <Link to="/dashboard">Dashboard</Link>}
           {isAuthenticated && <Link to="/my-proposals">My Proposals</Link>}
           {isAuthenticated && <Link to="/my-jobs">My Jobs</Link>}
           {isAuthenticated && <Link to="/chat">Messages</Link>}
@@ -68,6 +69,7 @@ export default function Navbar() {
           <div className="mobile-menu" onClick={e => e.stopPropagation()}>
             <Link to="/marketplace" onClick={closeMobile}>Marketplace</Link>
             <Link to="/jobs" onClick={closeMobile}>Jobs</Link>
+            {isAuthenticated && <Link to="/dashboard" onClick={closeMobile}>Dashboard</Link>}
             {isAuthenticated && <Link to="/my-proposals" onClick={closeMobile}>My Proposals</Link>}
             {isAuthenticated && <Link to="/my-jobs" onClick={closeMobile}>My Jobs</Link>}
             {isAuthenticated && <Link to="/profile" onClick={closeMobile}>Profile</Link>}
