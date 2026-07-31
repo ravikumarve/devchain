@@ -550,6 +550,19 @@ cd apps/web && npx shadcn@latest add <component-name>
 
 ## 💾 Session Memory Ledger
 
+### [2026-07-31 18:45] - Landing Page Nav + Ambient Mesh Fix (Commit 10)
+- **State**: Success — committed (`396ea1d`) + pushed to main
+- **MCP Data Used**: agent-browser DOM verification (mockup vs app: nav links, CTA row, ambient pixels), direct file reads/writes, bash for build + eslint + jest regression, PIL pixel sampling of screenshots
+- **Agents Deployed**: Orchestrator (direct execution)
+- **Architectural Decision**: Landing page now matches `devchain_landing.html` mockup exactly:
+  - **Landing nav** added to `Landing.tsx` (logo ◆ DevChain + Architecture→#features, Tech Stack→#stack, Live Demo→#demo, Pricing→#pricing, FAQ→#faq, Documentation→github.com/ravikumarve/devchain + Sign In `btn-ghost` (transparent, 1px border) + Live Dashboard `btn-outline` + ☰ hamburger). User complaint: top bar was showing the workspace Navbar instead of these marketing anchors.
+  - **App.tsx**: extracted `AppContent` with `useLocation()` — hides workspace `<Navbar />` only on `/` (landing); sub-pages keep workspace top-nav (verified /marketplace still renders it).
+  - **Ambient mesh**: added `.landing-page .ambient-mesh` fixed overlay (blue `rgba(59,130,246,0.08)` at 15% top-left + green `rgba(16,185,129,0.05)` at 85% bottom-right) matching mockup CSS. User complaint "blue tint not fully black" — the mockup HAS a subtle blue tint; app was flat black and mismatched. Pixel-verified identical: top-left `(3,6,13)` both app + mockup.
+  - **Hero CTAs**: `.hero-ctas` forced `flex-wrap: nowrap` (overrides earlier `wrap` at line 1495; new rule at ~1931) so Explore Dashboard / View Source / Get the Boilerplate stay on ONE row (was wrapping below at ≤1280px).
+  - **Mobile**: `.landing-nav` flex-wrap + `.nav-toggle` hamburger toggles `.nav-links.open` (copied verbatim from mockup 768px media query).
+- **Verification**: tsc+vite build clean (427.85 kB) ✓ | eslint clean ✓ | 187/187 tests ✓ (pre-commit hook) | browser DOM: nav links exact, CTA row all top:587, ambient gradient present, `hasWorkspaceNav=false` on /, workspace nav present on /marketplace, `#features` anchor scroll works | screenshots `screenshots/landing-fixed-top.png`, `screenshots/mockup-landing-top.png` (pixel-identical top-left)
+- **Next Turn Directive**: Gumroad launch prep (verify `devchain.gumroad.com` URL — STILL UNVERIFIED, write LICENSE, finalize README), or run `npm run setup:local` on clean clone to validate 5-min setup claim, or mobile parity pass.
+
 ### [2026-07-31 18:05] - All Legacy Pages Rebuilt into Midnight Monolith (Commit 9)
 - **State**: Success — committed (`b637ccc`) + pushed to main
 - **MCP Data Used**: agent-browser DOM verification (create-product/post-job/product/:id/job/:id/sell/purchase-cancel/my-proposals/my-jobs), direct file reads/writes, bash for build + jest regression
