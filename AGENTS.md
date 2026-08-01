@@ -550,6 +550,19 @@ cd apps/web && npx shadcn@latest add <component-name>
 
 ## 💾 Session Memory Ledger
 
+### [2026-07-31 20:05] - Profile Page Midnight Monolith Compliance (Commit 12)
+- **State**: Success — committed (`aaddefc`) + pushed to main
+- **MCP Data Used**: agent-browser DOM verification (profile tabs/products/sales, Range-rect alignment checks), direct file reads/writes, bash for build + eslint + jest regression
+- **Agents Deployed**: Orchestrator (direct execution)
+- **Architectural Decision**: Profile (seller account) now fully theme-compliant:
+  - **Tabs**: killed legacy `.dash-tabs` (blue active pill + emoji labels). New workspace mono underline tabs — JetBrains Mono, no emoji, active = 2px white underline, inactive `--text-faint`.
+  - **Header card**: borderless (bottom hairline), avatar `--bg-surface` + 1px `--border-solid` + mono initial (was blue gradient), reputation badge mono bordered (was accent-glow pill + star emoji).
+  - **Tables**: `.dash-table` → workspace `.data-table` (mono uppercase headers, hairline rows). Emoji removed from cert block, empty states, loading spinner (CSS ring + mono text).
+  - **ALIGNMENT ROOT CAUSE (user-reported)**: `.item-secondary`/`.val-mono` base CSS sets `display: block`; applied directly on `<td>` it broke `table-cell` layout, shifting the Category column ~4px above Product/Price/Status. Fix: `.workspace .data-table td.item-secondary, td.val-mono { display: table-cell }` + `vertical-align: top`. Verified via Range getClientRects: all cells start on same baseline (spread 0–3px).
+  - Fixed pre-existing eslint `no-explicit-any` in loaders map (typed `Record<TabKey, () => Promise<{data?: Record<string, unknown>}>>` + casts at setState).
+- **Verification**: tsc+vite build clean ✓ | eslint clean ✓ | 187/187 tests ✓ (pre-commit hook) | browser DOM: tabs mono + no emoji, products/sales rows aligned (spread 0–3px), dash-tabs/dash-table 0 refs, empty states use ◆ glyph | screenshots `screenshots/profile-workspace-fixed.png`, `profile-products-aligned.png`
+- **Next Turn Directive**: Gumroad launch prep (verify `devchain.gumroad.com` URL — STILL UNVERIFIED, write LICENSE, finalize README), or run `npm run setup:local` on clean clone to validate 5-min setup claim, or mobile parity pass.
+
 ### [2026-07-31 19:10] - Marketplace + Jobs Rebuilt into Midnight Monolith (Commit 11)
 - **State**: Success — committed (`26ca901`) + pushed to main
 - **MCP Data Used**: agent-browser DOM verification (marketplace/jobs/login/register), direct file reads/writes, bash for build + eslint + jest regression
