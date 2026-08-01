@@ -2081,7 +2081,22 @@ textarea::placeholder {
 }
 .workspace .data-table td {
   padding: 1.25rem 0; border-bottom: 1px solid var(--border-faint); font-size: 0.95rem;
+  vertical-align: top;
 }
+.workspace .data-table td.item-secondary,
+.workspace .data-table td.val-mono {
+  display: table-cell;
+}
+.workspace .data-table td .item-primary,
+.workspace .data-table td .item-secondary,
+.workspace .data-table td .val-mono {
+  vertical-align: baseline;
+}
+.workspace .data-table tr td:first-child .item-primary,
+.workspace .data-table tr td:first-child .item-secondary {
+  display: inline-block;
+}
+.workspace .data-table tr td:first-child .item-secondary { margin-left: 8px; }
 .workspace .data-table tr:last-child td { border-bottom: none; }
 .workspace .data-table tr:hover td { color: var(--text-main); cursor: pointer; }
 

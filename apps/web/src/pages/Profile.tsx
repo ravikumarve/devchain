@@ -44,10 +44,10 @@ interface JobData {
 type TabKey = 'purchases' | 'sales' | 'products' | 'jobs';
 
 const TABS: { key: TabKey; label: string }[] = [
-  { key: 'purchases', label: '🧾 My Purchases' },
-  { key: 'sales', label: '💰 My Sales' },
-  { key: 'products', label: '📦 My Products' },
-  { key: 'jobs', label: '💼 My Jobs' },
+  { key: 'purchases', label: 'My Purchases' },
+  { key: 'sales', label: 'My Sales' },
+  { key: 'products', label: 'My Products' },
+  { key: 'jobs', label: 'My Jobs' },
 ];
 
 function dateStr(iso?: string): string {
@@ -92,7 +92,7 @@ export default function Profile() {
     if (!isAuthenticated) return;
     let cancelled = false;
     setLoading(true);
-    const loaders: Record<TabKey, () => Promise<any>> = {
+    const loaders: Record<TabKey, () => Promise<{ data?: Record<string, unknown> }>> = {
       purchases: () => ownershipAPI.myPurchases(),
       sales: () => ownershipAPI.mySales(),
       products: () => productsAPI.getMine(),
@@ -101,11 +101,11 @@ export default function Profile() {
     loaders[tab]()
       .then((res) => {
         if (cancelled) return;
-        const data = res.data || {};
-        if (tab === 'purchases') setPurchases(data.purchases || []);
-        else if (tab === 'sales') setSales(data.sales || []);
-        else if (tab === 'products') setProducts(data.products || []);
-        else if (tab === 'jobs') setJobs(Array.isArray(data.jobs) ? data.jobs : []);
+        const data = res.data as Record<string, unknown>;
+        if (tab === 'purchases') setPurchases((data.purchases as PurchaseData[]) || []);
+        else if (tab === 'sales') setSales((data.sales as SaleData[]) || []);
+        else if (tab === 'products') setProducts((data.products as ProductData[]) || []);
+        else if (tab === 'jobs') setJobs(Array.isArray(data.jobs) ? (data.jobs as JobData[]) : []);
       })
       .catch((err) => {
         if (!cancelled) console.error('Profile load error:', err);
@@ -135,41 +135,60 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Profile header card */}
-      <div className="dash-section" style={{ padding: '1.6rem', display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+      {/* Profile header card (borderless, theme tokens only) */}
+      <div className="data-section" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '3rem', paddingBottom: '2rem', borderBottom: '1px solid var(--border-faint)' }}>
         <div style={{ position: 'relative' }}>
           <div style={{
-            width: 80,
-            height: 80,
+            width: 72,
+            height: 72,
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--accent-blue), #60a5fa)',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-solid)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '2rem',
-            fontWeight: 800,
-            color: '#fff',
+            fontSize: '1.75rem',
+            fontWeight: 600,
+            color: 'var(--text-main)',
+            fontFamily: 'var(--font-mono)',
           }}>
             {user?.username?.[0]?.toUpperCase()}
           </div>
-          <div style={{ position: 'absolute', bottom: 4, right: 4, width: 14, height: 14, borderRadius: '50%', background: 'var(--success-green)', border: '2px solid var(--bg-surface)' }} />
+          <div style={{ position: 'absolute', bottom: 4, right: 4, width: 12, height: 12, borderRadius: '50%', background: 'var(--success-green)', border: '2px solid var(--bg-void)' }} />
         </div>
         <div style={{ flex: 1, minWidth: 220 }}>
-          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: '0.25rem' }}>@{user?.username}</h2>
+          <h2 style={{ fontSize: '1.6rem', fontWeight: 600, letterSpacing: '-0.03em', marginBottom: '0.25rem' }}>@{user?.username}</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '0.35rem' }}>{user?.email}</p>
           <p style={{ color: 'var(--text-faint)', fontSize: '0.82rem', fontStyle: 'italic', marginBottom: '0.6rem' }}>
             {user?.bio || 'No bio yet'}
           </p>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--bg-panel)', border: '1px solid var(--accent-glow)', borderRadius: 20, padding: '0.25rem 0.75rem', color: 'var(--accent-blue)', fontSize: '0.8rem', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
-            ⭐ {user?.reputationScore ?? 0} Reputation Score
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', border: '1px solid var(--border-solid)', borderRadius: 4, padding: '0.25rem 0.75rem', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 500, fontFamily: 'var(--font-mono)' }}>
+            {user?.reputationScore ?? 0} Reputation Score
           </span>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="dash-tabs">
+      {/* Tabs — workspace mono underline style */}
+      <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '2.5rem', borderBottom: '1px solid var(--border-faint)', overflowX: 'auto' }}>
         {TABS.map((t) => (
-          <button key={t.key} className={`dash-tab${tab === t.key ? ' active' : ''}`} onClick={() => setTab(t.key)}>
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            style={{
+              padding: '0.7rem 1.1rem',
+              border: 'none',
+              background: 'transparent',
+              color: tab === t.key ? 'var(--text-main)' : 'var(--text-faint)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              borderBottom: tab === t.key ? '2px solid var(--text-main)' : '2px solid transparent',
+              marginBottom: -1,
+              transition: 'color 0.2s',
+            }}
+          >
             {t.label}
           </button>
         ))}
@@ -179,16 +198,16 @@ export default function Profile() {
       {editOpen && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
           onClick={() => setEditOpen(false)}>
-          <div className="dash-section" style={{ width: '100%', maxWidth: 480, padding: '1.75rem' }} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.25rem' }}>✏️ Edit Profile</h2>
+          <div className="data-section" style={{ width: '100%', maxWidth: 480, padding: '1.75rem', background: 'var(--bg-surface)', border: '1px solid var(--border-solid)', borderRadius: 8 }} onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.25rem', letterSpacing: '-0.02em' }}>Edit Profile</h2>
             <div style={{ marginBottom: '1.1rem' }}>
-              <label style={{ fontSize: '0.82rem', fontWeight: 700, display: 'block', marginBottom: '0.5rem' }}>Bio</label>
+              <label className="form-label" style={{ fontSize: '0.82rem', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>Bio</label>
               <textarea
                 style={{
                   width: '100%',
-                  background: 'var(--bg-surface)',
+                  background: 'var(--bg-void)',
                   border: '1px solid var(--border-solid)',
-                  borderRadius: 10,
+                  borderRadius: 4,
                   padding: '0.75rem 0.9rem',
                   color: 'var(--text-main)',
                   fontSize: '0.88rem',
@@ -235,7 +254,16 @@ export default function Profile() {
       {/* Content */}
       <div style={{ minHeight: 300 }}>
         {loading ? (
-          <EmptyState icon="⚙️" title="Loading…" description={`Fetching your ${tab}.`} />
+          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <div style={{
+              width: 40, height: 40, border: '3px solid var(--border-faint)',
+              borderTop: '3px solid var(--text-main)', borderRadius: '50%',
+              animation: 'spin 1s linear infinite', margin: '0 auto',
+            }} />
+            <p style={{ color: 'var(--text-muted)', marginTop: 16, fontFamily: 'var(--font-mono)', fontSize: 13 }}>
+              Loading {tab.replace(/_/g, ' ')}...
+            </p>
+          </div>
         ) : tab === 'purchases' ? (
           <PurchasesList purchases={purchases} />
         ) : tab === 'sales' ? (
@@ -253,34 +281,38 @@ export default function Profile() {
 
 function PurchasesList({ purchases }: { purchases: PurchaseData[] }) {
   if (purchases.length === 0) {
-    return <EmptyState icon="🧾" title="No purchases yet" description="Browse the marketplace to find something amazing." />;
+    return <EmptyState icon="◆" title="No purchases yet" description="Browse the marketplace to find something amazing." />;
   }
   return (
-    <div className="dash-section">
-      <div className="dash-section-title">My Purchases</div>
+    <div className="data-section">
+      <div className="section-title">My Purchases</div>
       <p className="dash-section-sub">Digital products you own, with SHA-256 ownership certificates</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', marginTop: '1rem' }}>
         {purchases.map((p) => (
-          <div key={p.id} className="dash-section" style={{ padding: '1.25rem 1.5rem' }}>
+          <div key={p.id} style={{ padding: '1.25rem 0', borderBottom: '1px solid var(--border-faint)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
               <div>
                 <div className="item-primary" style={{ fontSize: '1.05rem' }}>{p.product?.title}</div>
-                <div className="item-secondary" style={{ fontFamily: 'var(--font-sans)' }}>
+                <div className="item-secondary">
                   by @{p.product?.seller?.username || 'Seller'} · {dateStr(p.purchasedAt)}
                 </div>
               </div>
               <span className="val-mono" style={{ fontSize: '1.25rem' }}>${(p.amountPaid || 0).toFixed(2)}</span>
             </div>
             {p.certificate?.ownershipHash && (
-              <div className="cert-block" style={{ marginTop: '1rem' }}>
-                <div className="cert-label">🔐 SHA-256 CERTIFICATE</div>
-                <div className="cert-hash">{p.certificate.ownershipHash}</div>
+              <div style={{ marginTop: '1rem', border: '1px solid var(--border-solid)', borderRadius: 4, padding: '0.9rem 1rem' }}>
+                <div style={{ fontSize: '0.62rem', fontWeight: 600, letterSpacing: 2, color: 'var(--text-muted)', marginBottom: '0.5rem', fontFamily: 'var(--font-mono)' }}>
+                  SHA-256 CERTIFICATE
+                </div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-faint)', wordBreak: 'break-all', lineHeight: 1.6 }}>
+                  {p.certificate.ownershipHash}
+                </div>
                 <div style={{ marginTop: '0.5rem' }}>
                   <a
                     href={`${window.location.origin}${p.certificate.verifyUrl}`}
                     target="_blank"
                     rel="noreferrer"
-                    style={{ color: 'var(--accent-blue)', fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}
+                    style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontFamily: 'var(--font-mono)', textDecoration: 'none' }}
                   >
                     Verify on-chain →
                   </a>
@@ -296,40 +328,42 @@ function PurchasesList({ purchases }: { purchases: PurchaseData[] }) {
 
 function SalesList({ sales }: { sales: SaleData[] }) {
   if (sales.length === 0) {
-    return <EmptyState icon="💰" title="No sales yet" description="List a product to start earning on DevChain." />;
+    return <EmptyState icon="◆" title="No sales yet" description="List a product to start earning on DevChain." />;
   }
   const total = sales.reduce((sum, s) => sum + (s.amountPaid || 0), 0);
   return (
-    <div className="dash-section">
-      <div className="dash-section-title">My Sales</div>
+    <div className="data-section">
+      <div className="section-title">My Sales</div>
       <p className="dash-section-sub">Earnings from your digital products</p>
-      <div className="kpi-row" style={{ marginTop: '1rem' }}>
+      <div className="kpi-row" style={{ marginTop: '1rem', marginBottom: '2.5rem' }}>
         <div className="kpi-item">
           <span className="kpi-lbl">Total Revenue</span>
           <span className="kpi-val" style={{ color: 'var(--success-green)' }}>${total.toFixed(2)}</span>
           <span className="kpi-sub">{sales.length} sale{sales.length !== 1 ? 's' : ''}</span>
         </div>
       </div>
-      <table className="dash-table" style={{ marginTop: '1.25rem' }}>
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Buyer</th>
-            <th>Date</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sales.map((s) => (
-            <tr key={s.id}>
-              <td><span className="item-primary">{s.product?.title || 'Untitled product'}</span></td>
-              <td className="item-secondary" style={{ fontFamily: 'var(--font-sans)' }}>@{s.buyer?.username || 'Buyer'}</td>
-              <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-faint)' }}>{dateStr(s.soldAt || s.purchasedAt)}</td>
-              <td className="val-mono" style={{ color: 'var(--success-green)' }}>+${(s.amountPaid || 0).toFixed(2)}</td>
+      <div className="table-wrap">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Buyer</th>
+              <th>Date</th>
+              <th>Amount</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sales.map((s) => (
+              <tr key={s.id}>
+                <td><span className="item-primary">{s.product?.title || 'Untitled product'}</span></td>
+                <td className="item-secondary">@{s.buyer?.username || 'Buyer'}</td>
+                <td className="val-mono" style={{ fontSize: '0.8rem', color: 'var(--text-faint)' }}>{dateStr(s.soldAt || s.purchasedAt)}</td>
+                <td className="val-mono" style={{ color: 'var(--success-green)' }}>+${(s.amountPaid || 0).toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -338,7 +372,7 @@ function ProductsList({ products, navigate }: { products: ProductData[]; navigat
   if (products.length === 0) {
     return (
       <EmptyState
-        icon="📦"
+        icon="◆"
         title="No products listed"
         description="Start selling your code on DevChain."
         actions={[{ label: 'Create Product', onClick: () => navigate('/create-product') }]}
@@ -346,41 +380,45 @@ function ProductsList({ products, navigate }: { products: ProductData[]; navigat
     );
   }
   return (
-    <div className="dash-section">
-      <div className="dash-section-title">
+    <div className="data-section">
+      <div className="section-title">
         My Products
-        <span className="dash-link" style={{ cursor: 'pointer' }} onClick={() => navigate('/create-product')}>+ New Product</span>
+        <span className="dash-link" style={{ cursor: 'pointer', color: 'var(--text-muted)' }} onClick={() => navigate('/create-product')}>+ New Product</span>
       </div>
       <p className="dash-section-sub">Everything you're selling in the marketplace</p>
-      <table className="dash-table" style={{ marginTop: '1rem' }}>
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Category</th>
-            <th>Sales</th>
-            <th>Price</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((p) => (
-            <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/product/${p.id}`)}>
-              <td>
-                <span className="item-primary">{p.title}</span>
-                <span className="item-secondary">{p.tags?.slice(0, 3).join(' · ') || ''}</span>
-              </td>
-              <td className="item-secondary" style={{ fontFamily: 'var(--font-sans)' }}>{p.category}</td>
-              <td className="val-mono">{p.downloadsCount ?? 0}</td>
-              <td className="val-mono">${(p.price || 0).toFixed(2)}</td>
-              <td>
-                <span className={`status-dot ${p.isActive ? 'active' : 'closed'}`}>
-                  {p.isActive ? 'Active' : 'Inactive'}
-                </span>
-              </td>
+      <div className="table-wrap">
+        <table className="data-table" style={{ marginTop: '1rem' }}>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Sales</th>
+              <th>Price</th>
+              <th>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {products.map((p) => (
+              <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/product/${p.id}`)}>
+                <td>
+                  <span className="item-primary">{p.title}</span>
+                  {p.tags && p.tags.length > 0 && (
+                    <span className="item-secondary">#{p.tags.slice(0, 3).join(' #')}</span>
+                  )}
+                </td>
+                <td className="item-secondary">{p.category}</td>
+                <td className="val-mono">{p.downloadsCount ?? 0}</td>
+                <td className="val-mono">${(p.price || 0).toFixed(2)}</td>
+                <td>
+                  <span className={`status-dot ${p.isActive ? 'active' : 'closed'}`}>
+                    {p.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -389,7 +427,7 @@ function JobsList({ jobs, navigate }: { jobs: JobData[]; navigate: NavigateFunct
   if (jobs.length === 0) {
     return (
       <EmptyState
-        icon="💼"
+        icon="◆"
         title="No jobs posted"
         description="Post a job to hire DevChain developers."
         actions={[{ label: 'Post a Job', onClick: () => navigate('/post-job') }]}
@@ -397,29 +435,31 @@ function JobsList({ jobs, navigate }: { jobs: JobData[]; navigate: NavigateFunct
     );
   }
   return (
-    <div className="dash-section">
-      <div className="dash-section-title">My Jobs</div>
+    <div className="data-section">
+      <div className="section-title">My Jobs</div>
       <p className="dash-section-sub">Jobs you've posted for hire</p>
-      <table className="dash-table" style={{ marginTop: '1rem' }}>
-        <thead>
-          <tr>
-            <th>Job</th>
-            <th>Budget</th>
-            <th>Proposals</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {jobs.map((j) => (
-            <tr key={j.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/job/${j.id}`)}>
-              <td><span className="item-primary">{j.title}</span></td>
-              <td className="val-mono">${j.budgetMin?.toLocaleString()}–${j.budgetMax?.toLocaleString()}</td>
-              <td className="val-mono">{j.proposalCount ?? 0}</td>
-              <td><span className={`status-dot ${j.status}`}>{statusBadge(j.status)}</span></td>
+      <div className="table-wrap">
+        <table className="data-table" style={{ marginTop: '1rem' }}>
+          <thead>
+            <tr>
+              <th>Job</th>
+              <th>Budget</th>
+              <th>Proposals</th>
+              <th>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {jobs.map((j) => (
+              <tr key={j.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/job/${j.id}`)}>
+                <td><span className="item-primary">{j.title}</span></td>
+                <td className="val-mono">${j.budgetMin?.toLocaleString()}–${j.budgetMax?.toLocaleString()}</td>
+                <td className="val-mono">{j.proposalCount ?? 0}</td>
+                <td><span className={`status-dot ${j.status}`}>{statusBadge(j.status)}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
