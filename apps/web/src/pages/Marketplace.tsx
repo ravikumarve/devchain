@@ -231,7 +231,7 @@ export default function Marketplace() {
             }
           />
         ) : viewMode === 'grid' ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 1, background: 'var(--border-faint)', border: '1px solid var(--border-faint)', borderRadius: 8, overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 1, background: 'var(--border-faint)', border: '1px solid var(--border-faint)', borderRadius: 8, overflow: 'hidden' }}>
             {products.map(product => (
               <ProductCard key={product.id} product={product}
                 onClick={() => navigate(`/product/${product.id}`)} />
