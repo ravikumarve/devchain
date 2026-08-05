@@ -472,6 +472,10 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 Looking for the commercial boilerplate (one-time license, unlimited projects)? See the [MarketFoundry listing](docs/gumroad-listing.md) — includes the Expo mobile app, extended deployment guide, and priority support.
 
+## 🛒 Support the Project
+
+Star the repo, share it, or grab the Pro tier: [Buy on Gumroad](https://gumroad.com/ravikumarve)
+
 ---
 
 <p align="center">
