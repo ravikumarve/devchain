@@ -474,7 +474,7 @@ Looking for the commercial boilerplate (one-time license, unlimited projects)? S
 
 ## 🛒 Support the Project
 
-Star the repo, share it, or grab the Pro tier: [Buy on Gumroad](https://gumroad.com/ravikumarve)
+Star the repo, share it, or grab the Pro tier: [Buy on Gumroad](https://ravikumarve.gumroad.com)
 
 ---
 
